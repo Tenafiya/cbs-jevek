@@ -37,7 +37,7 @@ async fn table_exists(state: &AppState, name: &str) -> bool {
     count > 0
 }
 
-#[tokio::test]
+#[actix_web::test]
 async fn engine_health_returns_success() {
     let app = test_app().await;
 
@@ -55,7 +55,7 @@ async fn engine_health_returns_success() {
     assert_eq!(response_json["data"], json!(null));
 }
 
-#[tokio::test]
+#[actix_web::test]
 async fn migrate_up_and_down_via_endpoint() {
     let Some(db_url) = setup_test_database().await else {
         eprintln!("Skipping test: PostgreSQL container could not be started");
