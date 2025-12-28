@@ -88,6 +88,30 @@ mod m20251210_204505_create_financial_statements;
 mod m20251210_205002_create_ledger_lock_periods;
 mod m20251210_205331_create_report_schedules;
 mod m20251210_205945_create_generated_reports;
+mod m20251212_191919_create_report_analytics_caches;
+mod m20251212_192129_create_notification_templates;
+mod m20251212_192637_create_notification_queues;
+mod m20251212_193027_create_notification_preferences;
+mod m20251212_193227_create_support_tickets;
+mod m20251212_193841_create_support_interactions;
+mod m20251212_194235_create_refund_workflows;
+mod m20251212_194802_create_chargebacks;
+mod m20251212_195219_create_sla_configurations;
+mod m20251212_195551_create_integration_providers;
+mod m20251212_200017_create_integration_apikeys;
+mod m20251212_200256_create_integration_webhooks;
+mod m20251212_200614_create_integration_webhook_deliveries;
+mod m20251212_203308_create_integration_logs;
+mod m20251212_203641_create_credit_bureau_reports;
+mod m20251212_204011_create_kyc_provider_checks;
+mod m20251212_204334_create_customer_sessions;
+mod m20251212_204801_create_customer_app_preferences;
+mod m20251212_205056_create_customer_education_contents;
+mod m20251212_205422_create_super_admins;
+mod m20251212_205650_create_admin_audit_logs;
+mod m20251212_210040_create_health_n_maintenance;
+mod m20251212_210457_create_data_backups;
+mod m20251212_210901_create_regulatory_reporting_exports;
 
 pub struct Migrator;
 
@@ -183,6 +207,30 @@ impl MigratorTrait for Migrator {
             Box::new(m20251210_205002_create_ledger_lock_periods::Migration),
             Box::new(m20251210_205331_create_report_schedules::Migration),
             Box::new(m20251210_205945_create_generated_reports::Migration),
+            Box::new(m20251212_191919_create_report_analytics_caches::Migration),
+            Box::new(m20251212_192129_create_notification_templates::Migration),
+            Box::new(m20251212_192637_create_notification_queues::Migration),
+            Box::new(m20251212_193027_create_notification_preferences::Migration),
+            Box::new(m20251212_193227_create_support_tickets::Migration),
+            Box::new(m20251212_193841_create_support_interactions::Migration),
+            Box::new(m20251212_194235_create_refund_workflows::Migration),
+            Box::new(m20251212_194802_create_chargebacks::Migration),
+            Box::new(m20251212_195219_create_sla_configurations::Migration),
+            Box::new(m20251212_195551_create_integration_providers::Migration),
+            Box::new(m20251212_200017_create_integration_apikeys::Migration),
+            Box::new(m20251212_200256_create_integration_webhooks::Migration),
+            Box::new(m20251212_200614_create_integration_webhook_deliveries::Migration),
+            Box::new(m20251212_203308_create_integration_logs::Migration),
+            Box::new(m20251212_203641_create_credit_bureau_reports::Migration),
+            Box::new(m20251212_204011_create_kyc_provider_checks::Migration),
+            Box::new(m20251212_204334_create_customer_sessions::Migration),
+            Box::new(m20251212_204801_create_customer_app_preferences::Migration),
+            Box::new(m20251212_205056_create_customer_education_contents::Migration),
+            Box::new(m20251212_205422_create_super_admins::Migration),
+            Box::new(m20251212_205650_create_admin_audit_logs::Migration),
+            Box::new(m20251212_210040_create_health_n_maintenance::Migration),
+            Box::new(m20251212_210457_create_data_backups::Migration),
+            Box::new(m20251212_210901_create_regulatory_reporting_exports::Migration),
         ]
     }
 }
