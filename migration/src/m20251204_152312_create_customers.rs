@@ -2,7 +2,7 @@ use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
     m20251204_103935_create_countries::Countries,
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
 };
 
 #[derive(DeriveMigrationName)]
@@ -100,6 +100,9 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Customers::CustomFields).json_binary())
             .col(ColumnDef::new(Customers::Tags).array(ColumnType::Text))
             .col(ColumnDef::new(Customers::VerifiedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(Customers::CreatedBy).big_integer())
+            .col(ColumnDef::new(Customers::VerifiedBy).big_integer())
+            .col(ColumnDef::new(Customers::KycTier).json_binary())
             .col(
                 ColumnDef::new(Customers::IsDeleted)
                     .boolean()
@@ -126,6 +129,18 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(Customers::Table, Customers::CountryId)
                     .to(Countries::Table, Countries::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Customers::Table, Customers::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Customers::Table, Customers::VerifiedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

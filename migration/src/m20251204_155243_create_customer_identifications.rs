@@ -1,7 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_103935_create_countries::Countries, m20251204_152312_create_customers::Customers,
+    m20251204_103935_create_countries::Countries, m20251204_150208_create_branches::Staff,
+    m20251204_152312_create_customers::Customers,
 };
 
 #[derive(DeriveMigrationName)]
@@ -59,6 +60,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(CustomerIdentifications::VerifiedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(CustomerIdentifications::RejectionReason).string())
             .col(ColumnDef::new(CustomerIdentifications::Metadata).json_binary())
+            .col(ColumnDef::new(CustomerIdentifications::VerifiedBy).big_integer())
             .col(
                 ColumnDef::new(CustomerIdentifications::CreatedAt)
                     .timestamp_with_time_zone()
@@ -76,6 +78,15 @@ impl MigrationTrait for Migration {
                         CustomerIdentifications::CustomerId,
                     )
                     .to(Customers::Table, Customers::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        CustomerIdentifications::Table,
+                        CustomerIdentifications::VerifiedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(

@@ -1,7 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions, m20251208_154224_create_agents::Agents,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
+    m20251208_154224_create_agents::Agents,
 };
 
 #[derive(DeriveMigrationName)]
@@ -104,6 +105,7 @@ impl MigrationTrait for Migration {
                     .default(Expr::current_timestamp()),
             )
             .col(ColumnDef::new(AgentSettlements::ProcessedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(AgentSettlements::InitiatedBy).big_integer())
             .col(
                 ColumnDef::new(AgentSettlements::ReconciliationStatus)
                     .custom("agent_settlement_status")
@@ -130,6 +132,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(AgentSettlements::Table, AgentSettlements::AgentId)
                     .to(Agents::Table, Agents::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(AgentSettlements::Table, AgentSettlements::InitiatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .index(

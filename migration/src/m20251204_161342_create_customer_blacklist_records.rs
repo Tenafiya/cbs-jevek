@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_152312_create_customers::Customers,
 };
 
@@ -42,6 +42,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(CustomerBlacklistRecords::ReportedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(CustomerBlacklistRecords::RemovedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(CustomerBlacklistRecords::RemovalReason).string())
+            .col(ColumnDef::new(CustomerBlacklistRecords::ReportedBy).big_integer())
+            .col(ColumnDef::new(CustomerBlacklistRecords::RemovedBy).big_integer())
             .col(
                 ColumnDef::new(CustomerBlacklistRecords::CreatedAt)
                     .timestamp_with_time_zone()
@@ -59,6 +61,24 @@ impl MigrationTrait for Migration {
                         CustomerBlacklistRecords::InstitutionId,
                     )
                     .to(Institutions::Table, Institutions::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        CustomerBlacklistRecords::Table,
+                        CustomerBlacklistRecords::ReportedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        CustomerBlacklistRecords::Table,
+                        CustomerBlacklistRecords::RemovedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(

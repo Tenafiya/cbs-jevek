@@ -1,6 +1,6 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
-use crate::m20251208_093551_create_tellers::Tellers;
+use crate::{m20251204_150208_create_branches::Staff, m20251208_093551_create_tellers::Tellers};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -73,6 +73,7 @@ impl MigrationTrait for Migration {
                     .default(Expr::current_timestamp()),
             )
             .col(ColumnDef::new(TellerCashDrawers::ClosedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(TellerCashDrawers::ClosedBySupervisor).big_integer())
             .col(
                 ColumnDef::new(TellerCashDrawers::CreatedAt)
                     .timestamp_with_time_zone()
@@ -87,6 +88,15 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(TellerCashDrawers::Table, TellerCashDrawers::TellerId)
                     .to(Tellers::Table, Tellers::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        TellerCashDrawers::Table,
+                        TellerCashDrawers::ClosedBySupervisor,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

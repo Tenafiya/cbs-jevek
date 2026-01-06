@@ -1,5 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
+use crate::m20251204_150208_create_branches::Staff;
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -77,6 +79,8 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(TransactionDisputes::ResolvedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(TransactionDisputes::SlaDeadline).timestamp_with_time_zone())
+            .col(ColumnDef::new(TransactionDisputes::AssignedTo).big_integer())
+            .col(ColumnDef::new(TransactionDisputes::ResolvedBy).big_integer())
             .col(
                 ColumnDef::new(TransactionDisputes::CreatedAt)
                     .timestamp_with_time_zone()
@@ -86,6 +90,18 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(TransactionDisputes::UpdatedAt)
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(TransactionDisputes::Table, TransactionDisputes::AssignedTo)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(TransactionDisputes::Table, TransactionDisputes::ResolvedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();
 

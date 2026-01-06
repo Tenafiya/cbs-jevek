@@ -1,6 +1,9 @@
 use sea_orm_migration::prelude::*;
 
-use crate::m20251206_143556_create_loan_applications::LoanApplications;
+use crate::{
+    m20251204_150208_create_branches::Staff,
+    m20251206_143556_create_loan_applications::LoanApplications,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -26,6 +29,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanApplicationStatusHistory::ToStatus).string())
             .col(ColumnDef::new(LoanApplicationStatusHistory::TransitionReason).json_binary())
             .col(ColumnDef::new(LoanApplicationStatusHistory::ChangedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(LoanApplicationStatusHistory::ChangedBy).big_integer())
             .col(
                 ColumnDef::new(LoanApplicationStatusHistory::CreatedAt)
                     .timestamp_with_time_zone()
@@ -43,6 +47,15 @@ impl MigrationTrait for Migration {
                         LoanApplicationStatusHistory::LoanApplicationId,
                     )
                     .to(LoanApplications::Table, LoanApplications::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        LoanApplicationStatusHistory::Table,
+                        LoanApplicationStatusHistory::ChangedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

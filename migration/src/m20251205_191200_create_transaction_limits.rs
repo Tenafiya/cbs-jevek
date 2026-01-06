@@ -63,6 +63,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(TransactionLimits::EffectiveFrom).timestamp_with_time_zone())
             .col(ColumnDef::new(TransactionLimits::EffectiveTo).timestamp_with_time_zone())
+            .col(ColumnDef::new(TransactionLimits::KycTier).json_binary())
             .col(
                 ColumnDef::new(TransactionLimits::CreatedAt)
                     .timestamp_with_time_zone()

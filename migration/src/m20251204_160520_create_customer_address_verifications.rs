@@ -1,6 +1,8 @@
 use sea_orm_migration::prelude::*;
 
-use crate::m20251204_152312_create_customers::Customers;
+use crate::{
+    m20251204_150208_create_branches::Staff, m20251204_152312_create_customers::Customers,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -38,6 +40,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(CustomerAddressVerifications::VerifiedAt).timestamp_with_time_zone(),
             )
             .col(ColumnDef::new(CustomerAddressVerifications::RejectedReason).string())
+            .col(ColumnDef::new(CustomerAddressVerifications::VerifiedBy).big_integer())
             .col(
                 ColumnDef::new(CustomerAddressVerifications::CreatedAt)
                     .timestamp_with_time_zone()
@@ -47,6 +50,15 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(CustomerAddressVerifications::UpdatedAt)
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        CustomerAddressVerifications::Table,
+                        CustomerAddressVerifications::VerifiedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(
                 ForeignKey::create()

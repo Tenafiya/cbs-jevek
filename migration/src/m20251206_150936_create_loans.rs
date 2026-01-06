@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_152312_create_customers::Customers, m20251205_154503_create_accounts::Accounts,
     m20251205_210647_create_loan_products::LoanProducts,
     m20251206_143556_create_loan_applications::LoanApplications,
@@ -117,6 +117,7 @@ impl MigrationTrait for Migration {
                     .default(0.00),
             )
             .col(ColumnDef::new(Loans::CustomFields).json_binary())
+            .col(ColumnDef::new(Loans::CreatedBy).big_integer())
             .col(
                 ColumnDef::new(Loans::CreatedAt)
                     .timestamp_with_time_zone()
@@ -155,6 +156,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(Loans::Table, Loans::AccountId)
                     .to(Accounts::Table, Accounts::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Loans::Table, Loans::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

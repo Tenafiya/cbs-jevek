@@ -63,6 +63,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AccountTypes::MaximumBalance).decimal_len(20, 4))
             .col(ColumnDef::new(AccountTypes::InterestRate).decimal_len(10, 6))
             .col(ColumnDef::new(AccountTypes::InterestRateCalcMethod).custom("acc_type_int_calc"))
+            .col(ColumnDef::new(AccountTypes::KycTier).json_binary())
             .col(
                 ColumnDef::new(AccountTypes::InterestPayoutFrequency)
                     .custom("acc_type_int_payout_freq"),

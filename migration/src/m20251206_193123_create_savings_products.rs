@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_151411_create_chart_of_accounts::ChartOfAccounts,
 };
 
@@ -151,6 +151,7 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .default(true),
             )
+            .col(ColumnDef::new(SavingsProducts::CreatedBy).big_integer())
             .col(
                 ColumnDef::new(SavingsProducts::RequiresApproval)
                     .boolean()
@@ -177,6 +178,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(SavingsProducts::Table, SavingsProducts::GlAccountId)
                     .to(ChartOfAccounts::Table, ChartOfAccounts::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(SavingsProducts::Table, SavingsProducts::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

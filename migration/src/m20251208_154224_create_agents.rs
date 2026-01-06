@@ -1,7 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Branches,
+    m20251204_112805_create_institutions::Institutions,
+    m20251204_150208_create_branches::{Branches, Staff},
     m20251205_154503_create_accounts::Accounts,
 };
 
@@ -78,6 +79,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Agents::TerminatedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Agents::GeofenceRadius).json_binary())
             .col(ColumnDef::new(Agents::CustomFields).json_binary())
+            .col(ColumnDef::new(Agents::KycStatus).json_binary())
+            .col(ColumnDef::new(Agents::VerifiedBy).big_integer())
             .col(
                 ColumnDef::new(Agents::CreatedAt)
                     .timestamp_with_time_zone()
@@ -112,7 +115,15 @@ impl MigrationTrait for Migration {
                     .to(Accounts::Table, Accounts::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Agents::Table, Agents::VerifiedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
             .to_owned();
+
+        manager.create_table(agents).await?;
 
         Ok(())
     }

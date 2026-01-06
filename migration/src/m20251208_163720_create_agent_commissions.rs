@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251205_193221_create_transactions::Transactions, m20251208_154224_create_agents::Agents,
 };
 
@@ -83,6 +83,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(AgentCommissionRules::EffectiveFrom).timestamp_with_time_zone())
             .col(ColumnDef::new(AgentCommissionRules::EffectiveTo).timestamp_with_time_zone())
+            .col(ColumnDef::new(AgentCommissionRules::CreatedBy).big_integer())
             .col(
                 ColumnDef::new(AgentCommissionRules::CreatedAt)
                     .timestamp_with_time_zone()
@@ -100,6 +101,12 @@ impl MigrationTrait for Migration {
                         AgentCommissionRules::InstitutionId,
                     )
                     .to(Institutions::Table, Institutions::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(AgentCommissionRules::Table, AgentCommissionRules::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

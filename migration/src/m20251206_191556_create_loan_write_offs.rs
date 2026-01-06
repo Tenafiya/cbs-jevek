@@ -1,6 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use crate::m20251206_150936_create_loans::Loans;
+use crate::{m20251204_150208_create_branches::Staff, m20251206_150936_create_loans::Loans};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -49,6 +49,7 @@ impl MigrationTrait for Migration {
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
             )
+            .col(ColumnDef::new(LoanWriteOffs::WrittenOffBy).big_integer())
             .col(
                 ColumnDef::new(LoanWriteOffs::CreatedAt)
                     .timestamp_with_time_zone()
@@ -63,6 +64,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(LoanWriteOffs::Table, LoanWriteOffs::LoanId)
                     .to(Loans::Table, Loans::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanWriteOffs::Table, LoanWriteOffs::WrittenOffBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

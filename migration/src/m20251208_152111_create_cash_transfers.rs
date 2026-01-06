@@ -1,6 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
-use crate::m20251204_112805_create_institutions::Institutions;
+use crate::{
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -62,6 +64,8 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(CashTransfers::Status).custom("cash_transfers_status"))
             .col(ColumnDef::new(CashTransfers::ApprovedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(CashTransfers::RequestedBy).big_integer())
+            .col(ColumnDef::new(CashTransfers::ApprovedBy).big_integer())
             .col(
                 ColumnDef::new(CashTransfers::CreatedAt)
                     .timestamp_with_time_zone()
@@ -76,6 +80,18 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(CashTransfers::Table, CashTransfers::InstitutionId)
                     .to(Institutions::Table, Institutions::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(CashTransfers::Table, CashTransfers::RequestedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(CashTransfers::Table, CashTransfers::ApprovedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

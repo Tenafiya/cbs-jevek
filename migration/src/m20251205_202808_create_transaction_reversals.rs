@@ -1,6 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
-use crate::m20251205_193221_create_transactions::Transactions;
+use crate::{
+    m20251204_150208_create_branches::Staff, m20251205_193221_create_transactions::Transactions,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -56,6 +58,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(TransactionReversals::RequestedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(TransactionReversals::ApprovedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(TransactionReversals::MakerCheckerWorkflowId).big_integer())
+            .col(ColumnDef::new(TransactionReversals::RequestedBy).big_integer())
+            .col(ColumnDef::new(TransactionReversals::ApprovedBy).big_integer())
             .col(
                 ColumnDef::new(TransactionReversals::CreatedAt)
                     .timestamp_with_time_zone()
@@ -73,6 +77,24 @@ impl MigrationTrait for Migration {
                         TransactionReversals::OrginalTransactionId,
                     )
                     .to(Transactions::Table, Transactions::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        TransactionReversals::Table,
+                        TransactionReversals::RequestedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        TransactionReversals::Table,
+                        TransactionReversals::ApprovedBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(

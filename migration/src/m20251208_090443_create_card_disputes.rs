@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_152312_create_customers::Customers,
     m20251207_214445_create_card_transactions::CardTransactions,
 };
@@ -82,6 +82,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(CardDisputes::Resolution).string())
             .col(ColumnDef::new(CardDisputes::FinalDecision).string())
             .col(ColumnDef::new(CardDisputes::ResolvedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(CardDisputes::AssignedTo).big_integer())
+            .col(ColumnDef::new(CardDisputes::ResolvedBy).big_integer())
             .col(
                 ColumnDef::new(CardDisputes::CreatedAt)
                     .timestamp_with_time_zone()
@@ -108,6 +110,18 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(CardDisputes::Table, CardDisputes::CardTransactionId)
                     .to(CardTransactions::Table, CardTransactions::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(CardDisputes::Table, CardDisputes::AssignedTo)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(CardDisputes::Table, CardDisputes::ResolvedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

@@ -1,6 +1,6 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
-use crate::m20251206_150936_create_loans::Loans;
+use crate::{m20251204_150208_create_branches::Staff, m20251206_150936_create_loans::Loans};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -51,6 +51,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanPenalties::WaivedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(LoanPenalties::WaiveReason).string())
             .col(ColumnDef::new(LoanPenalties::Status).custom("loan_penalty_status"))
+            .col(ColumnDef::new(LoanPenalties::WaivedBy).big_integer())
             .col(
                 ColumnDef::new(LoanPenalties::CreatedAt)
                     .timestamp_with_time_zone()
@@ -65,6 +66,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(LoanPenalties::Table, LoanPenalties::LoanId)
                     .to(Loans::Table, Loans::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanPenalties::Table, LoanPenalties::WaivedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

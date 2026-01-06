@@ -1,7 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions, m20251205_154503_create_accounts::Accounts,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
+    m20251205_154503_create_accounts::Accounts,
 };
 
 #[derive(DeriveMigrationName)]
@@ -64,6 +65,7 @@ impl MigrationTrait for Migration {
                     .custom("acc_type_status")
                     .default("ACTIVE"),
             )
+            .col(ColumnDef::new(AccountLinks::CreatedBy).big_integer())
             .col(
                 ColumnDef::new(AccountLinks::CreatedAt)
                     .timestamp_with_time_zone()
@@ -78,6 +80,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(AccountLinks::Table, AccountLinks::InstitutionId)
                     .to(Institutions::Table, Institutions::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(AccountLinks::Table, AccountLinks::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(

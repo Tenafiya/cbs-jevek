@@ -1,6 +1,9 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
-use crate::m20251208_101414_create_teller_cash_drawers::TellerCashDrawers;
+use crate::{
+    m20251204_150208_create_branches::Staff,
+    m20251208_101414_create_teller_cash_drawers::TellerCashDrawers,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -36,6 +39,7 @@ impl MigrationTrait for Migration {
                     .custom("teller_recon_type"),
             )
             .col(ColumnDef::new(TellerReconciliations::Notes).string())
+            .col(ColumnDef::new(TellerReconciliations::SupervisorId).big_integer())
             .col(
                 ColumnDef::new(TellerReconciliations::CreatedAt)
                     .timestamp_with_time_zone()
@@ -53,6 +57,15 @@ impl MigrationTrait for Migration {
                         TellerReconciliations::CashDrawerId,
                     )
                     .to(TellerCashDrawers::Table, TellerCashDrawers::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        TellerReconciliations::Table,
+                        TellerReconciliations::SupervisorId,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

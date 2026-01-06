@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_151411_create_chart_of_accounts::ChartOfAccounts,
     m20251205_205817_create_loan_product_types::LoanProductTypes,
 };
@@ -166,6 +166,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanProducts::LoanGlAccountId).big_integer())
             .col(ColumnDef::new(LoanProducts::InterestGlAccountId).big_integer())
             .col(ColumnDef::new(LoanProducts::PenaltyGlAccountId).big_integer())
+            .col(ColumnDef::new(LoanProducts::RequiredKyc).json_binary())
+            .col(ColumnDef::new(LoanProducts::CreatedBy).big_integer())
             .col(
                 ColumnDef::new(LoanProducts::CreatedAt)
                     .timestamp_with_time_zone()
@@ -204,6 +206,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(LoanProducts::Table, LoanProducts::PenaltyGlAccountId)
                     .to(ChartOfAccounts::Table, ChartOfAccounts::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanProducts::Table, LoanProducts::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

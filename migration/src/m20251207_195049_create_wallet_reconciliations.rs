@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251207_183348_create_wallet_providers::WalletProviders,
 };
 
@@ -56,6 +56,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(WalletReconciliations::ReconciledAt).timestamp_with_time_zone())
             .col(ColumnDef::new(WalletReconciliations::DiscrepancyDetails).json_binary())
+            .col(ColumnDef::new(WalletReconciliations::ReconciledBy).big_integer())
             .col(
                 ColumnDef::new(WalletReconciliations::CreatedAt)
                     .timestamp_with_time_zone()
@@ -82,6 +83,15 @@ impl MigrationTrait for Migration {
                         WalletReconciliations::WalletProviderId,
                     )
                     .to(WalletProviders::Table, WalletProviders::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(
+                        WalletReconciliations::Table,
+                        WalletReconciliations::ReconciledBy,
+                    )
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

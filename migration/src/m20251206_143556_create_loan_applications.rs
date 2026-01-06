@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_152312_create_customers::Customers,
     m20251205_210647_create_loan_products::LoanProducts,
 };
@@ -92,6 +92,10 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanApplications::ApprovalConditions).json_binary())
             .col(ColumnDef::new(LoanApplications::RejectedReason).string())
             .col(ColumnDef::new(LoanApplications::RejectedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(LoanApplications::SubmittedBy).big_integer())
+            .col(ColumnDef::new(LoanApplications::AssignedOfficer).big_integer())
+            .col(ColumnDef::new(LoanApplications::ApprovedBy).big_integer())
+            .col(ColumnDef::new(LoanApplications::RejectedBy).big_integer())
             .col(
                 ColumnDef::new(LoanApplications::CreatedAt)
                     .timestamp_with_time_zone()
@@ -118,6 +122,30 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(LoanApplications::Table, LoanApplications::CustomerId)
                     .to(Customers::Table, Customers::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanApplications::Table, LoanApplications::SubmittedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanApplications::Table, LoanApplications::AssignedOfficer)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanApplications::Table, LoanApplications::ApprovedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(LoanApplications::Table, LoanApplications::RejectedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

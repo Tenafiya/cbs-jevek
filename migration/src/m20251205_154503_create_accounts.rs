@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_152312_create_customers::Customers,
     m20251205_151223_create_account_types::AccountTypes,
 };
@@ -92,6 +92,9 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Accounts::CustomFields).json_binary())
             .col(ColumnDef::new(Accounts::ClosureReason).string())
             .col(ColumnDef::new(Accounts::ClosedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(Accounts::FrozenBy).big_integer())
+            .col(ColumnDef::new(Accounts::CreatedBy).big_integer())
+            .col(ColumnDef::new(Accounts::ClosedBy).big_integer())
             .col(
                 ColumnDef::new(Accounts::CreatedAt)
                     .timestamp_with_time_zone()
@@ -112,6 +115,24 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(Accounts::Table, Accounts::CustomerId)
                     .to(Customers::Table, Customers::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Accounts::Table, Accounts::FrozenBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Accounts::Table, Accounts::ClosedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Accounts::Table, Accounts::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .foreign_key(

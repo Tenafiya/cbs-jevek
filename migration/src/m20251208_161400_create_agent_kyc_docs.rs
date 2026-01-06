@@ -1,5 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
+use crate::m20251204_150208_create_branches::Staff;
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -38,6 +40,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(AgentKycDocs::VerifiedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(AgentKycDocs::RejectionReason).string())
+            .col(ColumnDef::new(AgentKycDocs::VerifiedBy).big_integer())
             .col(
                 ColumnDef::new(AgentKycDocs::CreatedAt)
                     .timestamp_with_time_zone()
@@ -47,6 +50,12 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(AgentKycDocs::UpdatedAt)
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(AgentKycDocs::Table, AgentKycDocs::VerifiedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();
 

@@ -1,7 +1,7 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions,
+    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
     m20251204_152312_create_customers::Customers, m20251205_154503_create_accounts::Accounts,
     m20251205_165925_create_transaction_channels::TransactionChannels,
 };
@@ -112,6 +112,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Transactions::AmlAlertId).string())
             .col(ColumnDef::new(Transactions::CustomFields).json_binary())
             .col(ColumnDef::new(Transactions::ApprovedAt).timestamp_with_time_zone())
+            .col(ColumnDef::new(Transactions::CreatedBy).big_integer())
+            .col(ColumnDef::new(Transactions::ApprovedBy).big_integer())
             .col(
                 ColumnDef::new(Transactions::CreatedAt)
                     .timestamp_with_time_zone()
@@ -162,6 +164,18 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(Transactions::Table, Transactions::CreditCustomerId)
                     .to(Customers::Table, Customers::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Transactions::Table, Transactions::CreatedBy)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Transactions::Table, Transactions::ApprovedBy)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();

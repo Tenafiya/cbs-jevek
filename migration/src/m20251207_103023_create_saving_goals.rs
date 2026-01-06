@@ -63,6 +63,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(SavingGoals::ContributionFreq).custom("savings_product_freq"))
             .col(ColumnDef::new(SavingGoals::Status).custom("saving_goals_status"))
             .col(ColumnDef::new(SavingGoals::CompletionDate).date())
+            .col(ColumnDef::new(SavingGoals::ProgressPercentage).integer())
             .col(
                 ColumnDef::new(SavingGoals::IsGroupSavings)
                     .boolean()

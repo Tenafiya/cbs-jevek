@@ -1,7 +1,8 @@
 use sea_orm_migration::{prelude::*, sea_orm::Statement};
 
 use crate::{
-    m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Branches,
+    m20251204_112805_create_institutions::Institutions,
+    m20251204_150208_create_branches::{Branches, Staff},
 };
 
 #[derive(DeriveMigrationName)]
@@ -54,6 +55,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Tellers::LastLoginAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Tellers::CurrentSessionId).string())
             .col(ColumnDef::new(Tellers::CurrentTerminalId).string())
+            .col(ColumnDef::new(Tellers::StaffId).big_integer())
             .col(
                 ColumnDef::new(Tellers::CreatedAt)
                     .timestamp_with_time_zone()
@@ -74,6 +76,12 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .from(Tellers::Table, Tellers::BranchId)
                     .to(Branches::Table, Branches::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Tellers::Table, Tellers::StaffId)
+                    .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
             .to_owned();
