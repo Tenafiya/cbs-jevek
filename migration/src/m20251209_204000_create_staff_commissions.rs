@@ -55,9 +55,14 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(StaffCommissions::TransactionType)
-                    .custom("agent_commissions_trans_type"),
+                    .custom("agent_commissions_trans_type")
+                    .not_null(),
             )
-            .col(ColumnDef::new(StaffCommissions::Status).custom("agent_commissions_status"))
+            .col(
+                ColumnDef::new(StaffCommissions::Status)
+                    .custom("agent_commissions_status")
+                    .not_null(),
+            )
             .col(ColumnDef::new(StaffCommissions::PaidAt).timestamp_with_time_zone())
             .col(ColumnDef::new(StaffCommissions::PayrollCycle).string())
             .col(
@@ -93,18 +98,6 @@ impl MigrationTrait for Migration {
                     .from(StaffCommissions::Table, StaffCommissions::CommissionRuleId)
                     .to(AgentCommissionRules::Table, AgentCommissionRules::Id)
                     .on_delete(ForeignKeyAction::Cascade),
-            )
-            .index(
-                Index::create()
-                    .name("idx_staff_commission_staff")
-                    .table(StaffCommissions::Table)
-                    .col(StaffCommissions::StaffId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_staff_commission_status")
-                    .table(StaffCommissions::Table)
-                    .col(StaffCommissions::Status),
             )
             .to_owned();
 

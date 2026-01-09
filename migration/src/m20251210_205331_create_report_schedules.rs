@@ -96,42 +96,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_report_schedules_institution")
-                    .table(ReportSchedules::Table)
-                    .col(ReportSchedules::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_schedules_type")
-                    .table(ReportSchedules::Table)
-                    .col(ReportSchedules::ReportType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_schedules_category")
-                    .table(ReportSchedules::Table)
-                    .col(ReportSchedules::ReportCategory),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_schedules_frequency")
-                    .table(ReportSchedules::Table)
-                    .col(ReportSchedules::Frequency),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_schedules_active")
-                    .table(ReportSchedules::Table)
-                    .col(ReportSchedules::IsActive),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_schedules_next_run")
-                    .table(ReportSchedules::Table)
-                    .col(ReportSchedules::NextRunAt),
-            )
             .to_owned();
 
         manager.create_table(report_schedules).await?;

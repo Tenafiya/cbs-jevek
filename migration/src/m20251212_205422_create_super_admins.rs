@@ -21,7 +21,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(SuperAdmins::Id)
                     .big_integer()
                     .not_null()
-                    .primary_key()
+                    .primary_key(),
             )
             .col(
                 ColumnDef::new(SuperAdmins::Username)
@@ -68,32 +68,6 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(SuperAdmins::UpdatedAt)
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
-            )
-            .index(
-                Index::create()
-                    .name("idx_super_admins_username")
-                    .table(SuperAdmins::Table)
-                    .col(SuperAdmins::Username)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("uk_super_admins_email")
-                    .table(SuperAdmins::Table)
-                    .col(SuperAdmins::EmailAddress)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_super_admins_status")
-                    .table(SuperAdmins::Table)
-                    .col(SuperAdmins::AdminStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_super_admins_last_login")
-                    .table(SuperAdmins::Table)
-                    .col(SuperAdmins::LastLoginAt),
             )
             .to_owned();
 

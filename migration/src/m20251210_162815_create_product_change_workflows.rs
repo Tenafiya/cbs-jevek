@@ -126,25 +126,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_product_change_workflows_institution")
-                    .table(ProductChangeWorkflows::Table)
-                    .col(ProductChangeWorkflows::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_product_change_workflows_status")
-                    .table(ProductChangeWorkflows::Table)
-                    .col(ProductChangeWorkflows::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_product_change_workflows_product")
-                    .table(ProductChangeWorkflows::Table)
-                    .col(ProductChangeWorkflows::ProductType)
-                    .col(ProductChangeWorkflows::ProductId),
-            )
             .to_owned();
 
         manager.create_table(product_change_workflows).await?;

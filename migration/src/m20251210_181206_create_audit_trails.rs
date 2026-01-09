@@ -99,37 +99,6 @@ impl MigrationTrait for Migration {
                     .to(Institutions::Table, Institutions::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_audit_trails_timestamp")
-                    .table(AuditTrails::Table)
-                    .col(AuditTrails::EventTimestamp),
-            )
-            .index(
-                Index::create()
-                    .name("idx_audit_trails_user")
-                    .table(AuditTrails::Table)
-                    .col(AuditTrails::UserId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_audit_trails_resource")
-                    .table(AuditTrails::Table)
-                    .col(AuditTrails::ResourceType)
-                    .col(AuditTrails::ResourceId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_audit_trails_action")
-                    .table(AuditTrails::Table)
-                    .col(AuditTrails::Action),
-            )
-            .index(
-                Index::create()
-                    .name("idx_audit_trails_success")
-                    .table(AuditTrails::Table)
-                    .col(AuditTrails::IsSuccess),
-            )
             .to_owned();
 
         manager.create_table(audit_trails).await?;

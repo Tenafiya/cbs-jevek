@@ -97,18 +97,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_fee_waiver_workflows_status")
-                    .table(FeeWaiverWorkflows::Table)
-                    .col(FeeWaiverWorkflows::ApprovalStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_fee_waiver_workflows_fee_app")
-                    .table(FeeWaiverWorkflows::Table)
-                    .col(FeeWaiverWorkflows::FeeApplicationId),
-            )
             .to_owned();
 
         manager.create_table(fee_waiver_workflows).await?;

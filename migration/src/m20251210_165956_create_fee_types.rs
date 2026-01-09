@@ -115,26 +115,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("uk_fee_types_code")
-                    .table(FeeTypes::Table)
-                    .col(FeeTypes::InstitutionId)
-                    .col(FeeTypes::FeeCode)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_fee_types_category")
-                    .table(FeeTypes::Table)
-                    .col(FeeTypes::FeeCategory),
-            )
-            .index(
-                Index::create()
-                    .name("idx_fee_types_active")
-                    .table(FeeTypes::Table)
-                    .col(FeeTypes::IsActive),
-            )
             .to_owned();
 
         manager.create_table(fee_types).await?;

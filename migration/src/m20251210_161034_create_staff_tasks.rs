@@ -122,24 +122,6 @@ impl MigrationTrait for Migration {
                     .to(Accounts::Table, Accounts::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_staff_tasks_assigned_to")
-                    .table(StaffTasks::Table)
-                    .col(StaffTasks::AssignedTo),
-            )
-            .index(
-                Index::create()
-                    .name("idx_staff_tasks_status")
-                    .table(StaffTasks::Table)
-                    .col(StaffTasks::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_staff_tasks_due_date")
-                    .table(StaffTasks::Table)
-                    .col(StaffTasks::DueDate),
-            )
             .to_owned();
 
         manager.create_table(staff_tasks).await?;

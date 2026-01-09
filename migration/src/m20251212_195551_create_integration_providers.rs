@@ -35,7 +35,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(IntegrationProviders::Id)
                     .big_integer()
                     .not_null()
-                    .primary_key()
+                    .primary_key(),
             )
             .col(
                 ColumnDef::new(IntegrationProviders::InstitutionId)
@@ -101,7 +101,10 @@ impl MigrationTrait for Migration {
             )
             .foreign_key(
                 ForeignKey::create()
-                    .from(IntegrationProviders::Table, IntegrationProviders::InstitutionId)
+                    .from(
+                        IntegrationProviders::Table,
+                        IntegrationProviders::InstitutionId,
+                    )
                     .to(Institutions::Table, Institutions::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
@@ -110,32 +113,6 @@ impl MigrationTrait for Migration {
                     .from(IntegrationProviders::Table, IntegrationProviders::CreatedBy)
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
-            )
-            .index(
-                Index::create()
-                    .name("uk_integration_providers_code")
-                    .table(IntegrationProviders::Table)
-                    .col(IntegrationProviders::InstitutionId)
-                    .col(IntegrationProviders::ProviderCode)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_providers_type")
-                    .table(IntegrationProviders::Table)
-                    .col(IntegrationProviders::ServiceType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_providers_status")
-                    .table(IntegrationProviders::Table)
-                    .col(IntegrationProviders::ProviderStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_providers_primary")
-                    .table(IntegrationProviders::Table)
-                    .col(IntegrationProviders::IsPrimary),
             )
             .to_owned();
 

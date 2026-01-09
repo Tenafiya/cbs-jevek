@@ -82,24 +82,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_field_officer_routes_staff")
-                    .table(FieldOfficerRoutes::Table)
-                    .col(FieldOfficerRoutes::StaffId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_field_officer_routes_date")
-                    .table(FieldOfficerRoutes::Table)
-                    .col(FieldOfficerRoutes::RouteDate),
-            )
-            .index(
-                Index::create()
-                    .name("idx_field_officer_routes_status")
-                    .table(FieldOfficerRoutes::Table)
-                    .col(FieldOfficerRoutes::Status),
-            )
             .to_owned();
 
         manager.create_table(field_officer_routes).await?;

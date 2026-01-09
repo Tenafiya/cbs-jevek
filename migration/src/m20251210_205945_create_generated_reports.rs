@@ -110,31 +110,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_generated_reports_schedule")
-                    .table(GeneratedReports::Table)
-                    .col(GeneratedReports::ScheduleId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_generated_reports_type")
-                    .table(GeneratedReports::Table)
-                    .col(GeneratedReports::ReportType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_generated_reports_period")
-                    .table(GeneratedReports::Table)
-                    .col(GeneratedReports::ReportPeriodStart)
-                    .col(GeneratedReports::ReportPeriodEnd),
-            )
-            .index(
-                Index::create()
-                    .name("idx_generated_reports_distribution")
-                    .table(GeneratedReports::Table)
-                    .col(GeneratedReports::DistributionStatus),
-            )
             .to_owned();
 
         manager.create_table(generated_reports).await?;

@@ -128,24 +128,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_fee_applications_status")
-                    .table(FeeApplications::Table)
-                    .col(FeeApplications::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_fee_applications_customer")
-                    .table(FeeApplications::Table)
-                    .col(FeeApplications::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_fee_applications_account")
-                    .table(FeeApplications::Table)
-                    .col(FeeApplications::AccountId),
-            )
             .to_owned();
 
         manager.create_table(fee_applications).await?;

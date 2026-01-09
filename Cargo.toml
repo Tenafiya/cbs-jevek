@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 
 [workspace]
-members = [".", "migration"]
+members = [".", "migration", "entity"]
 
 [profile.dev]
 opt-level = 1
@@ -40,6 +40,7 @@ opt-level = 3
 
 [dependencies]
 migration = { path = "migration" }
+entity = { path = "entity" }
 actix-cors = "0.7.1"
 actix-http = "3.11.2"
 actix-rt = "2.11.0"
@@ -75,6 +76,8 @@ tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "fmt", "json"] }
 uuid = { version = "1.18.1", features = ["v4", "fast-rng", "macro-diagnostics"] }
 validator = { version = "0.20.0", features = ["derive"] }
+anyhow = "1.0.100"
+snowflake_me = "0.5.0"
 
 [dev-dependencies]
 testcontainers-modules = { version = "0.14", features = ["postgres"] }

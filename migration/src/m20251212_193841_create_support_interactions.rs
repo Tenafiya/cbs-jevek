@@ -77,30 +77,6 @@ impl MigrationTrait for Migration {
                     .to(SupportTickets::Table, SupportTickets::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_ticket_interactions_ticket")
-                    .table(TicketInteractions::Table)
-                    .col(TicketInteractions::TicketId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_ticket_interactions_type")
-                    .table(TicketInteractions::Table)
-                    .col(TicketInteractions::InteractionType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_ticket_interactions_internal")
-                    .table(TicketInteractions::Table)
-                    .col(TicketInteractions::IsInternal),
-            )
-            .index(
-                Index::create()
-                    .name("idx_ticket_interactions_created_at")
-                    .table(TicketInteractions::Table)
-                    .col(TicketInteractions::CreatedAt),
-            )
             .to_owned();
 
         manager.create_table(ticket_interactions).await?;

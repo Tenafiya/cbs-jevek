@@ -84,37 +84,6 @@ impl MigrationTrait for Migration {
                     .to(IntegrationProviders::Table, IntegrationProviders::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_integration_logs_provider")
-                    .table(IntegrationLogs::Table)
-                    .col(IntegrationLogs::ProviderId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_logs_status")
-                    .table(IntegrationLogs::Table)
-                    .col(IntegrationLogs::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_logs_created_at")
-                    .table(IntegrationLogs::Table)
-                    .col(IntegrationLogs::CreatedAt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_logs_reference")
-                    .table(IntegrationLogs::Table)
-                    .col(IntegrationLogs::ReferenceType)
-                    .col(IntegrationLogs::ReferenceId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_logs_response_time")
-                    .table(IntegrationLogs::Table)
-                    .col(IntegrationLogs::ResponseTimeMs),
-            )
             .to_owned();
 
         manager.create_table(integration_logs).await?;

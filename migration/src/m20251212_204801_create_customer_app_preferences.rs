@@ -103,20 +103,6 @@ impl MigrationTrait for Migration {
                     .to(Customers::Table, Customers::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("uk_customer_app_preferences")
-                    .table(CustomerAppPreferences::Table)
-                    .col(CustomerAppPreferences::InstitutionId)
-                    .col(CustomerAppPreferences::CustomerId)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_app_prefs_customer")
-                    .table(CustomerAppPreferences::Table)
-                    .col(CustomerAppPreferences::CustomerId),
-            )
             .to_owned();
 
         manager.create_table(customer_app_preferences).await?;

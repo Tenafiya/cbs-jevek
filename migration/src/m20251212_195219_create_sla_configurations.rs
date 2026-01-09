@@ -79,24 +79,6 @@ impl MigrationTrait for Migration {
                     .to(Institutions::Table, Institutions::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_sla_configurations_institution")
-                    .table(SlaConfigurations::Table)
-                    .col(SlaConfigurations::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_sla_configurations_category")
-                    .table(SlaConfigurations::Table)
-                    .col(SlaConfigurations::SlaCategory),
-            )
-            .index(
-                Index::create()
-                    .name("idx_sla_configurations_active")
-                    .table(SlaConfigurations::Table)
-                    .col(SlaConfigurations::IsActive),
-            )
             .to_owned();
 
         manager.create_table(sla_configurations).await?;

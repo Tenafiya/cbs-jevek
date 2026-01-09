@@ -102,33 +102,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_notification_templates")
-                    .table(NotificationTemplates::Table)
-                    .col(NotificationTemplates::InstitutionId)
-                    .col(NotificationTemplates::TemplateCode)
-                    .col(NotificationTemplates::LanguageCode)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_templates_type")
-                    .table(NotificationTemplates::Table)
-                    .col(NotificationTemplates::NotificationType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_templates_active")
-                    .table(NotificationTemplates::Table)
-                    .col(NotificationTemplates::IsActive),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_templates_default")
-                    .table(NotificationTemplates::Table)
-                    .col(NotificationTemplates::IsDefault),
-            )
             .to_owned();
 
         manager.create_table(notification_templates).await?;
@@ -164,4 +137,3 @@ pub enum NotificationTemplates {
     CreatedAt,
     UpdatedAt,
 }
-

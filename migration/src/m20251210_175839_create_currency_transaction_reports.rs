@@ -90,27 +90,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_currency_reports_date_type")
-                    .table(CurrencyTransactionReports::Table)
-                    .col(CurrencyTransactionReports::InstitutionId)
-                    .col(CurrencyTransactionReports::ReportDate)
-                    .col(CurrencyTransactionReports::ReportType)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_currency_reports_type")
-                    .table(CurrencyTransactionReports::Table)
-                    .col(CurrencyTransactionReports::ReportType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_currency_reports_filed")
-                    .table(CurrencyTransactionReports::Table)
-                    .col(CurrencyTransactionReports::IsFiledToRegulator),
-            )
             .to_owned();
 
         manager.create_table(currency_transaction_reports).await?;

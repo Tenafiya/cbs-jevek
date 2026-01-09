@@ -119,25 +119,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_reports_type")
-                    .table(RegulatoryReports::Table)
-                    .col(RegulatoryReports::ReportType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_reports_status")
-                    .table(RegulatoryReports::Table)
-                    .col(RegulatoryReports::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_reports_period")
-                    .table(RegulatoryReports::Table)
-                    .col(RegulatoryReports::ReportingPeriodStart)
-                    .col(RegulatoryReports::ReportingPeriodEnd),
-            )
             .to_owned();
 
         manager.create_table(regulatory_reports).await?;

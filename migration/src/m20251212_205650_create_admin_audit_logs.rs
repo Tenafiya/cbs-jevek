@@ -64,37 +64,6 @@ impl MigrationTrait for Migration {
                     .to(Institutions::Table, Institutions::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_admin_audit_logs_admin")
-                    .table(AdminAuditLogs::Table)
-                    .col(AdminAuditLogs::AdminId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_admin_audit_logs_institution")
-                    .table(AdminAuditLogs::Table)
-                    .col(AdminAuditLogs::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_admin_audit_logs_action")
-                    .table(AdminAuditLogs::Table)
-                    .col(AdminAuditLogs::Action),
-            )
-            .index(
-                Index::create()
-                    .name("idx_admin_audit_logs_resource")
-                    .table(AdminAuditLogs::Table)
-                    .col(AdminAuditLogs::ResourceType)
-                    .col(AdminAuditLogs::ResourceId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_admin_audit_logs_created_at")
-                    .table(AdminAuditLogs::Table)
-                    .col(AdminAuditLogs::CreatedAt),
-            )
             .to_owned();
 
         manager.create_table(admin_audit_logs).await?;

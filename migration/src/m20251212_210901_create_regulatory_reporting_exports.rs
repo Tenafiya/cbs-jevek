@@ -105,30 +105,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_exports_institution")
-                    .table(RegulatoryReportingExports::Table)
-                    .col(RegulatoryReportingExports::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_exports_type")
-                    .table(RegulatoryReportingExports::Table)
-                    .col(RegulatoryReportingExports::ExportType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_exports_status")
-                    .table(RegulatoryReportingExports::Table)
-                    .col(RegulatoryReportingExports::ExportStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_regulatory_exports_submitted")
-                    .table(RegulatoryReportingExports::Table)
-                    .col(RegulatoryReportingExports::SubmittedToRegulator),
-            )
             .to_owned();
 
         manager.create_table(regulatory_reporting_exports).await?;

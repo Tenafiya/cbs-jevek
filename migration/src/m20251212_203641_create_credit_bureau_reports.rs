@@ -130,36 +130,6 @@ impl MigrationTrait for Migration {
                     .to(LoanApplications::Table, LoanApplications::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_credit_bureau_reports_customer")
-                    .table(CreditBureauReports::Table)
-                    .col(CreditBureauReports::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_credit_bureau_reports_provider")
-                    .table(CreditBureauReports::Table)
-                    .col(CreditBureauReports::ProviderId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_credit_bureau_reports_status")
-                    .table(CreditBureauReports::Table)
-                    .col(CreditBureauReports::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_credit_bureau_reports_loan_app")
-                    .table(CreditBureauReports::Table)
-                    .col(CreditBureauReports::LoanApplicationId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_credit_bureau_reports_inquiry_type")
-                    .table(CreditBureauReports::Table)
-                    .col(CreditBureauReports::InquiryType),
-            )
             .to_owned();
 
         manager.create_table(credit_bureau_reports).await?;

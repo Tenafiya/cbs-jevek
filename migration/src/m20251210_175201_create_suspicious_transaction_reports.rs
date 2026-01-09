@@ -144,31 +144,6 @@ impl MigrationTrait for Migration {
                     .to(Accounts::Table, Accounts::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("uk_str_report_reference")
-                    .table(SuspiciousTransactionReports::Table)
-                    .col(SuspiciousTransactionReports::ReportReference)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_str_status")
-                    .table(SuspiciousTransactionReports::Table)
-                    .col(SuspiciousTransactionReports::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_str_customer")
-                    .table(SuspiciousTransactionReports::Table)
-                    .col(SuspiciousTransactionReports::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_str_filed_to_fiu")
-                    .table(SuspiciousTransactionReports::Table)
-                    .col(SuspiciousTransactionReports::IsFiled),
-            )
             .to_owned();
 
         manager.create_table(suspicious_transaction_reports).await?;

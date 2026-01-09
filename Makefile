@@ -4,7 +4,7 @@ setup:
 	cargo init
 
 dev-run:
-	cargo watch -c -w src -x check -x test -x run --env RUST_LOG=debug --env RUST_BACKTRACE=full
+	cargo watch -c -w src -x check -x run --env RUST_LOG=debug --env RUST_BACKTRACE=full
 
 
 prod-build:
@@ -84,7 +84,7 @@ clean:
 	cargo clean
 
 install-deps:
-	cargo add actix-web actix-rt actix-http chrono thiserror tracing-subscriber chrono-tz futures-util futures actix-cors tokio-util tracing config regex rand env_logger log serde_json sha2 md5 hex bcrypt base64 dotenvy aes-gcm lettre once_cell && \
+	cargo add actix-web snowflake_me anyhow actix-rt actix-http chrono thiserror tracing-subscriber chrono-tz futures-util futures actix-cors tokio-util tracing config regex rand env_logger log serde_json sha2 md5 hex bcrypt base64 dotenvy aes-gcm lettre once_cell && \
 	cargo add uuid --features "v4 fast-rng macro-diagnostics" && \
 	cargo add serde --features "derive" && \
 	cargo add sea-orm --features "sqlx-postgres runtime-tokio-rustls macros" && \

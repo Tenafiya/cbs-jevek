@@ -98,30 +98,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_gl_postings_value_date")
-                    .table(GlPostings::Table)
-                    .col(GlPostings::ValueDate),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_postings_debit_account")
-                    .table(GlPostings::Table)
-                    .col(GlPostings::DebitAccountId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_postings_credit_account")
-                    .table(GlPostings::Table)
-                    .col(GlPostings::CreditAccountId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_postings_reversed")
-                    .table(GlPostings::Table)
-                    .col(GlPostings::IsReversed),
-            )
             .to_owned();
 
         manager.create_table(gl_postings).await?;

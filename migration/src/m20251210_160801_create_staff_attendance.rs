@@ -57,20 +57,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_staff_attendance_date")
-                    .table(StaffAttendance::Table)
-                    .col(StaffAttendance::StaffId)
-                    .col(StaffAttendance::AttendanceDate)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_staff_attendance_date")
-                    .table(StaffAttendance::Table)
-                    .col(StaffAttendance::AttendanceDate),
-            )
             .to_owned();
 
         manager.create_table(staff_attendance).await?;

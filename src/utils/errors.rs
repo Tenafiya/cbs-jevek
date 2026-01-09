@@ -134,12 +134,6 @@ impl ResponseError for ApiError {
                     None,
                 ))
             }
-
-            _ => HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
-                ApiCode::InternalServerError,
-                "Unexpected server error",
-                None,
-            )),
         }
     }
 }

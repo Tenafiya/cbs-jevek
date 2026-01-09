@@ -101,30 +101,6 @@ impl MigrationTrait for Migration {
                     .to(Customers::Table, Customers::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_tax_withholding_transaction")
-                    .table(TaxWithholding::Table)
-                    .col(TaxWithholding::TransactionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_tax_withholding_customer")
-                    .table(TaxWithholding::Table)
-                    .col(TaxWithholding::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_tax_withholding_period")
-                    .table(TaxWithholding::Table)
-                    .col(TaxWithholding::TaxPeriod),
-            )
-            .index(
-                Index::create()
-                    .name("idx_tax_withholding_remittance")
-                    .table(TaxWithholding::Table)
-                    .col(TaxWithholding::IsRemittedToTaxAuthority),
-            )
             .to_owned();
 
         manager.create_table(tax_withholding).await?;

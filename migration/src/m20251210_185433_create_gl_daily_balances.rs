@@ -95,27 +95,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_gl_daily_balances")
-                    .table(GlDailyBalances::Table)
-                    .col(GlDailyBalances::InstitutionId)
-                    .col(GlDailyBalances::AccountId)
-                    .col(GlDailyBalances::BalanceDate)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_balances_date")
-                    .table(GlDailyBalances::Table)
-                    .col(GlDailyBalances::BalanceDate),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_balances_reconciled")
-                    .table(GlDailyBalances::Table)
-                    .col(GlDailyBalances::IsReconciled),
-            )
             .to_owned();
 
         manager.create_table(gl_daily_balances).await?;

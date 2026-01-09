@@ -166,7 +166,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Staff::PhoneNumber).string().not_null())
             .col(ColumnDef::new(Staff::EmailAddress).string().not_null())
             .col(ColumnDef::new(Staff::DateOfBirth).date())
-            .col(ColumnDef::new(Staff::Gender).custom("gender_enum"))
+            .col(ColumnDef::new(Staff::Gender).custom("staff_gender_enum"))
             .col(ColumnDef::new(Staff::Nationality).string())
             .col(ColumnDef::new(Staff::JobTitle).string())
             .col(ColumnDef::new(Staff::Department).string())

@@ -45,7 +45,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(Vaults::MinBalance)
                     .decimal_len(20, 4)
-                    .default(Expr::current_timestamp()),
+                    .default(0.00),
             )
             .col(ColumnDef::new(Vaults::Status).custom("vault_status"))
             .col(ColumnDef::new(Vaults::LastAuditedAt).timestamp_with_time_zone())

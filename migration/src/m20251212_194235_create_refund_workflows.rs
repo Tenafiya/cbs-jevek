@@ -146,24 +146,6 @@ impl MigrationTrait for Migration {
                     .to(Wallets::Table, Wallets::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_refund_workflows_status")
-                    .table(RefundWorkflows::Table)
-                    .col(RefundWorkflows::ApprovalStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_refund_workflows_transaction")
-                    .table(RefundWorkflows::Table)
-                    .col(RefundWorkflows::TransactionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_refund_workflows_type")
-                    .table(RefundWorkflows::Table)
-                    .col(RefundWorkflows::RefundType),
-            )
             .to_owned();
 
         manager.create_table(refund_workflows).await?;

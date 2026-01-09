@@ -770,12 +770,14 @@ dependencies = [
  "actix-rt",
  "actix-web",
  "aes-gcm",
+ "anyhow",
  "base64 0.22.1",
  "bcrypt",
  "chrono",
  "chrono-tz",
  "config",
  "dotenvy",
+ "entity",
  "env_logger",
  "futures",
  "futures-util",
@@ -794,6 +796,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "snowflake_me",
  "testcontainers-modules",
  "thiserror",
  "tokio",
@@ -1390,6 +1393,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "entity"
+version = "0.1.0"
+dependencies = [
+ "sea-orm",
+ "serde",
 ]
 
 [[package]]
@@ -4113,6 +4124,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "snowflake_me"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e7f8bbc7bbcd473d868e1aee1ccc599e03473ad68f3ac6234441030a6419338"
+dependencies = [
+ "base64 0.22.1",
+ "chrono",
+ "thiserror",
 ]
 
 [[package]]

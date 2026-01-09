@@ -78,36 +78,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_data_backups_institution")
-                    .table(DataBackups::Table)
-                    .col(DataBackups::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_data_backups_type")
-                    .table(DataBackups::Table)
-                    .col(DataBackups::BackupType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_data_backups_status")
-                    .table(DataBackups::Table)
-                    .col(DataBackups::BackupStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_data_backups_expires")
-                    .table(DataBackups::Table)
-                    .col(DataBackups::ExpiresAt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_data_backups_verified")
-                    .table(DataBackups::Table)
-                    .col(DataBackups::Verified),
-            )
             .to_owned();
 
         manager.create_table(data_backups).await?;

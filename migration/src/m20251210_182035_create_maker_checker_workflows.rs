@@ -121,30 +121,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_maker_checker_status")
-                    .table(MakerCheckerWorkflows::Table)
-                    .col(MakerCheckerWorkflows::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_maker_checker_maker")
-                    .table(MakerCheckerWorkflows::Table)
-                    .col(MakerCheckerWorkflows::MakerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_maker_checker_checker")
-                    .table(MakerCheckerWorkflows::Table)
-                    .col(MakerCheckerWorkflows::CheckerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_maker_checker_expires")
-                    .table(MakerCheckerWorkflows::Table)
-                    .col(MakerCheckerWorkflows::ExpiresAt),
-            )
             .to_owned();
 
         manager.create_table(maker_checker_workflows).await?;

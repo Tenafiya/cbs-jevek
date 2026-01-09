@@ -76,25 +76,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_product_visibility_rules_institution")
-                    .table(ProductVisibilityRules::Table)
-                    .col(ProductVisibilityRules::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_product_visibility_rules_product")
-                    .table(ProductVisibilityRules::Table)
-                    .col(ProductVisibilityRules::ProductType)
-                    .col(ProductVisibilityRules::ProductId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_product_visibility_rules_active")
-                    .table(ProductVisibilityRules::Table)
-                    .col(ProductVisibilityRules::IsActive),
-            )
             .to_owned();
 
         manager.create_table(product_visibility_rules).await?;

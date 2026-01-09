@@ -105,30 +105,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_integration_webhooks_provider")
-                    .table(IntegrationWebhooks::Table)
-                    .col(IntegrationWebhooks::ProviderId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_webhooks_status")
-                    .table(IntegrationWebhooks::Table)
-                    .col(IntegrationWebhooks::WebhookStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_webhooks_delivery")
-                    .table(IntegrationWebhooks::Table)
-                    .col(IntegrationWebhooks::LastDeliveryAt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_webhooks_failure")
-                    .table(IntegrationWebhooks::Table)
-                    .col(IntegrationWebhooks::LastFailureAt),
-            )
             .to_owned();
 
         manager.create_table(integration_webhooks).await?;

@@ -106,30 +106,6 @@ impl MigrationTrait for Migration {
                     .to(NotificationTemplates::Table, NotificationTemplates::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_notification_queue_status")
-                    .table(NotificationQueue::Table)
-                    .col(NotificationQueue::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_queue_priority")
-                    .table(NotificationQueue::Table)
-                    .col(NotificationQueue::Priority),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_queue_scheduled")
-                    .table(NotificationQueue::Table)
-                    .col(NotificationQueue::ScheduledAt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_queue_type")
-                    .table(NotificationQueue::Table)
-                    .col(NotificationQueue::NotificationType),
-            )
             .to_owned();
 
         manager.create_table(notification_queue).await?;

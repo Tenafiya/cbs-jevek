@@ -79,24 +79,6 @@ impl MigrationTrait for Migration {
                     .to(Customers::Table, Customers::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_field_officer_visits_route")
-                    .table(FieldOfficerVisits::Table)
-                    .col(FieldOfficerVisits::RouteId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_field_officer_visits_customer")
-                    .table(FieldOfficerVisits::Table)
-                    .col(FieldOfficerVisits::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_field_officer_visits_type")
-                    .table(FieldOfficerVisits::Table)
-                    .col(FieldOfficerVisits::VisitType),
-            )
             .to_owned();
 
         manager.create_table(field_officer_visits).await?;

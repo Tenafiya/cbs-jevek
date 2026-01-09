@@ -95,24 +95,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_integration_api_keys_provider")
-                    .table(IntegrationApiKeys::Table)
-                    .col(IntegrationApiKeys::ProviderId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_api_keys_status")
-                    .table(IntegrationApiKeys::Table)
-                    .col(IntegrationApiKeys::KeyStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_integration_api_keys_expiry")
-                    .table(IntegrationApiKeys::Table)
-                    .col(IntegrationApiKeys::ValidUntil),
-            )
             .to_owned();
 
         manager.create_table(integration_api_keys).await?;

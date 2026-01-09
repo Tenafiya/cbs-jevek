@@ -99,20 +99,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("uk_commission_payouts_cycle")
-                    .table(CommissionPayouts::Table)
-                    .col(CommissionPayouts::InstitutionId)
-                    .col(CommissionPayouts::PayoutCycle)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_commission_payouts_status")
-                    .table(CommissionPayouts::Table)
-                    .col(CommissionPayouts::Status),
-            )
             .to_owned();
 
         manager.create_table(commission_payouts).await?;

@@ -59,34 +59,6 @@ impl MigrationTrait for Migration {
                     .to(Institutions::Table, Institutions::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_report_analytics_cache")
-                    .table(ReportAnalyticsCache::Table)
-                    .col(ReportAnalyticsCache::InstitutionId)
-                    .col(ReportAnalyticsCache::ReportType)
-                    .col(ReportAnalyticsCache::CacheKey)
-                    .col(ReportAnalyticsCache::GeneratedAt)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_cache_type")
-                    .table(ReportAnalyticsCache::Table)
-                    .col(ReportAnalyticsCache::ReportType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_cache_expires")
-                    .table(ReportAnalyticsCache::Table)
-                    .col(ReportAnalyticsCache::ExpiresAt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_report_cache_key")
-                    .table(ReportAnalyticsCache::Table)
-                    .col(ReportAnalyticsCache::CacheKey),
-            )
             .to_owned();
 
         manager.create_table(report_analytics_cache).await?;

@@ -91,36 +91,6 @@ impl MigrationTrait for Migration {
                     .to(CustomerIdentifications::Table, CustomerIdentifications::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_kyc_provider_checks_customer")
-                    .table(KycProviderChecks::Table)
-                    .col(KycProviderChecks::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_kyc_provider_checks_provider")
-                    .table(KycProviderChecks::Table)
-                    .col(KycProviderChecks::ProviderId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_kyc_provider_checks_type")
-                    .table(KycProviderChecks::Table)
-                    .col(KycProviderChecks::CheckType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_kyc_provider_checks_status")
-                    .table(KycProviderChecks::Table)
-                    .col(KycProviderChecks::CheckStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_kyc_provider_checks_identification")
-                    .table(KycProviderChecks::Table)
-                    .col(KycProviderChecks::IdentificationId),
-            )
             .to_owned();
 
         manager.create_table(kyc_provider_checks).await?;

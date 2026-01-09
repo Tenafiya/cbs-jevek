@@ -82,36 +82,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_customer_education_content_institution")
-                    .table(CustomerEducationContent::Table)
-                    .col(CustomerEducationContent::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_education_content_type")
-                    .table(CustomerEducationContent::Table)
-                    .col(CustomerEducationContent::ContentType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_education_content_category")
-                    .table(CustomerEducationContent::Table)
-                    .col(CustomerEducationContent::ContentCategory),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_education_content_published")
-                    .table(CustomerEducationContent::Table)
-                    .col(CustomerEducationContent::IsPublished),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_education_content_published_at")
-                    .table(CustomerEducationContent::Table)
-                    .col(CustomerEducationContent::PublishedAt),
-            )
             .to_owned();
 
         manager.create_table(customer_education_content).await?;

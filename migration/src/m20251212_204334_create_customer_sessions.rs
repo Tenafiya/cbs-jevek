@@ -114,43 +114,6 @@ impl MigrationTrait for Migration {
                     .to(Customers::Table, Customers::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("uk_customer_session_token")
-                    .table(CustomerSessions::Table)
-                    .col(CustomerSessions::SessionTokenHash)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_sessions_customer")
-                    .table(CustomerSessions::Table)
-                    .col(CustomerSessions::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_sessions_status")
-                    .table(CustomerSessions::Table)
-                    .col(CustomerSessions::SessionStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_sessions_current")
-                    .table(CustomerSessions::Table)
-                    .col(CustomerSessions::IsCurrent),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_sessions_expires")
-                    .table(CustomerSessions::Table)
-                    .col(CustomerSessions::ExpiresAt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_customer_sessions_activity")
-                    .table(CustomerSessions::Table)
-                    .col(CustomerSessions::LastActivityAt),
-            )
             .to_owned();
 
         manager.create_table(customer_sessions).await?;

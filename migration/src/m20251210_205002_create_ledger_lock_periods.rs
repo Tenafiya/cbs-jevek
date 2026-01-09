@@ -83,27 +83,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("uk_ledger_lock_periods")
-                    .table(LedgerLockPeriods::Table)
-                    .col(LedgerLockPeriods::InstitutionId)
-                    .col(LedgerLockPeriods::StartDate)
-                    .col(LedgerLockPeriods::EndDate)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_ledger_locks_type")
-                    .table(LedgerLockPeriods::Table)
-                    .col(LedgerLockPeriods::LockType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_ledger_locks_status")
-                    .table(LedgerLockPeriods::Table)
-                    .col(LedgerLockPeriods::IsLocked),
-            )
             .to_owned();
 
         manager.create_table(ledger_lock_periods).await?;

@@ -93,24 +93,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_data_retention_rules_institution")
-                    .table(DataRetentionRules::Table)
-                    .col(DataRetentionRules::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_data_retention_rules_category")
-                    .table(DataRetentionRules::Table)
-                    .col(DataRetentionRules::DataCategory),
-            )
-            .index(
-                Index::create()
-                    .name("idx_data_retention_rules_active")
-                    .table(DataRetentionRules::Table)
-                    .col(DataRetentionRules::IsActive),
-            )
             .to_owned();
 
         manager.create_table(data_retention_rules).await?;

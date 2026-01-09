@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
             .get_connection()
             .execute(Statement::from_string(
                 manager.get_database_backend(),
-                "CREATE TYPE risk_level_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH')".to_string(),
+                "CREATE TYPE aml_risk_level_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH')".to_string(),
             ))
             .await?;
 
@@ -101,18 +101,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_aml_rules_institution")
-                    .table(AmlRules::Table)
-                    .col(AmlRules::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_aml_rules_active")
-                    .table(AmlRules::Table)
-                    .col(AmlRules::IsActive),
-            )
             .to_owned();
 
         manager.create_table(aml_rules).await?;
@@ -136,7 +124,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AmlAlerts::AlertType).string().not_null())
             .col(
                 ColumnDef::new(AmlAlerts::RiskLevel)
-                    .custom("risk_level_enum")
+                    .custom("aml_risk_level_enum")
                     .default("MEDIUM"),
             )
             .col(ColumnDef::new(AmlAlerts::CustomerId).big_integer())
@@ -210,30 +198,6 @@ impl MigrationTrait for Migration {
                     .from(AmlAlerts::Table, AmlAlerts::ResolvedBy)
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
-            )
-            .index(
-                Index::create()
-                    .name("idx_aml_alerts_institution")
-                    .table(AmlAlerts::Table)
-                    .col(AmlAlerts::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_aml_alerts_status")
-                    .table(AmlAlerts::Table)
-                    .col(AmlAlerts::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_aml_alerts_customer")
-                    .table(AmlAlerts::Table)
-                    .col(AmlAlerts::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_aml_alerts_risk_level")
-                    .table(AmlAlerts::Table)
-                    .col(AmlAlerts::RiskLevel),
             )
             .to_owned();
 

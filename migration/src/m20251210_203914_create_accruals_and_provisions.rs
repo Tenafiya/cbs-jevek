@@ -126,30 +126,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_accruals_institution")
-                    .table(AccrualsAndProvisions::Table)
-                    .col(AccrualsAndProvisions::InstitutionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_accruals_account")
-                    .table(AccrualsAndProvisions::Table)
-                    .col(AccrualsAndProvisions::AccountId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_accruals_date")
-                    .table(AccrualsAndProvisions::Table)
-                    .col(AccrualsAndProvisions::AccrualDate),
-            )
-            .index(
-                Index::create()
-                    .name("idx_accruals_status")
-                    .table(AccrualsAndProvisions::Table)
-                    .col(AccrualsAndProvisions::Status),
-            )
             .to_owned();
 
         manager.create_table(accruals_and_provisions).await?;

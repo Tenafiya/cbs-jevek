@@ -93,30 +93,6 @@ impl MigrationTrait for Migration {
                     .to(CardTransactions::Table, CardTransactions::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_chargebacks_transaction")
-                    .table(Chargebacks::Table)
-                    .col(Chargebacks::TransactionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_chargebacks_status")
-                    .table(Chargebacks::Table)
-                    .col(Chargebacks::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_chargebacks_card_txn")
-                    .table(Chargebacks::Table)
-                    .col(Chargebacks::CardTransactionId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_chargebacks_due_date")
-                    .table(Chargebacks::Table)
-                    .col(Chargebacks::RepresentmentDueDate),
-            )
             .to_owned();
 
         manager.create_table(chargebacks).await?;

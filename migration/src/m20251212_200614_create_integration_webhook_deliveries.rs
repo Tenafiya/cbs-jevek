@@ -71,36 +71,6 @@ impl MigrationTrait for Migration {
                     .to(IntegrationWebhooks::Table, IntegrationWebhooks::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_webhook_deliveries_webhook")
-                    .table(WebhookDeliveries::Table)
-                    .col(WebhookDeliveries::WebhookId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_webhook_deliveries_event_type")
-                    .table(WebhookDeliveries::Table)
-                    .col(WebhookDeliveries::EventType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_webhook_deliveries_status")
-                    .table(WebhookDeliveries::Table)
-                    .col(WebhookDeliveries::DeliveryStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_webhook_deliveries_attempt")
-                    .table(WebhookDeliveries::Table)
-                    .col(WebhookDeliveries::DeliveryAttempt),
-            )
-            .index(
-                Index::create()
-                    .name("idx_webhook_deliveries_created_at")
-                    .table(WebhookDeliveries::Table)
-                    .col(WebhookDeliveries::CreatedAt),
-            )
             .to_owned();
 
         manager.create_table(webhook_deliveries).await?;

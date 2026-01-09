@@ -55,30 +55,6 @@ impl MigrationTrait for Migration {
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
             )
-            .index(
-                Index::create()
-                    .name("idx_health_metrics_name")
-                    .table(SystemHealthMetrics::Table)
-                    .col(SystemHealthMetrics::MetricName),
-            )
-            .index(
-                Index::create()
-                    .name("idx_health_metrics_category")
-                    .table(SystemHealthMetrics::Table)
-                    .col(SystemHealthMetrics::MetricCategory),
-            )
-            .index(
-                Index::create()
-                    .name("idx_health_metrics_status")
-                    .table(SystemHealthMetrics::Table)
-                    .col(SystemHealthMetrics::MetricStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_health_metrics_recorded_at")
-                    .table(SystemHealthMetrics::Table)
-                    .col(SystemHealthMetrics::RecordedAt),
-            )
             .to_owned();
 
         manager.create_table(system_health_metrics).await?;
@@ -141,19 +117,6 @@ impl MigrationTrait for Migration {
                     )
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
-            )
-            .index(
-                Index::create()
-                    .name("idx_maintenance_windows_status")
-                    .table(SystemMaintenanceWindows::Table)
-                    .col(SystemMaintenanceWindows::WindowStatus),
-            )
-            .index(
-                Index::create()
-                    .name("idx_maintenance_windows_scheduled")
-                    .table(SystemMaintenanceWindows::Table)
-                    .col(SystemMaintenanceWindows::ScheduledStartAt)
-                    .col(SystemMaintenanceWindows::ScheduledEndAt),
             )
             .to_owned();
 

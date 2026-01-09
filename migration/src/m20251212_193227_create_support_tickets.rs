@@ -143,49 +143,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_number")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::TicketNumber)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_customer")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::CustomerId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_status")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::Status),
-            )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_assigned")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::AssignedTo),
-            )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_priority")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::Priority),
-            )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_escalated")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::IsEscalated),
-            )
-            .index(
-                Index::create()
-                    .name("idx_support_tickets_sla_deadline")
-                    .table(SupportTickets::Table)
-                    .col(SupportTickets::SlaDeadline),
-            )
             .to_owned();
 
         manager.create_table(support_tickets).await?;

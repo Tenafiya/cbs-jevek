@@ -86,24 +86,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_gl_reversals_original")
-                    .table(GlReversals::Table)
-                    .col(GlReversals::OriginalPostingId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_reversals_reversal")
-                    .table(GlReversals::Table)
-                    .col(GlReversals::ReversalPostingId),
-            )
-            .index(
-                Index::create()
-                    .name("idx_gl_reversals_type")
-                    .table(GlReversals::Table)
-                    .col(GlReversals::ReversalType),
-            )
             .to_owned();
 
         manager.create_table(gl_reversals).await?;

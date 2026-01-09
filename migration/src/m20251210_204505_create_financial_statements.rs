@@ -107,27 +107,6 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::SetNull),
             )
-            .index(
-                Index::create()
-                    .name("idx_financial_statements")
-                    .table(FinancialStatements::Table)
-                    .col(FinancialStatements::InstitutionId)
-                    .col(FinancialStatements::StatementType)
-                    .col(FinancialStatements::StatementPeriod)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_financial_statements_type")
-                    .table(FinancialStatements::Table)
-                    .col(FinancialStatements::StatementType),
-            )
-            .index(
-                Index::create()
-                    .name("idx_financial_statements_status")
-                    .table(FinancialStatements::Table)
-                    .col(FinancialStatements::Status),
-            )
             .to_owned();
 
         manager.create_table(financial_statements).await?;

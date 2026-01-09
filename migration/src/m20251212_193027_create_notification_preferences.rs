@@ -90,20 +90,6 @@ impl MigrationTrait for Migration {
                     .to(Customers::Table, Customers::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
-            .index(
-                Index::create()
-                    .name("idx_notification_preferences")
-                    .table(NotificationPreferences::Table)
-                    .col(NotificationPreferences::InstitutionId)
-                    .col(NotificationPreferences::CustomerId)
-                    .unique(),
-            )
-            .index(
-                Index::create()
-                    .name("idx_notification_preferences_customer")
-                    .table(NotificationPreferences::Table)
-                    .col(NotificationPreferences::CustomerId),
-            )
             .to_owned();
 
         manager.create_table(notification_preferences).await?;
