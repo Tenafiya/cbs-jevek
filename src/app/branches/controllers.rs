@@ -9,7 +9,7 @@ use crate::{
     utils::{
         self,
         errors::{ApiCode, ApiError, ApiResponse},
-        models::PathParamsModel,
+        models::{PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
 
@@ -63,12 +63,18 @@ pub async fn get_branch_details(
 
 pub async fn get_branches(
     _req: HttpRequest,
+    query: web::Query<QueryParamsModel>,
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     let data = params.into_inner();
 
-    match services::get_all(&data.id.parse().unwrap_or(0), &state).await {
+    let query = QueryModel {
+        size: query.size,
+        page: query.page,
+    };
+
+    match services::get_all(&data.id.parse().unwrap_or(0), &query, &state).await {
         Ok(branches) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",

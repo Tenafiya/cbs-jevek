@@ -4,6 +4,7 @@ use crate::AppState;
 
 pub mod branches;
 pub mod countries;
+pub mod customers;
 pub mod health;
 pub mod institutions;
 

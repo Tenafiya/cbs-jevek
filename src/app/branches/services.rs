@@ -1,9 +1,17 @@
 use actix_web::web;
 use sea_orm::{
-    ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult, QueryFilter,
+    ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult, PaginatorTrait,
+    QueryFilter, QueryOrder,
 };
 
-use crate::{AppState, app::branches::models::AddBranchModel, utils};
+use crate::{
+    AppState,
+    app::branches::models::AddBranchModel,
+    utils::{
+        self,
+        models::{MetaModel, QueryModel},
+    },
+};
 
 pub async fn save_branch(
     model: &AddBranchModel,
@@ -63,17 +71,34 @@ pub async fn get_via_ins(
 
 pub async fn get_all(
     id: &i64,
+    query: &QueryModel,
     state: &web::Data<AppState>,
-) -> Result<Vec<entity::branches::Model>, DbErr> {
-    let results = entity::branches::Entity::find()
+) -> Result<(Vec<entity::branches::Model>, MetaModel), DbErr> {
+    let page = query.page.max(1);
+    let per_page = query.size.max(1);
+
+    let paginator = entity::branches::Entity::find()
         .filter(
             Condition::all()
                 .add(entity::branches::Column::InstitutionId.eq(*id))
                 .add(entity::branches::Column::IsDeleted.eq(false)),
         )
-        .all(state.pgdb.get_ref())
+        .order_by_desc(entity::branches::Column::UpdatedAt)
+        .paginate(state.pgdb.get_ref(), per_page);
+
+    let all = paginator.num_items_and_pages().await?;
+
+    let items = paginator
+        .fetch_page(page - 1)
         .await
         .map_err(|err| DbErr::Custom(err.to_string()))?;
 
-    Ok(results)
+    let meta = MetaModel {
+        total_items: all.number_of_items,
+        total_pages: all.number_of_pages,
+        page,
+        per_page,
+    };
+
+    Ok((items, meta))
 }

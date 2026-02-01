@@ -1,13 +1,16 @@
 use actix_web::web;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult,
-    QueryFilter,
+    PaginatorTrait, QueryFilter, QueryOrder,
 };
 
 use crate::{
     AppState,
     app::institutions::models::{AddInstitutionModel, UpdateInstitutionModel},
-    utils,
+    utils::{
+        self,
+        models::{MetaModel, QueryModel},
+    },
 };
 
 pub async fn save_institution(
@@ -55,22 +58,36 @@ pub async fn get_one(
 }
 
 pub async fn get_all(
+    query: &QueryModel,
     state: &web::Data<AppState>,
-) -> Result<Vec<entity::institutions::Model>, DbErr> {
-    let results = entity::institutions::Entity::find()
+) -> Result<(Vec<entity::institutions::Model>, MetaModel), DbErr> {
+    let page = query.page.max(1);
+    let per_page = query.size.max(1);
+
+    let paginator = entity::institutions::Entity::find()
         .filter(
             Condition::all()
                 .add(entity::institutions::Column::IsActive.eq(true))
                 .add(entity::institutions::Column::IsDeleted.eq(false)),
         )
-        .all(state.pgdb.get_ref())
-        .await
-        .map_err(|err| {
-            eprintln!("Database retrieval error: {}", err);
-            DbErr::Custom(err.to_string())
-        })?;
+        .order_by_desc(entity::institutions::Column::UpdatedAt)
+        .paginate(state.pgdb.get_ref(), per_page);
 
-    Ok(results)
+    let all = paginator.num_items_and_pages().await?;
+
+    let items = paginator.fetch_page(page - 1).await.map_err(|err| {
+        eprintln!("Database pagination error: {}", err);
+        DbErr::Custom(err.to_string())
+    })?;
+
+    let meta = MetaModel {
+        total_items: all.number_of_items,
+        total_pages: all.number_of_pages,
+        page,
+        per_page,
+    };
+
+    Ok((items, meta))
 }
 
 pub async fn update(

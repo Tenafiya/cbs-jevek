@@ -12,7 +12,7 @@ use crate::{
     utils::{
         self,
         errors::{ApiCode, ApiError, ApiResponse},
-        models::PathParamsModel,
+        models::{PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
 
@@ -62,9 +62,15 @@ pub async fn get_institution(
 
 pub async fn get_institutions(
     _req: HttpRequest,
+    query: web::Query<QueryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    match services::get_all(&state).await {
+    let query = QueryModel {
+        size: query.size,
+        page: query.page,
+    };
+
+    match services::get_all(&query, &state).await {
         Ok(insts) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
