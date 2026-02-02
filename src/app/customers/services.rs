@@ -35,6 +35,7 @@ pub async fn save_customer(
         phone_number: Set(Some(data.phone_number)),
         phone_country_code: Set(Some(data.phone_country_code)),
         email: Set(data.email),
+        created_by: Set(Some(data.created_by)),
         ..Default::default()
     };
 
@@ -225,4 +226,91 @@ pub async fn get_customers(
     };
 
     Ok((items, meta))
+}
+
+pub async fn update_sanctions(
+    id: &i64,
+    provider: &String,
+    state: &web::Data<AppState>,
+) -> Result<(), DbErr> {
+    let customer = entity::customers::Entity::update_many()
+        .filter(
+            Condition::all()
+                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::IsSanctionsCheckPassed.eq(false)),
+        )
+        .col_expr(
+            entity::customers::Column::IsSanctionsCheckPassed,
+            Expr::col(entity::customers::Column::IsSanctionsCheckPassed).not(),
+        )
+        .col_expr(
+            entity::customers::Column::SanctionsProvider,
+            Expr::value(provider),
+        )
+        .col_expr(
+            entity::customers::Column::SanctionsCheckDate,
+            Expr::value(chrono::Utc::now()),
+        )
+        .exec(state.pgdb.get_ref())
+        .await
+        .map_err(|err| DbErr::Custom(err.to_string()))?;
+
+    if customer.rows_affected == 0 {
+        return Err(DbErr::Custom("Customer not found".into()));
+    };
+
+    Ok(())
+}
+
+pub async fn customer_verify(
+    id: &i64,
+    user: &i64,
+    state: &web::Data<AppState>,
+) -> Result<(), DbErr> {
+    let customer = entity::customers::Entity::update_many()
+        .filter(
+            Condition::all()
+                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::VerifiedAt.is_null()),
+        )
+        .col_expr(
+            entity::customers::Column::VerifiedAt,
+            Expr::value(chrono::Utc::now()),
+        )
+        .col_expr(entity::customers::Column::VerifiedBy, Expr::value(*user))
+        .exec(state.pgdb.get_ref())
+        .await
+        .map_err(|err| DbErr::Custom(err.to_string()))?;
+
+    if customer.rows_affected == 0 {
+        return Err(DbErr::Custom("Customer not found".into()));
+    };
+
+    Ok(())
+}
+
+pub async fn customer_delete(id: &i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
+    let customer = entity::customers::Entity::update_many()
+        .filter(
+            Condition::all()
+                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::IsDeleted.eq(false)),
+        )
+        .col_expr(
+            entity::customers::Column::IsDeleted,
+            Expr::col(entity::customers::Column::IsDeleted).not(),
+        )
+        .col_expr(
+            entity::customers::Column::DeletedAt,
+            Expr::value(chrono::Utc::now()),
+        )
+        .exec(state.pgdb.get_ref())
+        .await
+        .map_err(|err| DbErr::Custom(err.to_string()))?;
+
+    if customer.rows_affected == 0 {
+        return Err(DbErr::Custom("Customer not found".into()));
+    };
+
+    Ok(())
 }

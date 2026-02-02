@@ -24,6 +24,7 @@ pub struct AddCustomerModel {
     pub phone_number: String,
     pub phone_country_code: String,
     pub email: Option<String>,
+    pub created_by: i64,
 }
 
 #[derive(Debug, Clone)]
