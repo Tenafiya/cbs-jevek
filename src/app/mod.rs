@@ -14,5 +14,6 @@ pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig)
         cfg.configure(|c| countries::routes::init(c, state.clone()));
         cfg.configure(|c| institutions::routes::init(c, state.clone()));
         cfg.configure(|c| branches::routes::init(c, state.clone()));
+        cfg.configure(|c| customers::routes::init(c, state.clone()));
     }
 }

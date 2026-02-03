@@ -31,6 +31,12 @@ pub struct MetaModel {
     pub per_page: u64,
 }
 
+#[derive(Debug, Serialize)]
+pub struct ListResponseModel<T> {
+    pub items: T,
+    pub meta: MetaModel,
+}
+
 fn default_page() -> u64 {
     1
 }

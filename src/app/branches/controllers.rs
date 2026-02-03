@@ -9,7 +9,7 @@ use crate::{
     utils::{
         self,
         errors::{ApiCode, ApiError, ApiResponse},
-        models::{PathParamsModel, QueryModel, QueryParamsModel},
+        models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
 
@@ -20,10 +20,15 @@ pub async fn add_branch(
 ) -> Result<HttpResponse, ApiError> {
     let data = payload.into_inner();
 
+    let institution_id = data
+        .institution_id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid Institution ID format".to_string()))?;
+
     let branch = AddBranchModel {
         name: data.name,
         code: utils::gen_snow_ids::get_code(6).await,
-        institution: data.institution_id.parse().unwrap_or(0),
+        institution: institution_id,
         address: data.address,
         phone: data.phone,
         email: data.email,
@@ -33,7 +38,7 @@ pub async fn add_branch(
     };
 
     match services::save_branch(&branch, &state).await {
-        Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
             {},
@@ -50,7 +55,12 @@ pub async fn get_branch_details(
 ) -> Result<HttpResponse, ApiError> {
     let data = params.into_inner();
 
-    match services::get_details(&data.id.parse().unwrap_or(0), &state).await {
+    let id = data
+        .id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+
+    match services::get_details(&id, &state).await {
         Ok(branch) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -69,18 +79,26 @@ pub async fn get_branches(
 ) -> Result<HttpResponse, ApiError> {
     let data = params.into_inner();
 
+    let id = data
+        .id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+
     let query = QueryModel {
         size: query.size,
         page: query.page,
     };
 
-    match services::get_all(&data.id.parse().unwrap_or(0), &query, &state).await {
-        Ok(branches) => Ok(HttpResponse::Ok().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
-            "Successful",
-            branches,
-            None,
-        ))),
+    match services::get_all(&id, &query, &state).await {
+        Ok(res) => {
+            let (items, meta) = res;
+            Ok(HttpResponse::Ok().json(ApiResponse::success(
+                ApiCode::OperationSuccess,
+                "Successful",
+                ListResponseModel { items, meta },
+                None,
+            )))
+        }
         Err(_) => Err(ApiError::NotFound),
     }
 }

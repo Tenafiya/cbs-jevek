@@ -12,7 +12,7 @@ use crate::{
     utils::{
         self,
         errors::{ApiCode, ApiError, ApiResponse},
-        models::{PathParamsModel, QueryModel, QueryParamsModel},
+        models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
 
@@ -23,16 +23,21 @@ pub async fn add_institution(
 ) -> Result<HttpResponse, ApiError> {
     let data = payload.into_inner();
 
+    let country_id = data
+        .country_id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid Country ID format".to_string()))?;
+
     let institution = AddInstitutionModel {
         name: data.name,
         code: utils::gen_snow_ids::get_code(6).await,
-        country: data.country_id.parse().unwrap_or(0),
+        country: country_id,
         license_num: data.license_num,
         regulation_num: data.regulation_num,
     };
 
     match services::save_institution(&institution, &state).await {
-        Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Institution Created",
             {},
@@ -49,7 +54,12 @@ pub async fn get_institution(
 ) -> Result<HttpResponse, ApiError> {
     let data = params.into_inner();
 
-    match services::get_one(&data.id.parse().unwrap_or(0), &state).await {
+    let id = data
+        .id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+
+    match services::get_one(&id, &state).await {
         Ok(ins) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -71,12 +81,15 @@ pub async fn get_institutions(
     };
 
     match services::get_all(&query, &state).await {
-        Ok(insts) => Ok(HttpResponse::Ok().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
-            "Successful",
-            insts,
-            None,
-        ))),
+        Ok(insts) => {
+            let (items, meta) = insts;
+            Ok(HttpResponse::Ok().json(ApiResponse::success(
+                ApiCode::OperationSuccess,
+                "Successful",
+                ListResponseModel { items, meta },
+                None,
+            )))
+        }
         Err(_) => Err(ApiError::NotFound),
     }
 }
@@ -88,6 +101,11 @@ pub async fn update_institution(
 ) -> Result<HttpResponse, ApiError> {
     let data = payload.into_inner();
 
+    let id = data
+        .id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+
     let update_model = UpdateInstitutionModel {
         name: data.name,
         timezone: data.timezone,
@@ -95,7 +113,7 @@ pub async fn update_institution(
         regulation_num: data.regulation_num,
     };
 
-    match services::update(&data.id.parse().unwrap_or(0), &update_model, &state).await {
+    match services::update(&id, &update_model, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
