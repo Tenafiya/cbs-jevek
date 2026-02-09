@@ -8,7 +8,7 @@ use crate::{
     AppState,
     app::branches::models::AddBranchModel,
     utils::{
-        self,
+        gen_snow_ids::gen_snowflake_slug,
         models::{MetaModel, QueryModel},
     },
 };
@@ -17,8 +17,10 @@ pub async fn save_branch(
     model: &AddBranchModel,
     state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::branches::ActiveModel>, DbErr> {
-    let (snowflake, _) =
-        utils::gen_snow_ids::gen_snowflake_slug().unwrap_or_else(|_| (0, "0".into()));
+    let (snowflake, _) = match gen_snowflake_slug() {
+        Ok(res) => res,
+        Err(_) => return Err(DbErr::Custom("Failed to generate ID's".to_string())),
+    };
 
     let data = model.clone();
 

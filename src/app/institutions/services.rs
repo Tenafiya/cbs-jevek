@@ -8,7 +8,7 @@ use crate::{
     AppState,
     app::institutions::models::{AddInstitutionModel, UpdateInstitutionModel},
     utils::{
-        self,
+        gen_snow_ids::gen_snowflake_slug,
         models::{MetaModel, QueryModel},
     },
 };
@@ -17,10 +17,10 @@ pub async fn save_institution(
     model: &AddInstitutionModel,
     state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::institutions::ActiveModel>, DbErr> {
-    let (snowflake, _) = utils::gen_snow_ids::gen_snowflake_slug().unwrap_or_else(|e| {
-        println!("snowflake error: {e}; falling back to 0");
-        (0, "0".into())
-    });
+    let (snowflake, _) = match gen_snowflake_slug() {
+        Ok(res) => res,
+        Err(_) => return Err(DbErr::Custom("Failed to generate ID's".to_string())),
+    };
 
     let data = model.clone();
 

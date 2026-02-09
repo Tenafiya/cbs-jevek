@@ -4,7 +4,9 @@ use sea_orm::{
     ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult, QueryFilter,
 };
 
-use crate::{AppState, app::countries::models::CountryResponseModel, utils};
+use crate::{
+    AppState, app::countries::models::CountryResponseModel, utils::gen_snow_ids::gen_snowflake_slug,
+};
 
 use crate::app::countries::models::AddCountryModel;
 
@@ -12,10 +14,10 @@ pub async fn save_country(
     model: &AddCountryModel,
     state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::countries::ActiveModel>, DbErr> {
-    let (snowflake, slug) = utils::gen_snow_ids::gen_snowflake_slug().unwrap_or_else(|e| {
-        println!("snowflake error: {e}; falling back to 0");
-        (0, "0".into())
-    });
+    let (snowflake, slug) = match gen_snowflake_slug() {
+        Ok(res) => res,
+        Err(_) => return Err(DbErr::Custom("Failed to generate ID's".to_string())),
+    };
 
     let data = model.clone();
 
