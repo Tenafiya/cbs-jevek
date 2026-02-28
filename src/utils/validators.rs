@@ -1,6 +1,31 @@
 use chrono::{Datelike, NaiveDate, Utc};
+use once_cell::sync::Lazy;
+use regex::Regex;
 use sea_orm::prelude::Decimal;
+use std::collections::HashMap;
 use validator::ValidationError;
+
+static CONTACT_REGEX: Lazy<HashMap<&'static str, Regex>> = Lazy::new(|| {
+    HashMap::from([
+        ("US", Regex::new(r"^[0-9]\d{11}$").unwrap()),
+        ("UK", Regex::new(r"^[0-9]\d{11}$").unwrap()),
+        ("GH", Regex::new(r"^[0-9]\d{10}$").unwrap()),
+        ("NG", Regex::new(r"^[0-9]\d{10}$").unwrap()),
+        ("KE", Regex::new(r"^[0-9]\d{10}$").unwrap()),
+    ])
+});
+
+pub fn validate_contact(contact: &str, country: &str) -> Result<(), ValidationError> {
+    let re = CONTACT_REGEX
+        .get(country)
+        .ok_or_else(|| ValidationError::new("Invalid Country Code"))?;
+
+    if re.is_match(contact) {
+        Ok(())
+    } else {
+        Err(ValidationError::new("Invalid Phone Number"))
+    }
+}
 
 pub fn validate_operation(operand: &str) -> Result<(), ValidationError> {
     match operand {
@@ -18,7 +43,7 @@ pub fn validate_gender(gender: &str) -> Result<(), ValidationError> {
     }
 }
 
-pub fn validate_date(birth_date: &NaiveDate) -> Result<(), ValidationError> {
+pub fn validate_birth_date(birth_date: &NaiveDate) -> Result<(), ValidationError> {
     let today = Utc::now().date_naive();
 
     if *birth_date >= today {

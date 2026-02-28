@@ -7,14 +7,13 @@ use validator::Validate;
 
 use crate::utils::{
     models::default_decimal,
-    validators::{validate_date, validate_gender, validate_income},
+    validators::{validate_birth_date, validate_gender, validate_income},
 };
 
 #[derive(Debug, Clone)]
 pub struct AddCustomerModel {
     pub institution_id: i64,
     pub customer_type: CustomerType,
-    pub customer_num: String,
     pub first_name: String,
     pub last_name: String,
     pub middle_name: Option<String>,
@@ -65,7 +64,7 @@ pub struct AddCustomerParams {
     #[serde(rename = "middleName")]
     pub middle_name: Option<String>,
     #[serde(rename = "dateOfBirth")]
-    #[validate(custom(function = "validate_date"))]
+    #[validate(custom(function = "validate_birth_date"))]
     pub birth_date: NaiveDate,
     #[validate(custom(function = "validate_gender"))]
     pub gender: String,

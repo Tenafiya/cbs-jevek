@@ -18,7 +18,7 @@ pub async fn save_customer(
     model: &AddCustomerModel,
     state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::customers::ActiveModel>, DbErr> {
-    let (snowflake, _) = match gen_snowflake_slug() {
+    let (id, slug) = match gen_snowflake_slug() {
         Ok(res) => res,
         Err(_) => return Err(DbErr::Custom("Failed to generate ID's".to_string())),
     };
@@ -26,9 +26,9 @@ pub async fn save_customer(
     let data = model.clone();
 
     let customer = entity::customers::ActiveModel {
-        id: Set(snowflake),
+        id: Set(id),
         institution_id: Set(data.institution_id),
-        customer_number: Set(Some(data.customer_num)),
+        customer_number: Set(Some(slug)),
         first_name: Set(Some(data.first_name)),
         last_name: Set(Some(data.last_name)),
         middle_name: Set(data.middle_name),

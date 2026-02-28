@@ -25,7 +25,6 @@ pub async fn add_customer(
     let customer = AddCustomerModel {
         institution_id: 049430940300,
         customer_type: data.customer_type,
-        customer_num: "ueu2389208".into(),
         first_name: data.first_name,
         last_name: data.last_name,
         middle_name: data.middle_name,

@@ -7,6 +7,7 @@ pub mod countries;
 pub mod customers;
 pub mod health;
 pub mod institutions;
+pub mod staffs;
 
 pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig) + Clone {
     move |cfg: &mut web::ServiceConfig| {
@@ -15,5 +16,6 @@ pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig)
         cfg.configure(|c| institutions::routes::init(c, state.clone()));
         cfg.configure(|c| branches::routes::init(c, state.clone()));
         cfg.configure(|c| customers::routes::init(c, state.clone()));
+        cfg.configure(|c| staffs::routes::init(c, state.clone()));
     }
 }

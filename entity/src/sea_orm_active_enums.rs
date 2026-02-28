@@ -1519,6 +1519,7 @@ pub enum StaffEmploymentEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "staff_gender_enum")]
+#[serde(rename_all = "UPPERCASE")]
 pub enum StaffGenderEnum {
     #[sea_orm(string_value = "MALE")]
     Male,

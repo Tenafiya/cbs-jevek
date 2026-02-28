@@ -161,7 +161,6 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Staff::FirstName).string().not_null())
             .col(ColumnDef::new(Staff::LastName).string().not_null())
-            .col(ColumnDef::new(Staff::FullName).string())
             .col(ColumnDef::new(Staff::PhoneCountryCode).string())
             .col(ColumnDef::new(Staff::PhoneNumber).string().not_null())
             .col(ColumnDef::new(Staff::EmailAddress).string().not_null())
@@ -240,6 +239,19 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(staff).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE staff
+                    ADD COLUMN full_name VARCHAR(255)
+                    GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED
+                "#
+                .to_owned(),
+            ))
+            .await?;
 
         manager
             .alter_table(
@@ -344,7 +356,6 @@ pub enum Staff {
     EmployeeNumber,
     FirstName,
     LastName,
-    FullName,
     PhoneCountryCode,
     PhoneNumber,
     EmailAddress,
