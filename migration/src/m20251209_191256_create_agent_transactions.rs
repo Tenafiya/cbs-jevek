@@ -58,11 +58,11 @@ impl MigrationTrait for Migration {
                     .custom("agent_trans_type")
                     .not_null(),
             )
-            .col(ColumnDef::new(AgentTransactions::Amount).decimal_len(20, 4))
+            .col(ColumnDef::new(AgentTransactions::Amount).big_integer())
             .col(
                 ColumnDef::new(AgentTransactions::CommissionEarned)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(AgentTransactions::CustomerPhone).string())
             .col(ColumnDef::new(AgentTransactions::CustomerAccount).string())

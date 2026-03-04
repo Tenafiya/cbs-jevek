@@ -42,18 +42,18 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Wallets::Currency).json_binary())
             .col(
                 ColumnDef::new(Wallets::AvailableBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Wallets::LedgerBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Wallets::HoldBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Wallets::Status)

@@ -60,13 +60,13 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(CardDisputes::DisputeReason).string())
             .col(
                 ColumnDef::new(CardDisputes::AmountDisputed)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(CardDisputes::ProvisionalCreditAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(CardDisputes::Status)

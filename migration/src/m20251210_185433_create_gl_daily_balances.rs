@@ -37,18 +37,18 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(GlDailyBalances::OpeningBalance)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(GlDailyBalances::TotalDebits)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(GlDailyBalances::TotalCredits)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(GlDailyBalances::TransactionCount)
@@ -57,7 +57,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(GlDailyBalances::ClosingBalance)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

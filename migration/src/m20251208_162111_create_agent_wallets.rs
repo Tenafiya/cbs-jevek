@@ -49,20 +49,20 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AgentWallets::Currency).json_binary())
             .col(
                 ColumnDef::new(AgentWallets::CurrentBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentWallets::AvailableBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentWallets::MinBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
-            .col(ColumnDef::new(AgentWallets::MaxBalance).decimal_len(20, 4))
+            .col(ColumnDef::new(AgentWallets::MaxBalance).big_integer())
             .col(ColumnDef::new(AgentWallets::Status).custom("agent_wallet_status"))
             .col(ColumnDef::new(AgentWallets::LastFundedAt).timestamp_with_time_zone())
             .col(

@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(StaffCommissions::TransactionReference).string())
             .col(
                 ColumnDef::new(StaffCommissions::TransactionAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
@@ -50,7 +50,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(StaffCommissions::CommissionAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

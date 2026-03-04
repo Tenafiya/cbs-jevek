@@ -42,11 +42,11 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(ContributionCycles::CycleName).string())
             .col(ColumnDef::new(ContributionCycles::StartDate).date())
             .col(ColumnDef::new(ContributionCycles::EndDate).date())
-            .col(ColumnDef::new(ContributionCycles::ExpectedContributions).decimal_len(20, 4))
+            .col(ColumnDef::new(ContributionCycles::ExpectedContributions).big_integer())
             .col(
                 ColumnDef::new(ContributionCycles::ActualContributions)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(ContributionCycles::Status).custom("contribution_cycles_status"))
             .col(

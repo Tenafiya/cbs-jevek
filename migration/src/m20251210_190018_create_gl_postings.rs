@@ -41,7 +41,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(GlPostings::DebitAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
@@ -51,7 +51,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(GlPostings::CreditAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(GlPostings::Narration).text().not_null())

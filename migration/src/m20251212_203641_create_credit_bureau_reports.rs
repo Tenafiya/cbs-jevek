@@ -74,8 +74,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(CreditBureauReports::TotalOutstandingDefaultAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(CreditBureauReports::Status)

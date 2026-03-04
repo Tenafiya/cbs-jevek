@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanCollaterals::Description).string())
             .col(
                 ColumnDef::new(LoanCollaterals::EstimatedValue)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

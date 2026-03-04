@@ -41,8 +41,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(AgentPerformance::DepositAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentPerformance::WithdrawalCount)
@@ -51,8 +51,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(AgentPerformance::WithdrawalAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentPerformance::LoanRepaymentCount)
@@ -61,13 +61,13 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(AgentPerformance::LoanRepaymentAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentPerformance::CommissionEarned)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentPerformance::ActiveCustomerCount)

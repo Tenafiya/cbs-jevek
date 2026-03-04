@@ -57,7 +57,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Contributions::ContributionDate).date())
             .col(
                 ColumnDef::new(Contributions::Amount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(Contributions::ContributionType).custom("contribution_type"))
@@ -70,8 +70,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Contributions::MissedContributionDate).date())
             .col(
                 ColumnDef::new(Contributions::PenaltyApplied)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Contributions::Status).custom("contribution_status"))
             .col(

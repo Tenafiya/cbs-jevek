@@ -68,11 +68,11 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(
-                ColumnDef::new(SuspiciousTransactionReports::TransactionIds).custom("TEXT"), // Store as JSON array of UUID strings
+                ColumnDef::new(SuspiciousTransactionReports::TransactionIds).custom("TEXT"),
             )
             .col(
                 ColumnDef::new(SuspiciousTransactionReports::TotalAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

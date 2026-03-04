@@ -32,7 +32,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(FixedDepositAccounts::DepositAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
@@ -52,7 +52,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(FixedDepositAccounts::MaturityAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

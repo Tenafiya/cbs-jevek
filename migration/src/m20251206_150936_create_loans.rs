@@ -56,28 +56,28 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(Loans::PrincipalAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(Loans::DisbursedAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(Loans::OutstandingPrincipal)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(Loans::OutstandingInterest)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Loans::OutstandingPenalty)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Loans::TenureDays).integer().not_null())
             .col(
@@ -102,8 +102,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Loans::DaysInArrears).integer().default(0))
             .col(
                 ColumnDef::new(Loans::ArrearsAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Loans::DaysToWriteOff).integer())
             .col(
@@ -113,8 +113,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(Loans::ProvisionAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Loans::CustomFields).json_binary())
             .col(ColumnDef::new(Loans::CreatedBy).big_integer())

@@ -65,7 +65,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanApplications::RequestedPrincipal)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
@@ -74,10 +74,10 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(LoanApplications::Purpose).string())
-            .col(ColumnDef::new(LoanApplications::ApprovedPrincipal).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanApplications::ApprovedPrincipal).big_integer())
             .col(ColumnDef::new(LoanApplications::ApprovedTenureDays).integer())
             .col(ColumnDef::new(LoanApplications::ApprovedInterestRate).decimal_len(10, 6))
-            .col(ColumnDef::new(LoanApplications::InstallmentAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanApplications::InstallmentAmount).big_integer())
             .col(ColumnDef::new(LoanApplications::CreditScore).integer())
             .col(ColumnDef::new(LoanApplications::CreditBureauResponse).json_binary())
             .col(ColumnDef::new(LoanApplications::RiskRating).custom("loan_risk_rating"))

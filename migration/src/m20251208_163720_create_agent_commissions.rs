@@ -63,7 +63,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(AgentCommissionRules::CommissionType)
                     .custom("agent_commission_rule_comm_type"),
             )
-            .col(ColumnDef::new(AgentCommissionRules::CommissionValue).decimal_len(20, 4))
+            .col(ColumnDef::new(AgentCommissionRules::CommissionValue).big_integer())
             .col(
                 ColumnDef::new(AgentCommissionRules::HasSlabs)
                     .boolean()
@@ -72,10 +72,10 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AgentCommissionRules::SlabConfig).json_binary())
             .col(
                 ColumnDef::new(AgentCommissionRules::MinCommission)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
-            .col(ColumnDef::new(AgentCommissionRules::MaxCommission).decimal_len(20, 4))
+            .col(ColumnDef::new(AgentCommissionRules::MaxCommission).big_integer())
             .col(
                 ColumnDef::new(AgentCommissionRules::IsActive)
                     .boolean()
@@ -141,7 +141,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AgentCommissions::TransactionReference).string())
             .col(
                 ColumnDef::new(AgentCommissions::TransactionAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
@@ -151,7 +151,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(AgentCommissions::CommissionAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

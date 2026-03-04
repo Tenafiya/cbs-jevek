@@ -36,11 +36,11 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(CardLimits::CardId).big_integer().not_null())
             .col(ColumnDef::new(CardLimits::LimitType).custom("card_limit_type"))
-            .col(ColumnDef::new(CardLimits::LimitAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(CardLimits::LimitAmount).big_integer())
             .col(
                 ColumnDef::new(CardLimits::CurrentUsage)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(CardLimits::ResetFreq)

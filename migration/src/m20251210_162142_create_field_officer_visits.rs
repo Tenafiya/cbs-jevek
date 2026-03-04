@@ -58,8 +58,8 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .default(false),
             )
-            .col(ColumnDef::new(FieldOfficerVisits::ExpectedAmount).decimal_len(20, 4))
-            .col(ColumnDef::new(FieldOfficerVisits::CollectedAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(FieldOfficerVisits::ExpectedAmount).big_integer())
+            .col(ColumnDef::new(FieldOfficerVisits::CollectedAmount).big_integer())
             .col(ColumnDef::new(FieldOfficerVisits::Photos).json_binary())
             .col(ColumnDef::new(FieldOfficerVisits::Signatures).json_binary())
             .col(

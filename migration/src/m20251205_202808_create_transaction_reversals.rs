@@ -53,7 +53,7 @@ impl MigrationTrait for Migration {
                     .custom("transaction_reversal_typs"),
             )
             .col(ColumnDef::new(TransactionReversals::Reason).string())
-            .col(ColumnDef::new(TransactionReversals::Amount).decimal_len(20, 4))
+            .col(ColumnDef::new(TransactionReversals::Amount).big_integer())
             .col(ColumnDef::new(TransactionReversals::Status).custom("transaction_reversal_status"))
             .col(ColumnDef::new(TransactionReversals::RequestedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(TransactionReversals::ApprovedAt).timestamp_with_time_zone())

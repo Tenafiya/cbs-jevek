@@ -47,8 +47,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Branches::IsMain).boolean().default(false))
             .col(
                 ColumnDef::new(Branches::CashLimit)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Branches::IsActive).boolean().default(false))
             .col(ColumnDef::new(Branches::Status).string())

@@ -63,7 +63,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(TransactionDisputes::DisputeType).custom("transaction_dispute_type"),
             )
             .col(ColumnDef::new(TransactionDisputes::Description).string())
-            .col(ColumnDef::new(TransactionDisputes::AmountDisputed).decimal_len(20, 4))
+            .col(ColumnDef::new(TransactionDisputes::AmountDisputed).big_integer())
             .col(ColumnDef::new(TransactionDisputes::SupportingDocuments).json_binary())
             .col(
                 ColumnDef::new(TransactionDisputes::Status)
@@ -74,8 +74,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(TransactionDisputes::Resolution).string())
             .col(
                 ColumnDef::new(TransactionDisputes::RefundAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(TransactionDisputes::ResolvedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(TransactionDisputes::SlaDeadline).timestamp_with_time_zone())

@@ -51,15 +51,15 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(SavingGoals::GoalName).string())
-            .col(ColumnDef::new(SavingGoals::TargetAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(SavingGoals::TargetAmount).big_integer())
             .col(
                 ColumnDef::new(SavingGoals::CurrentAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(SavingGoals::StartDate).date().not_null())
             .col(ColumnDef::new(SavingGoals::TargetCompletionDate).date())
-            .col(ColumnDef::new(SavingGoals::ContributionAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(SavingGoals::ContributionAmount).big_integer())
             .col(ColumnDef::new(SavingGoals::ContributionFreq).custom("savings_product_freq"))
             .col(ColumnDef::new(SavingGoals::Status).custom("saving_goals_status"))
             .col(ColumnDef::new(SavingGoals::CompletionDate).date())

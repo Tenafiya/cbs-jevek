@@ -55,22 +55,22 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(FeeApplications::AccountId).big_integer())
             .col(
                 ColumnDef::new(FeeApplications::BaseAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(FeeApplications::FeeAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(FeeApplications::VatAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(FeeApplications::TotalAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

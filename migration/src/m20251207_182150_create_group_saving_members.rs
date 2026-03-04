@@ -44,11 +44,11 @@ impl MigrationTrait for Migration {
                     .default("MEMBER"),
             )
             .col(ColumnDef::new(GroupSavingMembers::JoinedDate).date())
-            .col(ColumnDef::new(GroupSavingMembers::CommittedAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(GroupSavingMembers::CommittedAmount).big_integer())
             .col(
                 ColumnDef::new(GroupSavingMembers::ActualContributed)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(GroupSavingMembers::IsActive)

@@ -65,22 +65,22 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanRepayments::PrincipalAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanRepayments::InterestAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanRepayments::PenaltyAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanRepayments::TotalAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(LoanRepayments::PaymentMethod).custom("loan_repayment_methods"))

@@ -53,7 +53,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(TransactionLimits::LimitType)
                     .custom("transaction_limits_limit_type"),
             )
-            .col(ColumnDef::new(TransactionLimits::MaxAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(TransactionLimits::MaxAmount).big_integer())
             .col(ColumnDef::new(TransactionLimits::MaxCount).integer())
             .col(ColumnDef::new(TransactionLimits::Currency).json_binary())
             .col(

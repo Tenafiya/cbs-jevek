@@ -49,7 +49,7 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(AccountLinks::Relationship).string())
-            .col(ColumnDef::new(AccountLinks::AuthorizedLimit).decimal_len(20, 4))
+            .col(ColumnDef::new(AccountLinks::AuthorizedLimit).big_integer())
             .col(
                 ColumnDef::new(AccountLinks::IsCreditAllowed)
                     .boolean()

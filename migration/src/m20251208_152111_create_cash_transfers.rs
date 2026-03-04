@@ -47,19 +47,19 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(CashTransfers::DestinationId).big_integer())
             .col(
                 ColumnDef::new(CashTransfers::Amount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(CashTransfers::CashBreakdown).json_binary())
             .col(ColumnDef::new(CashTransfers::Currency).json_binary())
             .col(
                 ColumnDef::new(CashTransfers::SourceBalanceBefore)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(CashTransfers::DestinationBalanceBefore)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(CashTransfers::Status).custom("cash_transfers_status"))

@@ -28,6 +28,14 @@ impl MigrationTrait for Migration {
             ))
             .await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"".to_string(),
+            ))
+            .await?;
+
         let table_meta = Table::create()
             .table(Countries::Table)
             .if_not_exists()

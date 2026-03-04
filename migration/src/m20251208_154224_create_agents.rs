@@ -65,8 +65,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Agents::CommissionAccountId).big_integer())
             .col(
                 ColumnDef::new(Agents::TransactionVolumeToday)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Agents::TransactionCountToday)

@@ -41,8 +41,8 @@ impl MigrationTrait for Migration {
                     .date()
                     .not_null(),
             )
-            .col(ColumnDef::new(LoanRescheduling::OldInstallmentAmount).decimal_len(20, 4))
-            .col(ColumnDef::new(LoanRescheduling::NewInstallmentAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanRescheduling::OldInstallmentAmount).big_integer())
+            .col(ColumnDef::new(LoanRescheduling::NewInstallmentAmount).big_integer())
             .col(ColumnDef::new(LoanRescheduling::Reason).string())
             .col(ColumnDef::new(LoanRescheduling::SupportingDocuments).json_binary())
             .col(ColumnDef::new(LoanRescheduling::Status).custom("loan_rescheduling_status"))

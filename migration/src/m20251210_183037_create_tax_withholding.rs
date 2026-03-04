@@ -56,12 +56,12 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(TaxWithholding::TaxableAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(TaxWithholding::TaxAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(TaxWithholding::TaxInvoiceNumber).string())

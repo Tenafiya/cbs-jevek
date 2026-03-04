@@ -72,9 +72,9 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(CardTransactions::TransactionChannel)
                     .custom("card_transactions_trans_channel"),
             )
-            .col(ColumnDef::new(CardTransactions::Amount).decimal_len(20, 4))
+            .col(ColumnDef::new(CardTransactions::Amount).big_integer())
             .col(ColumnDef::new(CardTransactions::Currency).json_binary())
-            .col(ColumnDef::new(CardTransactions::BillingAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(CardTransactions::BillingAmount).big_integer())
             .col(ColumnDef::new(CardTransactions::BillingCurrency).json_binary())
             .col(ColumnDef::new(CardTransactions::TransactionDate).timestamp_with_time_zone())
             .col(ColumnDef::new(CardTransactions::SettlementDate).date())

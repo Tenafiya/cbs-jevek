@@ -43,33 +43,33 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::PrincipalDue)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::InterestDue)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::TotalDue)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::PrincipalPaid)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::InterestPaid)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::PenaltyPaid)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanRepaymentSchedules::Status)

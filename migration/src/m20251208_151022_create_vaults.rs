@@ -37,15 +37,15 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Vaults::VaultCode).string())
             .col(
                 ColumnDef::new(Vaults::TotalBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Vaults::CashBreakdown).json_binary())
-            .col(ColumnDef::new(Vaults::MaxBalance).decimal_len(20, 4))
+            .col(ColumnDef::new(Vaults::MaxBalance).big_integer())
             .col(
                 ColumnDef::new(Vaults::MinBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Vaults::Status).custom("vault_status"))
             .col(ColumnDef::new(Vaults::LastAuditedAt).timestamp_with_time_zone())

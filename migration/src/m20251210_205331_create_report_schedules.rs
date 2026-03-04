@@ -35,8 +35,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(ReportSchedules::Id)
                     .big_integer()
                     .not_null()
-                    .primary_key()
-                    .auto_increment(),
+                    .primary_key(),
             )
             .col(
                 ColumnDef::new(ReportSchedules::InstitutionId)

@@ -24,7 +24,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanCollateralValuations::ValuationAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(

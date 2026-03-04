@@ -44,12 +44,12 @@ impl MigrationTrait for Migration {
                     .custom("acc_limit_type")
                     .not_null(),
             )
-            .col(ColumnDef::new(AccountLimits::LimitAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(AccountLimits::LimitAmount).big_integer())
             .col(ColumnDef::new(AccountLimits::LimitCount).integer())
             .col(
                 ColumnDef::new(AccountLimits::CurrentUsage)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AccountLimits::CurrentCount)

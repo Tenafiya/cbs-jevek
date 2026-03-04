@@ -30,40 +30,40 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .not_null(),
             )
-            .col(ColumnDef::new(TellerCashDrawers::OpeningBalance).decimal_len(20, 4))
+            .col(ColumnDef::new(TellerCashDrawers::OpeningBalance).big_integer())
             .col(ColumnDef::new(TellerCashDrawers::OpeningCash).json_binary())
             .col(
                 ColumnDef::new(TellerCashDrawers::TotalCashIn)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(TellerCashDrawers::TotalCashOut)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(TellerCashDrawers::TotalCheques)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(TellerCashDrawers::TotalTransfersIn)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(TellerCashDrawers::TotalTransfersOut)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
-            .col(ColumnDef::new(TellerCashDrawers::ClosingBalance).decimal_len(20, 4))
+            .col(ColumnDef::new(TellerCashDrawers::ClosingBalance).big_integer())
             .col(ColumnDef::new(TellerCashDrawers::ClosingCash).json_binary())
-            .col(ColumnDef::new(TellerCashDrawers::ExpectedAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(TellerCashDrawers::ExpectedAmount).big_integer())
             .col(
                 ColumnDef::new(TellerCashDrawers::VarianceAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(TellerCashDrawers::VarianceReason).string())
             .col(ColumnDef::new(TellerCashDrawers::Status).custom("teller_cash_drawers_status"))

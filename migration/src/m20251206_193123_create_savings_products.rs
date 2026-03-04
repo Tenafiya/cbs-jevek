@@ -87,11 +87,11 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(SavingsProducts::Currency).json_binary())
             .col(
                 ColumnDef::new(SavingsProducts::MinContribution)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
-            .col(ColumnDef::new(SavingsProducts::MaxContribution).decimal_len(20, 4))
-            .col(ColumnDef::new(SavingsProducts::DefaultContribution).decimal_len(20, 4))
+            .col(ColumnDef::new(SavingsProducts::MaxContribution).big_integer())
+            .col(ColumnDef::new(SavingsProducts::DefaultContribution).big_integer())
             .col(ColumnDef::new(SavingsProducts::ContributionFreq).custom("savings_product_freq"))
             .col(ColumnDef::new(SavingsProducts::InterestRate).decimal_len(10, 6))
             .col(
@@ -127,8 +127,8 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .default(false),
             )
-            .col(ColumnDef::new(SavingsProducts::MinTargetAmount).decimal_len(20, 4))
-            .col(ColumnDef::new(SavingsProducts::MaxTargetAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(SavingsProducts::MinTargetAmount).big_integer())
+            .col(ColumnDef::new(SavingsProducts::MaxTargetAmount).big_integer())
             .col(
                 ColumnDef::new(SavingsProducts::IsGroupSavingsAllowed)
                     .boolean()
@@ -138,13 +138,13 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(SavingsProducts::MaxGroupMembers).integer())
             .col(
                 ColumnDef::new(SavingsProducts::MissedContributionPenalty)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(SavingsProducts::MaintenanceFee)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(SavingsProducts::IsActive)

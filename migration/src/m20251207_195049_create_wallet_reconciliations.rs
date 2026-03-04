@@ -39,15 +39,15 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(WalletReconciliations::ReconciliationDate).date())
-            .col(ColumnDef::new(WalletReconciliations::ProviderOpeningBalance).decimal_len(20, 4))
-            .col(ColumnDef::new(WalletReconciliations::ProviderClosingBalance).decimal_len(20, 4))
-            .col(ColumnDef::new(WalletReconciliations::ProviderTotalCredits).decimal_len(20, 4))
-            .col(ColumnDef::new(WalletReconciliations::ProviderTotalDebits).decimal_len(20, 4))
+            .col(ColumnDef::new(WalletReconciliations::ProviderOpeningBalance).big_integer())
+            .col(ColumnDef::new(WalletReconciliations::ProviderClosingBalance).big_integer())
+            .col(ColumnDef::new(WalletReconciliations::ProviderTotalCredits).big_integer())
+            .col(ColumnDef::new(WalletReconciliations::ProviderTotalDebits).big_integer())
             .col(ColumnDef::new(WalletReconciliations::ProviderTransactionCount).integer())
             .col(
                 ColumnDef::new(WalletReconciliations::DifferenceAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(WalletReconciliations::Status)

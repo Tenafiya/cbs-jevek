@@ -68,24 +68,24 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Transactions::CreditCustomerId).big_integer())
             .col(
                 ColumnDef::new(Transactions::Amount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(Transactions::Currency).json_binary())
             .col(
                 ColumnDef::new(Transactions::FeeAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Transactions::VatAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Transactions::TotalAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Transactions::TransactionType).custom("transaction_type"))
             .col(

@@ -56,15 +56,15 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(FeeTypes::FeeValue)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(FeeTypes::MinimumFee)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
-            .col(ColumnDef::new(FeeTypes::MaximumFee).decimal_len(20, 4))
+            .col(ColumnDef::new(FeeTypes::MaximumFee).big_integer())
             .col(ColumnDef::new(FeeTypes::Currency).json_binary())
             .col(
                 ColumnDef::new(FeeTypes::IsVatApplicable)

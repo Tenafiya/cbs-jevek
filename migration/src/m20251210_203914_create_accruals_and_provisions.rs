@@ -69,13 +69,13 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AccrualsAndProvisions::PostingDate).timestamp_with_time_zone())
             .col(
                 ColumnDef::new(AccrualsAndProvisions::AccrualAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(AccrualsAndProvisions::ReversalAmount)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AccrualsAndProvisions::ReferenceType)

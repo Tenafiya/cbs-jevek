@@ -11,15 +11,6 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Create the INET extension if not exists
-        manager
-            .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"".to_string(),
-            ))
-            .await?;
-
         manager
             .get_connection()
             .execute(Statement::from_string(

@@ -24,7 +24,6 @@ impl MigrationTrait for Migration {
             ))
             .await?;
 
-        // System health metrics table
         let system_health_metrics = Table::create()
             .table(SystemHealthMetrics::Table)
             .if_not_exists()
@@ -40,10 +39,10 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(SystemHealthMetrics::MetricCategory).string())
-            .col(ColumnDef::new(SystemHealthMetrics::MetricValue).decimal_len(20, 4))
+            .col(ColumnDef::new(SystemHealthMetrics::MetricValue).big_integer())
             .col(ColumnDef::new(SystemHealthMetrics::MetricUnit).string())
-            .col(ColumnDef::new(SystemHealthMetrics::WarningThreshold).decimal_len(20, 4))
-            .col(ColumnDef::new(SystemHealthMetrics::CriticalThreshold).decimal_len(20, 4))
+            .col(ColumnDef::new(SystemHealthMetrics::WarningThreshold).big_integer())
+            .col(ColumnDef::new(SystemHealthMetrics::CriticalThreshold).big_integer())
             .col(
                 ColumnDef::new(SystemHealthMetrics::MetricStatus)
                     .custom("health_status")
@@ -59,7 +58,6 @@ impl MigrationTrait for Migration {
 
         manager.create_table(system_health_metrics).await?;
 
-        // System maintenance windows table
         let system_maintenance_windows = Table::create()
             .table(SystemMaintenanceWindows::Table)
             .if_not_exists()

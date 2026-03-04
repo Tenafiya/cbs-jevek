@@ -45,9 +45,9 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(LoanPenalties::PenaltyType).custom("loan_penalty_type"))
-            .col(ColumnDef::new(LoanPenalties::PenaltyAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanPenalties::PenaltyAmount).big_integer())
             .col(ColumnDef::new(LoanPenalties::CalculatedAt).timestamp_with_time_zone())
-            .col(ColumnDef::new(LoanPenalties::WaivedAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanPenalties::WaivedAmount).big_integer())
             .col(ColumnDef::new(LoanPenalties::WaivedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(LoanPenalties::WaiveReason).string())
             .col(ColumnDef::new(LoanPenalties::Status).custom("loan_penalty_status"))

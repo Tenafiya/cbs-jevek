@@ -44,9 +44,9 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .not_null(),
             )
-            .col(ColumnDef::new(AgentAudits::ExpectedFloatBalance).decimal_len(20, 4))
-            .col(ColumnDef::new(AgentAudits::ActualFloatBalance).decimal_len(20, 4))
-            .col(ColumnDef::new(AgentAudits::Variance).decimal_len(20, 4))
+            .col(ColumnDef::new(AgentAudits::ExpectedFloatBalance).big_integer())
+            .col(ColumnDef::new(AgentAudits::ActualFloatBalance).big_integer())
+            .col(ColumnDef::new(AgentAudits::Variance).big_integer())
             .col(ColumnDef::new(AgentAudits::Findings).json_binary())
             .col(ColumnDef::new(AgentAudits::ComplianceScore).decimal_len(5, 2))
             .col(ColumnDef::new(AgentAudits::RiskLevel).custom("risk_level_enum"))

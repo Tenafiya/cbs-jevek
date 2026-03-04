@@ -38,13 +38,13 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Tellers::TellerNumber).string().not_null())
             .col(
                 ColumnDef::new(Tellers::DrawerLimit)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(Tellers::CurrentDrawerBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Tellers::Status)

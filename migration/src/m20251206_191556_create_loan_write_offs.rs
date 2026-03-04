@@ -24,26 +24,26 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanWriteOffs::WriteOffAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanWriteOffs::OutstandingPrincipal)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanWriteOffs::OutstandingInterest)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanWriteOffs::OutstandingPenalty)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(LoanWriteOffs::WriteOffReason).string())
-            .col(ColumnDef::new(LoanWriteOffs::ProvisionAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanWriteOffs::ProvisionAmount).big_integer())
             .col(
                 ColumnDef::new(LoanWriteOffs::WrittenOffAt)
                     .timestamp_with_time_zone()

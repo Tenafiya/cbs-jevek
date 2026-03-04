@@ -35,7 +35,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanGuarantors::GuarantorAddress).string())
             .col(ColumnDef::new(LoanGuarantors::GuarantorRelationship).string())
             .col(ColumnDef::new(LoanGuarantors::GuarantorOccupation).string())
-            .col(ColumnDef::new(LoanGuarantors::GuarantorIncome).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanGuarantors::GuarantorIncome).big_integer())
             .col(ColumnDef::new(LoanGuarantors::AgreementDocumentUrl).string())
             .col(
                 ColumnDef::new(LoanGuarantors::IsConsentProvided)

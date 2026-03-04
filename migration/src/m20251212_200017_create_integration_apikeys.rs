@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -11,15 +11,6 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Create the INET extension if not exists
-        manager
-            .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"".to_string(),
-            ))
-            .await?;
-
         let integration_api_keys = Table::create()
             .table(IntegrationApiKeys::Table)
             .if_not_exists()

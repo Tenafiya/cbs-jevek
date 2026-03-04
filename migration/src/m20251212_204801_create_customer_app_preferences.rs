@@ -18,8 +18,7 @@ impl MigrationTrait for Migration {
                 ColumnDef::new(CustomerAppPreferences::Id)
                     .big_integer()
                     .not_null()
-                    .primary_key()
-                    .auto_increment(),
+                    .primary_key(),
             )
             .col(
                 ColumnDef::new(CustomerAppPreferences::InstitutionId)

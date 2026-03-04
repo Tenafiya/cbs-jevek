@@ -65,27 +65,27 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(AgentSettlements::TotalTransactionVolume)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentSettlements::TotalCommissionEarned)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentSettlements::PreviousBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentSettlements::Adjustments)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AgentSettlements::FinalSettlementAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(AgentSettlements::SettlementAccount).string())

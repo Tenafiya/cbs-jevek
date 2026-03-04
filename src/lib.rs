@@ -51,11 +51,6 @@ pub async fn start_server() -> Result<(), std::io::Error> {
 
     let addr = format!("{host}:{port}");
 
-    // let job_state = state.clone();
-    // tokio::spawn(async move {
-    //     launchjobs(job_state).await;
-    // });
-
     log::info!("🚀 Server starting at {}", addr);
 
     let server = HttpServer::new(move || {

@@ -44,7 +44,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Chargebacks::DisputeId).big_integer())
             .col(
                 ColumnDef::new(Chargebacks::ChargebackAmount)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(ColumnDef::new(Chargebacks::ChargebackReasonCode).string_len(50))
@@ -61,8 +61,8 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Chargebacks::RepresentmentDueDate).date())
             .col(ColumnDef::new(Chargebacks::ResolvedAt).timestamp_with_time_zone())
-            .col(ColumnDef::new(Chargebacks::ProvisionalCreditAmount).decimal_len(20, 4))
-            .col(ColumnDef::new(Chargebacks::FinalLiabilityAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(Chargebacks::ProvisionalCreditAmount).big_integer())
+            .col(ColumnDef::new(Chargebacks::FinalLiabilityAmount).big_integer())
             .col(ColumnDef::new(Chargebacks::NetworkReference).string())
             .col(ColumnDef::new(Chargebacks::NetworkResponse).json_binary())
             .col(

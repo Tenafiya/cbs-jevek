@@ -45,7 +45,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(StandingOrders::BeneficiaryName).string())
             .col(ColumnDef::new(StandingOrders::BeneficiaryAccount).string())
             .col(ColumnDef::new(StandingOrders::BeneficiaryBankCode).string())
-            .col(ColumnDef::new(StandingOrders::Amount).decimal_len(20, 4))
+            .col(ColumnDef::new(StandingOrders::Amount).big_integer())
             .col(ColumnDef::new(StandingOrders::Currency).json_binary())
             .col(ColumnDef::new(StandingOrders::Frequency).custom("standing_orders_freq"))
             .col(ColumnDef::new(StandingOrders::DayOfWeek).integer())

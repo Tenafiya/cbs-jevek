@@ -63,15 +63,15 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(LoanProducts::Currency).json_binary())
             .col(
                 ColumnDef::new(LoanProducts::MinimumPrincipal)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
             .col(
                 ColumnDef::new(LoanProducts::MaximumPrincipal)
-                    .decimal_len(20, 4)
+                    .big_integer()
                     .not_null(),
             )
-            .col(ColumnDef::new(LoanProducts::DefaultPrincipal).decimal_len(20, 4))
+            .col(ColumnDef::new(LoanProducts::DefaultPrincipal).big_integer())
             .col(
                 ColumnDef::new(LoanProducts::MinimumTenureDays)
                     .integer()
@@ -102,8 +102,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanProducts::ProcessingFeeFlat)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanProducts::InsuranceFeeRate)
@@ -112,8 +112,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanProducts::InsuranceFeeFlat)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanProducts::LatePaymentPenaltyRate)
@@ -122,8 +122,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(LoanProducts::LatePaymentPenaltyFlat)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(LoanProducts::PenaltyGracePeriodDays)

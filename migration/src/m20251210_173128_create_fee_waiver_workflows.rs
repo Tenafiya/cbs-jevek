@@ -58,8 +58,8 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(FeeWaiverWorkflows::ApprovalNotes).string())
             .col(ColumnDef::new(FeeWaiverWorkflows::ApprovedAt).timestamp_with_time_zone())
-            .col(ColumnDef::new(FeeWaiverWorkflows::RequestedWaiverAmount).decimal_len(20, 4))
-            .col(ColumnDef::new(FeeWaiverWorkflows::ApprovedWaiverAmount).decimal_len(20, 4))
+            .col(ColumnDef::new(FeeWaiverWorkflows::RequestedWaiverAmount).big_integer())
+            .col(ColumnDef::new(FeeWaiverWorkflows::ApprovedWaiverAmount).big_integer())
             .col(
                 ColumnDef::new(FeeWaiverWorkflows::CreatedAt)
                     .timestamp_with_time_zone()

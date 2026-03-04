@@ -57,10 +57,10 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AccountTypes::Currency).json_binary())
             .col(
                 ColumnDef::new(AccountTypes::MinimumBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
-            .col(ColumnDef::new(AccountTypes::MaximumBalance).decimal_len(20, 4))
+            .col(ColumnDef::new(AccountTypes::MaximumBalance).big_integer())
             .col(ColumnDef::new(AccountTypes::InterestRate).decimal_len(10, 6))
             .col(ColumnDef::new(AccountTypes::InterestRateCalcMethod).custom("acc_type_int_calc"))
             .col(ColumnDef::new(AccountTypes::KycTier).json_binary())
@@ -73,7 +73,7 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .default(false),
             )
-            .col(ColumnDef::new(AccountTypes::OverdraftLimit).decimal_len(20, 4))
+            .col(ColumnDef::new(AccountTypes::OverdraftLimit).big_integer().default(0))
             .col(ColumnDef::new(AccountTypes::OverdraftInterestRate).decimal_len(10, 6))
             .col(
                 ColumnDef::new(AccountTypes::DormancyPeriodDays)
@@ -82,13 +82,13 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(AccountTypes::MaintenanceFee)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AccountTypes::WithdrawalFee)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(AccountTypes::Status)

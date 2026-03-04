@@ -45,23 +45,23 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Accounts::Currency).json_binary())
             .col(
                 ColumnDef::new(Accounts::CurrentBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Accounts::AvailableBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Accounts::LedgerBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Accounts::HoldBalance)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Accounts::Status)
@@ -79,13 +79,13 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(Accounts::OverdraftLimit)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(
                 ColumnDef::new(Accounts::OverdraftUsed)
-                    .decimal_len(20, 4)
-                    .default(0.00),
+                    .big_integer()
+                    .default(0),
             )
             .col(ColumnDef::new(Accounts::ParentAccountId).big_integer())
             .col(ColumnDef::new(Accounts::Tags).array(ColumnType::Text))
