@@ -17,24 +17,18 @@ pub struct Model {
     pub account_name: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub current_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub available_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub ledger_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub hold_balance: Option<Decimal>,
+    pub current_balance: Option<i64>,
+    pub available_balance: Option<i64>,
+    pub ledger_balance: Option<i64>,
+    pub hold_balance: Option<i64>,
     pub status: Option<AccTypeStatus>,
     pub activation_date: Option<DateTimeWithTimeZone>,
     pub dormancy_date: Option<DateTimeWithTimeZone>,
     pub frozen_at: Option<DateTimeWithTimeZone>,
     pub frozen_reason: Option<String>,
     pub is_overdraft_allowable: Option<bool>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub overdraft_limit: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub overdraft_used: Option<Decimal>,
+    pub overdraft_limit: Option<i64>,
+    pub overdraft_used: Option<i64>,
     pub parent_account_id: Option<i64>,
     pub tags: Option<Vec<String>>,
     #[sea_orm(column_type = "JsonBinary", nullable)]

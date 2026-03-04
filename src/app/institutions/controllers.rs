@@ -34,6 +34,14 @@ pub async fn add_institution(
         country: country_id,
         license_num: data.license_num,
         regulation_num: data.regulation_num,
+        city: data.city,
+        zip_code: data.zip_code,
+        state: data.state,
+        date_format: data.date_format,
+        date_time_format: data.date_time_format,
+        address: data.address,
+        postal_address: data.postal_address,
+        
     };
 
     match services::save_institution(&institution, &state).await {

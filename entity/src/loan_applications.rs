@@ -16,17 +16,14 @@ pub struct Model {
     #[sea_orm(unique)]
     pub application_number: Option<String>,
     pub status: Option<LoanApplicationStatus>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub requested_principal: Decimal,
+    pub requested_principal: i64,
     pub requested_tenure_days: i32,
     pub purpose: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub approved_principal: Option<Decimal>,
+    pub approved_principal: Option<i64>,
     pub approved_tenure_days: Option<i32>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub approved_interest_rate: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub installment_amount: Option<Decimal>,
+    pub installment_amount: Option<i64>,
     pub credit_score: Option<i32>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub credit_bureau_response: Option<Json>,

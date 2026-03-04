@@ -21,19 +21,16 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Institutions::Code).string())
             .col(
                 ColumnDef::new(Institutions::CountryId)
-                    .big_integer()
-                    .not_null(),
+                    .big_integer(),
             )
             .col(ColumnDef::new(Institutions::Timezone).string())
             .col(
                 ColumnDef::new(Institutions::LicenseNumber)
-                    .string()
-                    .not_null(),
+                    .string(),
             )
             .col(
                 ColumnDef::new(Institutions::RegulatoryNumber)
-                    .string()
-                    .not_null(),
+                    .string(),
             )
             .col(ColumnDef::new(Institutions::LogoUrl).string())
             .col(ColumnDef::new(Institutions::City).string())
@@ -74,16 +71,41 @@ impl MigrationTrait for Migration {
 
         manager.create_table(insti).await?;
 
-        let contact_details  = Table::create()
+        let contact_details = Table::create()
             .table(ContactDetails::Table)
             .if_not_exists()
-            .col(ColumnDef::new(ContactDetails::Id).big_integer().not_null().primary_key())
-            .col(ColumnDef::new(ContactDetails::InstitutionId).big_integer().not_null())
+            .col(
+                ColumnDef::new(ContactDetails::Id)
+                    .big_integer()
+                    .not_null()
+                    .primary_key(),
+            )
+            .col(
+                ColumnDef::new(ContactDetails::InstitutionId)
+                    .big_integer()
+                    .not_null(),
+            )
             .col(ColumnDef::new(ContactDetails::Department).string())
-            .col(ColumnDef::new(ContactDetails::ContactType).string().not_null())
-            .col(ColumnDef::new(ContactDetails::ContactValue).string().not_null())
-            .col(ColumnDef::new(ContactDetails::IsActive).boolean().default(true))
-            .col(ColumnDef::new(ContactDetails::IsPrimary).boolean().default(false))
+            .col(
+                ColumnDef::new(ContactDetails::ContactType)
+                    .string()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(ContactDetails::ContactValue)
+                    .string()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(ContactDetails::IsActive)
+                    .boolean()
+                    .default(true),
+            )
+            .col(
+                ColumnDef::new(ContactDetails::IsPrimary)
+                    .boolean()
+                    .default(false),
+            )
             .col(
                 ColumnDef::new(ContactDetails::CreatedAt)
                     .timestamp_with_time_zone()

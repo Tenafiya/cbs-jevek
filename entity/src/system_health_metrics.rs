@@ -11,13 +11,10 @@ pub struct Model {
     pub id: i64,
     pub metric_name: String,
     pub metric_category: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub metric_value: Option<Decimal>,
+    pub metric_value: Option<i64>,
     pub metric_unit: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub warning_threshold: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub critical_threshold: Option<Decimal>,
+    pub warning_threshold: Option<i64>,
+    pub critical_threshold: Option<i64>,
     pub metric_status: Option<HealthStatus>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub metadata: Option<Json>,

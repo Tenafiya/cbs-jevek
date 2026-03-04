@@ -15,16 +15,13 @@ pub struct Model {
     pub source_id: Option<i64>,
     pub destination_type: Option<CashTransfersType>,
     pub destination_id: Option<i64>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub amount: Decimal,
+    pub amount: i64,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub cash_breakdown: Option<Json>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub source_balance_before: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub destination_balance_before: Decimal,
+    pub source_balance_before: i64,
+    pub destination_balance_before: i64,
     pub status: Option<CashTransfersStatus>,
     pub approved_at: Option<DateTimeWithTimeZone>,
     pub requested_by: Option<i64>,

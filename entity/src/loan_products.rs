@@ -19,12 +19,9 @@ pub struct Model {
     pub description: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub minimum_principal: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub maximum_principal: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub default_principal: Option<Decimal>,
+    pub minimum_principal: i64,
+    pub maximum_principal: i64,
+    pub default_principal: Option<i64>,
     pub minimum_tenure_days: i32,
     pub maximum_tenure_days: i32,
     pub default_tenure_days: Option<i32>,
@@ -35,16 +32,13 @@ pub struct Model {
     pub interest_accural_freq: Option<LoanProductFreq>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub processing_fee_rate: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub processing_fee_flat: Option<Decimal>,
+    pub processing_fee_flat: Option<i64>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub insurance_fee_rate: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub insurance_fee_flat: Option<Decimal>,
+    pub insurance_fee_flat: Option<i64>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub late_payment_penalty_rate: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub late_payment_penalty_flat: Option<Decimal>,
+    pub late_payment_penalty_flat: Option<i64>,
     pub penalty_grace_period_days: Option<i32>,
     pub repayment_freq: String,
     #[sea_orm(column_type = "JsonBinary", nullable)]

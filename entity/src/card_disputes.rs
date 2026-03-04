@@ -15,10 +15,8 @@ pub struct Model {
     pub card_transaction_id: i64,
     pub dispute_type: CardDisputeType,
     pub dispute_reason: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub amount_disputed: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provisional_credit_amount: Option<Decimal>,
+    pub amount_disputed: i64,
+    pub provisional_credit_amount: Option<i64>,
     pub status: Option<CardDisputeStatus>,
     pub is_chargeback_initiated: Option<bool>,
     pub chargeback_date: Option<Date>,

@@ -15,16 +15,11 @@ pub struct Model {
     pub settlement_cycle: String,
     pub settlement_date: Date,
     pub total_transactions: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_transaction_volume: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_commission_earned: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub previous_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub adjustments: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub final_settlement_amount: Decimal,
+    pub total_transaction_volume: Option<i64>,
+    pub total_commission_earned: Option<i64>,
+    pub previous_balance: Option<i64>,
+    pub adjustments: Option<i64>,
+    pub final_settlement_amount: i64,
     pub settlement_account: Option<String>,
     pub settlement_reference: Option<String>,
     pub settlement_channel: Option<AgentSettlementChannels>,

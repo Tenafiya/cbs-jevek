@@ -45,11 +45,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Branches::Email).string())
             .col(ColumnDef::new(Branches::Location).json_binary())
             .col(ColumnDef::new(Branches::IsMain).boolean().default(false))
-            .col(
-                ColumnDef::new(Branches::CashLimit)
-                    .big_integer()
-                    .default(0),
-            )
+            .col(ColumnDef::new(Branches::CashLimit).big_integer().default(0))
             .col(ColumnDef::new(Branches::IsActive).boolean().default(false))
             .col(ColumnDef::new(Branches::Status).string())
             .col(ColumnDef::new(Branches::IsDeleted).boolean().default(false))
@@ -161,7 +157,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Staff::FirstName).string().not_null())
             .col(ColumnDef::new(Staff::LastName).string().not_null())
-            .col(ColumnDef::new(Staff::PhoneCountryCode).string())
+            .col(ColumnDef::new(Staff::PhoneCountryCode).string().default("233"))
             .col(ColumnDef::new(Staff::PhoneNumber).string().not_null())
             .col(ColumnDef::new(Staff::EmailAddress).string().not_null())
             .col(ColumnDef::new(Staff::DateOfBirth).date())
@@ -180,8 +176,9 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Staff::RoleId).big_integer())
             .col(ColumnDef::new(Staff::Permissions).json_binary())
             .col(ColumnDef::new(Staff::PasswordHash).string().not_null())
+            .col(ColumnDef::new(Staff::IsPasswordChanged).boolean().default(false))
             .col(ColumnDef::new(Staff::PasswordLastChangedAt).timestamp_with_time_zone())
-            .col(ColumnDef::new(Staff::IsMfaEnabled).boolean().default(true))
+            .col(ColumnDef::new(Staff::IsMfaEnabled).boolean().default(false))
             .col(ColumnDef::new(Staff::MfaSecretEncrypted).string())
             .col(
                 ColumnDef::new(Staff::FailedLoginAttempts)
@@ -370,6 +367,7 @@ pub enum Staff {
     TerminationReason,
     RoleId,
     Permissions,
+    IsPasswordChanged,
     PasswordHash,
     PasswordLastChangedAt,
     IsMfaEnabled,

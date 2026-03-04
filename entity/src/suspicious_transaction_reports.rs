@@ -19,8 +19,7 @@ pub struct Model {
     pub account_id: i64,
     #[sea_orm(column_type = "Text", nullable)]
     pub transaction_ids: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub total_amount: Decimal,
+    pub total_amount: i64,
     pub suspicion_type: TransactionSuspicionType,
     pub suspicion_description: String,
     #[sea_orm(column_type = "JsonBinary", nullable)]

@@ -16,10 +16,8 @@ pub struct Model {
     pub account_id: i64,
     pub accrual_date: Date,
     pub posting_date: Option<DateTimeWithTimeZone>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub accrual_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub reversal_amount: Option<Decimal>,
+    pub accrual_amount: i64,
+    pub reversal_amount: Option<i64>,
     pub reference_type: Option<AccrualReferenceType>,
     pub reference_id: Option<i64>,
     pub status: Option<AccrualStatus>,

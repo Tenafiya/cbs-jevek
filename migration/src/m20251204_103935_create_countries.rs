@@ -113,6 +113,14 @@ impl MigrationTrait for Migration {
             .await?;
 
         manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"".to_string(),
+            ))
+            .await?;
+
+        manager
             .drop_table(Table::drop().table(Countries::Table).to_owned())
             .await
     }

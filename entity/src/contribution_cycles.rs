@@ -14,10 +14,8 @@ pub struct Model {
     pub cycle_name: Option<String>,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub expected_contributions: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub actual_contributions: Option<Decimal>,
+    pub expected_contributions: Option<i64>,
+    pub actual_contributions: Option<i64>,
     pub status: Option<ContributionCyclesStatus>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,

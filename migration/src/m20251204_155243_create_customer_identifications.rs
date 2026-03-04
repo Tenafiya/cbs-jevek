@@ -38,8 +38,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(CustomerIdentifications::IdNumber).string())
             .col(
                 ColumnDef::new(CustomerIdentifications::IssuingCountryId)
-                    .big_integer()
-                    .not_null(),
+                    .big_integer(),
             )
             .col(ColumnDef::new(CustomerIdentifications::IssueDate).date())
             .col(ColumnDef::new(CustomerIdentifications::ExpiryDate).date())

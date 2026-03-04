@@ -12,7 +12,7 @@ pub struct Model {
     pub customer_id: i64,
     pub id_type: Option<String>,
     pub id_number: Option<String>,
-    pub issuing_country_id: i64,
+    pub issuing_country_id: Option<i64>,
     pub issue_date: Option<Date>,
     pub expiry_date: Option<Date>,
     pub front_image_url: Option<String>,

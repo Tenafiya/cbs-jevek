@@ -15,14 +15,11 @@ pub struct Model {
     pub savings_product_id: i64,
     pub account_id: i64,
     pub goal_name: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub target_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub current_amount: Option<Decimal>,
+    pub target_amount: Option<i64>,
+    pub current_amount: Option<i64>,
     pub start_date: Date,
     pub target_completion_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub contribution_amount: Option<Decimal>,
+    pub contribution_amount: Option<i64>,
     pub contribution_freq: Option<SavingsProductFreq>,
     pub status: Option<SavingGoalsStatus>,
     pub completion_date: Option<Date>,

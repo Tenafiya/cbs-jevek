@@ -13,14 +13,11 @@ pub struct Model {
     pub branch_id: i64,
     pub vault_name: Option<String>,
     pub vault_code: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_balance: Option<Decimal>,
+    pub total_balance: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub cash_breakdown: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub max_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub min_balance: Option<Decimal>,
+    pub max_balance: Option<i64>,
+    pub min_balance: Option<i64>,
     pub status: Option<VaultStatus>,
     pub last_audited_at: Option<DateTimeWithTimeZone>,
     pub created_at: Option<DateTimeWithTimeZone>,

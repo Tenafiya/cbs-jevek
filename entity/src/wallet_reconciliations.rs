@@ -12,17 +12,12 @@ pub struct Model {
     pub institution_id: i64,
     pub wallet_provider_id: i64,
     pub reconciliation_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provider_opening_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provider_closing_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provider_total_credits: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provider_total_debits: Option<Decimal>,
+    pub provider_opening_balance: Option<i64>,
+    pub provider_closing_balance: Option<i64>,
+    pub provider_total_credits: Option<i64>,
+    pub provider_total_debits: Option<i64>,
     pub provider_transaction_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub difference_amount: Option<Decimal>,
+    pub difference_amount: Option<i64>,
     pub status: Option<WalletReconciliationStatus>,
     pub reconciled_at: Option<DateTimeWithTimeZone>,
     #[sea_orm(column_type = "JsonBinary", nullable)]

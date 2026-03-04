@@ -15,14 +15,10 @@ pub struct Model {
     pub account_id: i64,
     pub transaction_id: i64,
     pub installment_number: i32,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub principal_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub interest_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub penalty_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub total_amount: Decimal,
+    pub principal_amount: i64,
+    pub interest_amount: i64,
+    pub penalty_amount: Option<i64>,
+    pub total_amount: i64,
     pub payment_method: Option<LoanRepaymentMethods>,
     pub payment_reference: Option<String>,
     pub repayment_date: DateTimeWithTimeZone,

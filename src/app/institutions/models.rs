@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use serde_json::Value;
 use validator::Validate;
 
 #[derive(Debug, Clone)]
@@ -8,6 +9,13 @@ pub struct AddInstitutionModel {
     pub country: i64,
     pub license_num: String,
     pub regulation_num: String,
+    pub city: String,
+    pub zip_code: String,
+    pub state: String,
+    pub date_format: String,
+    pub date_time_format: String,
+    pub address: Value,
+    pub postal_address: Value,
 }
 
 #[derive(Debug, Clone)]
@@ -29,6 +37,18 @@ pub struct AddInstitutionParams {
     pub license_num: String,
     #[serde(rename = "regulatoryNumber")]
     pub regulation_num: String,
+    #[serde(rename = "gpsCode")]
+    pub zip_code: String,
+    pub city: String,
+    #[serde(rename = "region")]
+    pub state: String,
+    #[serde(rename = "dateFormat")]
+    pub date_format: String,
+    #[serde(rename = "dateTimeFormat")]
+    pub date_time_format: String,
+    pub address: Value,
+    #[serde(rename = "postalAddress")]
+    pub postal_address: Value
 }
 
 #[derive(Debug, Deserialize, Validate)]

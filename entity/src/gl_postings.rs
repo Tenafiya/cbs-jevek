@@ -14,11 +14,9 @@ pub struct Model {
     pub value_date: Date,
     pub posting_date: Option<DateTimeWithTimeZone>,
     pub debit_account_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub debit_amount: Decimal,
+    pub debit_amount: i64,
     pub credit_account_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub credit_amount: Decimal,
+    pub credit_amount: i64,
     #[sea_orm(column_type = "Text")]
     pub narration: String,
     pub is_reversed: Option<bool>,

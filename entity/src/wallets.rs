@@ -17,12 +17,9 @@ pub struct Model {
     pub wallet_name: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub available_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub ledger_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub hold_balance: Option<Decimal>,
+    pub available_balance: Option<i64>,
+    pub ledger_balance: Option<i64>,
+    pub hold_balance: Option<i64>,
     pub status: Option<WalletProvStatus>,
     pub is_primary: Option<bool>,
     pub provider_customer_id: Option<String>,

@@ -13,10 +13,8 @@ pub struct Model {
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub provision_rate: Option<Decimal>,
     pub provision_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provision_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub outstanding_balance: Option<Decimal>,
+    pub provision_amount: Option<i64>,
+    pub outstanding_balance: Option<i64>,
     pub days_in_arrears: Option<i32>,
     pub calculation_method: Option<String>,
     pub created_by: Option<i64>,

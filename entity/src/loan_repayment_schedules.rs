@@ -12,18 +12,12 @@ pub struct Model {
     pub loan_id: i64,
     pub installment_number: i32,
     pub due_date: Date,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub principal_due: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub interest_due: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub total_due: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub principal_paid: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub interest_paid: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub penalty_paid: Option<Decimal>,
+    pub principal_due: i64,
+    pub interest_due: i64,
+    pub total_due: i64,
+    pub principal_paid: Option<i64>,
+    pub interest_paid: Option<i64>,
+    pub penalty_paid: Option<i64>,
     pub status: Option<LoanRepaymentScheduleStatus>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,

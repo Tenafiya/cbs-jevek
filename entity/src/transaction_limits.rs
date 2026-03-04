@@ -15,8 +15,7 @@ pub struct Model {
     pub customer_type: Option<CustomerType>,
     pub account_category_id: i64,
     pub limit_type: Option<TransactionLimitsLimitType>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub max_amount: Option<Decimal>,
+    pub max_amount: Option<i64>,
     pub max_count: Option<i32>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,

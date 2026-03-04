@@ -11,14 +11,12 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
     pub account_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub deposit_amount: Decimal,
+    pub deposit_amount: i64,
     pub tenure_days: i32,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))")]
     pub interest_rate: Decimal,
     pub maturity_date: Date,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub maturity_amount: Decimal,
+    pub maturity_amount: i64,
     pub rollover_type: Option<FdRolloverType>,
     pub rollover_to_account_id: Option<i64>,
     pub is_early_withdrawal_allowed: Option<bool>,

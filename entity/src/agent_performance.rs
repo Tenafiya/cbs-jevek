@@ -12,16 +12,12 @@ pub struct Model {
     pub agent_id: i64,
     pub report_date: Date,
     pub deposit_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub deposit_amount: Option<Decimal>,
+    pub deposit_amount: Option<i64>,
     pub withdrawal_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub withdrawal_amount: Option<Decimal>,
+    pub withdrawal_amount: Option<i64>,
     pub loan_repayment_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub loan_repayment_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub commission_earned: Option<Decimal>,
+    pub loan_repayment_amount: Option<i64>,
+    pub commission_earned: Option<i64>,
     pub active_customer_count: Option<i32>,
     #[sea_orm(column_type = "Decimal(Some((5, 2)))", nullable)]
     pub performance_score: Option<Decimal>,

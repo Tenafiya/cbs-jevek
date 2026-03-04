@@ -1,4 +1,3 @@
-use sea_orm::prelude::Decimal;
 use serde::Deserialize;
 use serde_json::Value;
 use validator::Validate;
@@ -13,7 +12,7 @@ pub struct AddBranchModel {
     pub email: String,
     pub location: Value,
     pub is_main: bool,
-    pub cash_limit: Decimal,
+    pub cash_limit: i64,
 }
 
 #[derive(Debug, Deserialize, Validate)]
@@ -28,7 +27,7 @@ pub struct AddBranchParams {
     pub email: String,
     pub location: Value,
     #[serde(rename = "cashLimit")]
-    pub cash_limit: Decimal,
+    pub cash_limit: i64,
     #[serde(rename = "isMainBranch")]
     pub is_main_branch: bool,
 }

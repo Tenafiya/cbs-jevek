@@ -31,12 +31,9 @@ pub struct Model {
     pub card_status: Option<CardStatus>,
     pub activation_date: Option<DateTimeWithTimeZone>,
     pub blocking_reason: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub daily_atm_limit: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub daily_pos_limit: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub daily_online_limit: Option<Decimal>,
+    pub daily_atm_limit: Option<i64>,
+    pub daily_pos_limit: Option<i64>,
+    pub daily_online_limit: Option<i64>,
     pub cardholder_name: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub delivery_address: Option<Json>,

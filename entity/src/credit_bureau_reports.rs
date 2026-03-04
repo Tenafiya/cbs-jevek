@@ -23,8 +23,7 @@ pub struct Model {
     pub total_accounts: Option<i32>,
     pub active_accounts: Option<i32>,
     pub defaults_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_outstanding_default_amount: Option<Decimal>,
+    pub total_outstanding_default_amount: Option<i64>,
     pub status: Option<String>,
     pub error_code: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]

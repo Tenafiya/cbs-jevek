@@ -14,8 +14,7 @@ pub struct Model {
     pub payout_cycle: String,
     pub total_agents: Option<i32>,
     pub total_staff: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_payout_amount: Option<Decimal>,
+    pub total_payout_amount: Option<i64>,
     pub status: Option<CommPayoutStatus>,
     pub processed_at: Option<DateTimeWithTimeZone>,
     pub settlement_account_id: Option<i64>,

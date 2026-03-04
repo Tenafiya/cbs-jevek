@@ -9,17 +9,12 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
     pub loan_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub write_off_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub outstanding_principal: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub outstanding_interest: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub outstanding_penalty: Decimal,
+    pub write_off_amount: i64,
+    pub outstanding_principal: i64,
+    pub outstanding_interest: i64,
+    pub outstanding_penalty: i64,
     pub write_off_reason: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provision_amount: Option<Decimal>,
+    pub provision_amount: Option<i64>,
     pub written_off_at: Option<DateTimeWithTimeZone>,
     pub written_off_by: Option<i64>,
     pub created_at: Option<DateTimeWithTimeZone>,

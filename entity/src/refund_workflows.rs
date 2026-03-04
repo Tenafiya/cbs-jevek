@@ -13,10 +13,8 @@ pub struct Model {
     pub institution_id: i64,
     pub transaction_id: i64,
     pub dispute_id: Option<i64>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub refund_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub fee_refund_amount: Option<Decimal>,
+    pub refund_amount: i64,
+    pub fee_refund_amount: Option<i64>,
     #[sea_orm(column_type = "Text")]
     pub refund_reason: String,
     pub refund_type: RefundWorkflowRefundType,

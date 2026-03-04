@@ -16,7 +16,6 @@ pub struct Model {
     pub employee_number: String,
     pub first_name: String,
     pub last_name: String,
-    pub full_name: Option<String>,
     pub phone_country_code: Option<String>,
     #[sea_orm(unique)]
     pub phone_number: String,
@@ -35,6 +34,7 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub permissions: Option<Json>,
     pub password_hash: String,
+    pub is_password_changed: Option<bool>,
     pub password_last_changed_at: Option<DateTimeWithTimeZone>,
     pub is_mfa_enabled: Option<bool>,
     pub mfa_secret_encrypted: Option<String>,
@@ -49,6 +49,7 @@ pub struct Model {
     pub deleted_at: Option<DateTimeWithTimeZone>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
+    pub full_name: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -12,10 +12,8 @@ pub struct Model {
     pub id: i64,
     pub card_id: i64,
     pub limit_type: Option<CardLimitType>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub limit_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub current_usage: Option<Decimal>,
+    pub limit_amount: Option<i64>,
+    pub current_usage: Option<i64>,
     pub reset_freq: Option<CardLimitReset>,
     pub last_reset_at: Option<DateTimeWithTimeZone>,
     pub effective_from: Option<DateTimeWithTimeZone>,

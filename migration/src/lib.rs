@@ -112,6 +112,7 @@ mod m20251212_205650_create_admin_audit_logs;
 mod m20251212_210040_create_health_n_maintenance;
 mod m20251212_210457_create_data_backups;
 mod m20251212_210901_create_regulatory_reporting_exports;
+mod m20260304_182449_create_currencies;
 
 pub struct Migrator;
 
@@ -231,6 +232,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20251212_210040_create_health_n_maintenance::Migration),
             Box::new(m20251212_210457_create_data_backups::Migration),
             Box::new(m20251212_210901_create_regulatory_reporting_exports::Migration),
+            Box::new(m20260304_182449_create_currencies::Migration),
         ]
     }
 }

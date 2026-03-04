@@ -15,12 +15,10 @@ pub struct Model {
     pub commission_rule_id: i64,
     pub transaction_id: Option<i64>,
     pub transaction_reference: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub transaction_amount: Decimal,
+    pub transaction_amount: i64,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))")]
     pub commission_rate: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub commission_amount: Decimal,
+    pub commission_amount: i64,
     pub transaction_type: Option<AgentCommissionsTransType>,
     pub status: Option<AgentCommissionsStatus>,
     pub paid_at: Option<DateTimeWithTimeZone>,

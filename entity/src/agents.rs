@@ -28,8 +28,7 @@ pub struct Model {
     pub kyc_completed_at: Option<DateTimeWithTimeZone>,
     pub settlement_account_id: Option<i64>,
     pub commission_account_id: Option<i64>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub transaction_volume_today: Option<Decimal>,
+    pub transaction_volume_today: Option<i64>,
     pub transaction_count_today: Option<i32>,
     pub last_transaction_at: Option<DateTimeWithTimeZone>,
     pub status: Option<AgentStatus>,

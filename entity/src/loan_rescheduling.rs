@@ -12,10 +12,8 @@ pub struct Model {
     pub loan_id: i64,
     pub old_maturity_date: Date,
     pub newd_maturity_date: Date,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub old_installment_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub new_installment_amount: Option<Decimal>,
+    pub old_installment_amount: Option<i64>,
+    pub new_installment_amount: Option<i64>,
     pub reason: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub supporting_documents: Option<Json>,

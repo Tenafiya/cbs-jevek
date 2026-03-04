@@ -13,12 +13,9 @@ pub struct Model {
     pub agent_id: i64,
     pub audit_date: Date,
     pub auditor_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub expected_float_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub actual_float_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub variance: Option<Decimal>,
+    pub expected_float_balance: Option<i64>,
+    pub actual_float_balance: Option<i64>,
+    pub variance: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub findings: Option<Json>,
     #[sea_orm(column_type = "Decimal(Some((5, 2)))", nullable)]

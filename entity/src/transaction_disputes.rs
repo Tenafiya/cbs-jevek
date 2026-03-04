@@ -16,15 +16,13 @@ pub struct Model {
     pub customer_id: i64,
     pub dispute_type: Option<TransactionDisputeType>,
     pub description: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub amount_disputed: Option<Decimal>,
+    pub amount_disputed: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub supporting_documents: Option<Json>,
     pub status: Option<TransactionDisputeStatus>,
     pub priority: Option<TransactionPriority>,
     pub resolution: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub refund_amount: Option<Decimal>,
+    pub refund_amount: Option<i64>,
     pub resolved_at: Option<DateTimeWithTimeZone>,
     pub sla_deadline: Option<DateTimeWithTimeZone>,
     pub assigned_to: Option<i64>,

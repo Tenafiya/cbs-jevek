@@ -15,8 +15,7 @@ pub struct Model {
     pub institution_id: i64,
     pub reversal_type: Option<TransactionReversalTyps>,
     pub reason: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub amount: Option<Decimal>,
+    pub amount: Option<i64>,
     pub status: Option<TransactionReversalStatus>,
     pub requested_at: Option<DateTimeWithTimeZone>,
     pub approved_at: Option<DateTimeWithTimeZone>,

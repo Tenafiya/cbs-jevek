@@ -20,16 +20,12 @@ pub struct Model {
     pub credit_account_id: Option<i64>,
     pub debit_customer_id: Option<i64>,
     pub credit_customer_id: Option<i64>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub amount: Decimal,
+    pub amount: i64,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub fee_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub vat_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_amount: Option<Decimal>,
+    pub fee_amount: Option<i64>,
+    pub vat_amount: Option<i64>,
+    pub total_amount: Option<i64>,
     pub transaction_type: Option<TransactionType>,
     pub transaction_category: Option<TransactionCategoryType>,
     pub description: Option<String>,

@@ -19,8 +19,7 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub location: Option<Json>,
     pub is_main: Option<bool>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub cash_limit: Option<Decimal>,
+    pub cash_limit: Option<i64>,
     pub is_active: Option<bool>,
     pub status: Option<String>,
     pub is_deleted: Option<bool>,

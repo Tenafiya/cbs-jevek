@@ -17,8 +17,7 @@ pub struct Model {
     pub beneficiary_name: Option<String>,
     pub beneficiary_account: Option<String>,
     pub beneficiary_bank_code: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub amount: Option<Decimal>,
+    pub amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
     pub frequency: Option<StandingOrdersFreq>,

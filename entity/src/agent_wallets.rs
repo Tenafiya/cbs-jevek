@@ -15,14 +15,10 @@ pub struct Model {
     pub wallet_type: Option<AgentWalletType>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub current_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub available_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub min_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub max_balance: Option<Decimal>,
+    pub current_balance: Option<i64>,
+    pub available_balance: Option<i64>,
+    pub min_balance: Option<i64>,
+    pub max_balance: Option<i64>,
     pub status: Option<AgentWalletStatus>,
     pub last_funded_at: Option<DateTimeWithTimeZone>,
     pub created_at: Option<DateTimeWithTimeZone>,

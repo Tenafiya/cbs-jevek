@@ -13,8 +13,7 @@ pub struct Model {
     pub loan_id: Option<i64>,
     pub collateral_type: Option<LoanCollateralTypes>,
     pub description: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub estimated_value: Decimal,
+    pub estimated_value: i64,
     pub valuation_date: Date,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub document_urls: Option<Json>,

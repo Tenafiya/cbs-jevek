@@ -16,14 +16,10 @@ pub struct Model {
     pub reference_type: Option<FeeApplicationRefType>,
     pub customer_id: Option<i64>,
     pub account_id: Option<i64>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub base_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub fee_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub vat_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub total_amount: Decimal,
+    pub base_amount: i64,
+    pub fee_amount: i64,
+    pub vat_amount: Option<i64>,
+    pub total_amount: i64,
     pub status: Option<FeeApplicationStatus>,
     pub waived_by: Option<i64>,
     pub waived_at: Option<DateTimeWithTimeZone>,

@@ -13,8 +13,7 @@ pub struct Model {
     pub transaction_id: i64,
     pub card_transaction_id: Option<i64>,
     pub dispute_id: Option<i64>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub chargeback_amount: Decimal,
+    pub chargeback_amount: i64,
     pub chargeback_reason_code: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub chargeback_reason: Option<String>,
@@ -22,10 +21,8 @@ pub struct Model {
     pub initiated_at: Option<DateTimeWithTimeZone>,
     pub representment_due_date: Option<Date>,
     pub resolved_at: Option<DateTimeWithTimeZone>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provisional_credit_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub final_liability_amount: Option<Decimal>,
+    pub provisional_credit_amount: Option<i64>,
+    pub final_liability_amount: Option<i64>,
     pub network_reference: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub network_response: Option<Json>,

@@ -12,11 +12,9 @@ pub struct Model {
     pub id: i64,
     pub account_id: i64,
     pub limit_type: AccLimitType,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub limit_amount: Option<Decimal>,
+    pub limit_amount: Option<i64>,
     pub limit_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub current_usage: Option<Decimal>,
+    pub current_usage: Option<i64>,
     pub current_count: Option<i32>,
     pub reset_frequency: Option<AccResetFreqType>,
     pub last_reset_at: Option<DateTimeWithTimeZone>,

@@ -20,12 +20,9 @@ pub struct Model {
     pub savings_type: Option<SavingsProductType>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub min_contribution: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub max_contribution: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub default_contribution: Option<Decimal>,
+    pub min_contribution: Option<i64>,
+    pub max_contribution: Option<i64>,
+    pub default_contribution: Option<i64>,
     pub contribution_freq: Option<SavingsProductFreq>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub interest_rate: Option<Decimal>,
@@ -37,17 +34,13 @@ pub struct Model {
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub early_withdrawal_penalty_rate: Option<Decimal>,
     pub is_target_amount_enabled: Option<bool>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub min_target_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub max_target_amount: Option<Decimal>,
+    pub min_target_amount: Option<i64>,
+    pub max_target_amount: Option<i64>,
     pub is_group_savings_allowed: Option<bool>,
     pub min_group_members: Option<i32>,
     pub max_group_members: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub missed_contribution_penalty: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub maintenance_fee: Option<Decimal>,
+    pub missed_contribution_penalty: Option<i64>,
+    pub maintenance_fee: Option<i64>,
     pub is_active: Option<bool>,
     pub created_by: Option<i64>,
     pub requires_approval: Option<bool>,

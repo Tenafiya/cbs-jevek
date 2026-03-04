@@ -15,10 +15,8 @@ pub struct Model {
     pub tax_type: TaxWithholdingType,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))")]
     pub tax_rate: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub taxable_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub tax_amount: Decimal,
+    pub taxable_amount: i64,
+    pub tax_amount: i64,
     pub tax_invoice_number: Option<String>,
     pub tax_period: Date,
     pub is_remitted_to_tax_authority: Option<bool>,

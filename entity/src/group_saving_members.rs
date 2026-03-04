@@ -13,10 +13,8 @@ pub struct Model {
     pub customer_id: i64,
     pub member_role: Option<GroupSavingMemberRole>,
     pub joined_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub committed_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub actual_contributed: Option<Decimal>,
+    pub committed_amount: Option<i64>,
+    pub actual_contributed: Option<i64>,
     pub is_active: Option<bool>,
     pub exit_date: Option<Date>,
     pub exit_reason: Option<String>,

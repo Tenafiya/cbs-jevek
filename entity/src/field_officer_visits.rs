@@ -25,10 +25,8 @@ pub struct Model {
     pub purpose: Option<String>,
     pub outcome: Option<String>,
     pub follow_up_required: Option<bool>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub expected_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub collected_amount: Option<Decimal>,
+    pub expected_amount: Option<i64>,
+    pub collected_amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub photos: Option<Json>,
     #[sea_orm(column_type = "JsonBinary", nullable)]

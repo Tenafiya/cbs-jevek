@@ -28,9 +28,16 @@ pub async fn save_institution(
         id: Set(snowflake),
         name: Set(data.name),
         code: Set(Some(data.code)),
-        country_id: Set(data.country),
-        license_number: Set(data.license_num),
-        regulatory_number: Set(data.regulation_num),
+        country_id: Set(Some(data.country)),
+        license_number: Set(Some(data.license_num)),
+        regulatory_number: Set(Some(data.regulation_num)),
+        city: Set(Some(data.city)),
+        zip_code: Set(Some(data.zip_code)),
+        state: Set(Some(data.state)),
+        date_format: Set(Some(data.date_format)),
+        date_time_format: Set(Some(data.date_time_format)),
+        address: Set(Some(data.address)),
+        postal_address: Set(Some(data.postal_address)),
         ..Default::default()
     };
 
@@ -105,13 +112,9 @@ pub async fn update(
     if let Some(name) = &model.name {
         active.name = Set(name.clone());
     }
-    if let Some(license_num) = &model.license_num {
-        active.license_number = Set(license_num.clone());
-    }
-    if let Some(regulation_num) = &model.regulation_num {
-        active.regulatory_number = Set(regulation_num.clone());
-    }
 
+    active.regulatory_number = Set(model.regulation_num.clone());
+    active.license_number = Set(model.license_num.clone());
     active.timezone = Set(model.timezone.clone());
     active.updated_at = Set(Some(chrono::Utc::now().into()));
 

@@ -15,8 +15,7 @@ pub struct Model {
     pub linked_account_id: i64,
     pub link_type: AccLinkType,
     pub relationship: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub authorized_limit: Option<Decimal>,
+    pub authorized_limit: Option<i64>,
     pub is_credit_allowed: Option<bool>,
     pub is_debit_allowed: Option<bool>,
     pub status: Option<AccTypeStatus>,

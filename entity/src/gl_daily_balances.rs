@@ -11,15 +11,11 @@ pub struct Model {
     pub institution_id: i64,
     pub account_id: i64,
     pub balance_date: Date,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub opening_balance: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_debits: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_credits: Option<Decimal>,
+    pub opening_balance: i64,
+    pub total_debits: Option<i64>,
+    pub total_credits: Option<i64>,
     pub transaction_count: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub closing_balance: Decimal,
+    pub closing_balance: i64,
     pub is_reconciled: Option<bool>,
     pub reconciled_by: Option<i64>,
     pub reconciled_at: Option<DateTimeWithTimeZone>,

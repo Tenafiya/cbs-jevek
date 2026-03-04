@@ -18,8 +18,7 @@ pub struct Model {
     pub guarantor_address: Option<String>,
     pub guarantor_relationship: Option<String>,
     pub guarantor_occupation: Option<String>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub guarantor_income: Option<Decimal>,
+    pub guarantor_income: Option<i64>,
     pub agreement_document_url: Option<String>,
     pub is_consent_provided: Option<bool>,
     pub consent_date: Option<DateTimeWithTimeZone>,

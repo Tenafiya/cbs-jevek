@@ -18,10 +18,8 @@ pub struct Model {
     pub approval_status: Option<FeeWaiverWorkflowsApproval>,
     pub approval_notes: Option<String>,
     pub approved_at: Option<DateTimeWithTimeZone>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub requested_waiver_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub approved_waiver_amount: Option<Decimal>,
+    pub requested_waiver_amount: Option<i64>,
+    pub approved_waiver_amount: Option<i64>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
 }

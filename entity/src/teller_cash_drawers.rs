@@ -10,28 +10,19 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
     pub teller_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub opening_balance: Option<Decimal>,
+    pub opening_balance: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub opening_cash: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_cash_in: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_cash_out: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_cheques: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_transfers_in: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_transfers_out: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub closing_balance: Option<Decimal>,
+    pub total_cash_in: Option<i64>,
+    pub total_cash_out: Option<i64>,
+    pub total_cheques: Option<i64>,
+    pub total_transfers_in: Option<i64>,
+    pub total_transfers_out: Option<i64>,
+    pub closing_balance: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub closing_cash: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub expected_amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub variance_amount: Option<Decimal>,
+    pub expected_amount: Option<i64>,
+    pub variance_amount: Option<i64>,
     pub variance_reason: Option<String>,
     pub status: Option<TellerCashDrawersStatus>,
     pub opened_at: Option<DateTimeWithTimeZone>,

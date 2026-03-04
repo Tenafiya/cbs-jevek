@@ -13,8 +13,7 @@ pub struct Model {
     pub report_date: Date,
     pub report_type: CurrencyReportType,
     pub total_cash_transactions: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub total_cash_amount: Option<Decimal>,
+    pub total_cash_amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub threshold_breaches: Option<Json>,
     pub is_filed_to_regulator: Option<bool>,

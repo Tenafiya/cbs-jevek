@@ -15,10 +15,8 @@ pub struct Model {
     pub agent_wallet_id: i64,
     pub transaction_id: Option<i64>,
     pub transaction_type: AgentTransType,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub amount: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub commission_earned: Option<Decimal>,
+    pub amount: Option<i64>,
+    pub commission_earned: Option<i64>,
     pub customer_phone: Option<String>,
     pub customer_account: Option<String>,
     pub status: Option<AgentTransStatus>,

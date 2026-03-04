@@ -18,10 +18,8 @@ pub struct Model {
     #[sea_orm(unique)]
     pub external_reference: String,
     pub transaction_direction: WalletTransDirection,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub fee_amount: Option<Decimal>,
+    pub amount: i64,
+    pub fee_amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary")]
     pub currency: Json,
     pub counter_party_phone: Option<String>,

@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_limit_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccLimitType {
     #[sea_orm(string_value = "DAILY_DEBIT")]
     DailyDebit,
@@ -20,7 +19,6 @@ pub enum AccLimitType {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_link_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccLinkType {
     #[sea_orm(string_value = "JOINT")]
     Joint,
@@ -35,7 +33,6 @@ pub enum AccLinkType {
     db_type = "Enum",
     enum_name = "acc_reset_freq_type"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccResetFreqType {
     #[sea_orm(string_value = "DAILY")]
     Daily,
@@ -46,7 +43,6 @@ pub enum AccResetFreqType {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_type_int_calc")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccTypeIntCalc {
     #[sea_orm(string_value = "SIMPLE")]
     Simple,
@@ -61,7 +57,6 @@ pub enum AccTypeIntCalc {
     db_type = "Enum",
     enum_name = "acc_type_int_payout_freq"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccTypeIntPayoutFreq {
     #[sea_orm(string_value = "MONTHLY")]
     Monthly,
@@ -72,7 +67,6 @@ pub enum AccTypeIntPayoutFreq {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_type_status")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccTypeStatus {
     #[sea_orm(string_value = "ACTIVE")]
     Active,
@@ -93,7 +87,6 @@ pub enum AccTypeStatus {
     db_type = "Enum",
     enum_name = "accrual_reference_type"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccrualReferenceType {
     #[sea_orm(string_value = "LOAN")]
     Loan,
@@ -104,7 +97,6 @@ pub enum AccrualReferenceType {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "accrual_status")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccrualStatus {
     #[sea_orm(string_value = "ACCRUED")]
     Accrued,
@@ -115,7 +107,6 @@ pub enum AccrualStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "accrual_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AccrualType {
     #[sea_orm(string_value = "INTEREST_ACCRUAL")]
     InterestAccrual,
@@ -130,7 +121,6 @@ pub enum AccrualType {
     db_type = "Enum",
     enum_name = "agent_commission_rule_comm_type"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentCommissionRuleCommType {
     #[sea_orm(string_value = "PERCENTAGE")]
     Percentage,
@@ -143,7 +133,6 @@ pub enum AgentCommissionRuleCommType {
     db_type = "Enum",
     enum_name = "agent_commissions_status"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentCommissionsStatus {
     #[sea_orm(string_value = "PENDING")]
     Pending,
@@ -158,7 +147,6 @@ pub enum AgentCommissionsStatus {
     db_type = "Enum",
     enum_name = "agent_commissions_trans_type"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentCommissionsTransType {
     #[sea_orm(string_value = "DEPOSIT")]
     Deposit,
@@ -171,7 +159,6 @@ pub enum AgentCommissionsTransType {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "agent_entity_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentEntityType {
     #[sea_orm(string_value = "INDIVIDUAL")]
     Individual,
@@ -188,7 +175,6 @@ pub enum AgentEntityType {
     db_type = "Enum",
     enum_name = "agent_kyc_docs_doctype"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentKycDocsDoctype {
     #[sea_orm(string_value = "ID")]
     Id,
@@ -203,7 +189,6 @@ pub enum AgentKycDocsDoctype {
     db_type = "Enum",
     enum_name = "agent_settlement_channels"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentSettlementChannels {
     #[sea_orm(string_value = "BANK_TRANSFER")]
     BankTransfer,
@@ -216,7 +201,6 @@ pub enum AgentSettlementChannels {
     db_type = "Enum",
     enum_name = "agent_settlement_status"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentSettlementStatus {
     #[sea_orm(string_value = "PENDING")]
     Pending,
@@ -227,7 +211,6 @@ pub enum AgentSettlementStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "agent_status")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentStatus {
     #[sea_orm(string_value = "PENDING")]
     Pending,
@@ -240,7 +223,6 @@ pub enum AgentStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "agent_trans_status")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentTransStatus {
     #[sea_orm(string_value = "PENDING")]
     Pending,
@@ -253,7 +235,6 @@ pub enum AgentTransStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "agent_trans_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentTransType {
     #[sea_orm(string_value = "CASH_DEPOSIT")]
     CashDeposit,
@@ -274,7 +255,6 @@ pub enum AgentTransType {
     db_type = "Enum",
     enum_name = "agent_wallet_status"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentWalletStatus {
     #[sea_orm(string_value = "ACTIVE")]
     Active,
@@ -283,7 +263,6 @@ pub enum AgentWalletStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "agent_wallet_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AgentWalletType {
     #[sea_orm(string_value = "FLOAT")]
     Float,
@@ -292,7 +271,6 @@ pub enum AgentWalletType {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "aml_alerts_status")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AmlAlertsStatus {
     #[sea_orm(string_value = "OPEN")]
     Open,
@@ -309,7 +287,6 @@ pub enum AmlAlertsStatus {
     db_type = "Enum",
     enum_name = "aml_risk_level_enum"
 )]
-#[serde(rename_all = "UPPERCASE")]
 pub enum AmlRiskLevelEnum {
     #[sea_orm(string_value = "LOW")]
     Low,
@@ -656,7 +633,6 @@ pub enum CustomerSessionsStatus {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "customer_type")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum CustomerType {
     #[sea_orm(string_value = "INDIVIDUAL")]
     Individual,
@@ -1519,7 +1495,6 @@ pub enum StaffEmploymentEnum {
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "staff_gender_enum")]
-#[serde(rename_all = "UPPERCASE")]
 pub enum StaffGenderEnum {
     #[sea_orm(string_value = "MALE")]
     Male,

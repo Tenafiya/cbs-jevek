@@ -17,16 +17,11 @@ pub struct Model {
     pub account_id: i64,
     #[sea_orm(unique)]
     pub loan_account_number: String,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub principal_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub disbursed_amount: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub outstanding_principal: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub outstanding_interest: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub outstanding_penalty: Option<Decimal>,
+    pub principal_amount: i64,
+    pub disbursed_amount: i64,
+    pub outstanding_principal: i64,
+    pub outstanding_interest: Option<i64>,
+    pub outstanding_penalty: Option<i64>,
     pub tenure_days: i32,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))")]
     pub interest_rate: Decimal,
@@ -41,13 +36,11 @@ pub struct Model {
     pub is_npa: Option<bool>,
     pub npa_classification_date: Option<Date>,
     pub days_in_arrears: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub arrears_amount: Option<Decimal>,
+    pub arrears_amount: Option<i64>,
     pub days_to_write_off: Option<i32>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub provision_rate: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub provision_amount: Option<Decimal>,
+    pub provision_amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub custom_fields: Option<Json>,
     pub created_by: Option<i64>,

@@ -9,8 +9,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
     pub collateral_id: i64,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub valuation_amount: Decimal,
+    pub valuation_amount: i64,
     pub valuation_date: Date,
     pub valuator_name: Option<String>,
     pub valuation_report_url: Option<String>,

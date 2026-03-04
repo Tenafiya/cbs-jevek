@@ -17,14 +17,12 @@ pub struct Model {
     pub account_id: Option<i64>,
     pub transaction_id: Option<i64>,
     pub contribution_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub amount: Decimal,
+    pub amount: i64,
     pub contribution_type: Option<ContributionType>,
     pub contribution_reference: Option<String>,
     pub is_missed_contribution: Option<bool>,
     pub missed_contribution_date: Option<Date>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub penalty_applied: Option<Decimal>,
+    pub penalty_applied: Option<i64>,
     pub status: Option<ContributionStatus>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,

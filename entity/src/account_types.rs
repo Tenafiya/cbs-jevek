@@ -19,10 +19,8 @@ pub struct Model {
     pub description: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub minimum_balance: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub maximum_balance: Option<Decimal>,
+    pub minimum_balance: Option<i64>,
+    pub maximum_balance: Option<i64>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub interest_rate: Option<Decimal>,
     pub interest_rate_calc_method: Option<AccTypeIntCalc>,
@@ -30,15 +28,12 @@ pub struct Model {
     pub kyc_tier: Option<Json>,
     pub interest_payout_frequency: Option<AccTypeIntPayoutFreq>,
     pub is_overdraft_allowable: Option<bool>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub overdraft_limit: Option<Decimal>,
+    pub overdraft_limit: Option<i64>,
     #[sea_orm(column_type = "Decimal(Some((10, 6)))", nullable)]
     pub overdraft_interest_rate: Option<Decimal>,
     pub dormancy_period_days: Option<i32>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub maintenance_fee: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub withdrawal_fee: Option<Decimal>,
+    pub maintenance_fee: Option<i64>,
+    pub withdrawal_fee: Option<i64>,
     pub status: Option<AccTypeStatus>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub custom_fields: Option<Json>,

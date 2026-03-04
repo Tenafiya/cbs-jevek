@@ -21,12 +21,10 @@ pub struct Model {
     pub merchant_id: Option<String>,
     pub transaction_type: CardTransactionsTransType,
     pub transaction_channel: Option<CardTransactionsTransChannel>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub amount: Option<Decimal>,
+    pub amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub billing_amount: Option<Decimal>,
+    pub billing_amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub billing_currency: Option<Json>,
     pub transaction_date: Option<DateTimeWithTimeZone>,

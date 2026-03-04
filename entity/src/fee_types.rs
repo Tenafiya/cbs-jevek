@@ -15,12 +15,9 @@ pub struct Model {
     pub fee_code: String,
     pub fee_category: FeeTypesCategory,
     pub fee_calculation_method: FeeTypesCalcMethod,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub fee_value: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub minimum_fee: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub maximum_fee: Option<Decimal>,
+    pub fee_value: i64,
+    pub minimum_fee: Option<i64>,
+    pub maximum_fee: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub currency: Option<Json>,
     pub is_vat_applicable: Option<bool>,

@@ -17,15 +17,12 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub applies_to_agents: Option<Json>,
     pub commission_type: Option<AgentCommissionRuleCommType>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub commission_value: Option<Decimal>,
+    pub commission_value: Option<i64>,
     pub has_slabs: Option<bool>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub slab_config: Option<Json>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub min_commission: Option<Decimal>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub max_commission: Option<Decimal>,
+    pub min_commission: Option<i64>,
+    pub max_commission: Option<i64>,
     pub is_active: Option<bool>,
     pub effective_from: Option<DateTimeWithTimeZone>,
     pub effective_to: Option<DateTimeWithTimeZone>,

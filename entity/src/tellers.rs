@@ -13,10 +13,8 @@ pub struct Model {
     pub branch_id: i64,
     pub teller_name: String,
     pub teller_number: String,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))")]
-    pub drawer_limit: Decimal,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub current_drawer_balance: Option<Decimal>,
+    pub drawer_limit: i64,
+    pub current_drawer_balance: Option<i64>,
     pub status: Option<TellerStatus>,
     pub is_logged_in: Option<bool>,
     pub last_login_at: Option<DateTimeWithTimeZone>,

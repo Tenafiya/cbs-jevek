@@ -13,11 +13,9 @@ pub struct Model {
     pub loan_id: i64,
     pub installment_number: i32,
     pub penalty_type: Option<LoanPenaltyType>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub penalty_amount: Option<Decimal>,
+    pub penalty_amount: Option<i64>,
     pub calculated_at: Option<DateTimeWithTimeZone>,
-    #[sea_orm(column_type = "Decimal(Some((20, 4)))", nullable)]
-    pub waived_amount: Option<Decimal>,
+    pub waived_amount: Option<i64>,
     pub waived_at: Option<DateTimeWithTimeZone>,
     pub waive_reason: Option<String>,
     pub status: Option<LoanPenaltyStatus>,
