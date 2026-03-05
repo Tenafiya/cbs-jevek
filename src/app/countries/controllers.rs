@@ -51,7 +51,7 @@ pub async fn get_countries(
             countries,
             None,
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(_) => Err(ApiError::NotFound),
     }
 }
 
@@ -69,7 +69,7 @@ pub async fn get_country(
             country,
             None,
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(_) => Err(ApiError::NotFound),
     }
 }
 

@@ -1,5 +1,6 @@
 use rand::{Rng, rng};
 use snowflake_me::Snowflake;
+use rand::distr::Alphanumeric;
 
 pub const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -54,4 +55,12 @@ pub async fn get_code(num: i16) -> String {
         .collect();
 
     code
+}
+
+pub fn gen_string(size: usize) -> String {
+    rng()
+        .sample_iter(&Alphanumeric)
+        .take(size)
+        .map(char::from)
+        .collect()
 }
