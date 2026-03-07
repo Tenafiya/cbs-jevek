@@ -24,7 +24,7 @@ pub async fn encrypt_password(password: &str, salt: &uuid::Uuid) -> String {
     let prehashed = preprocess_password(password, salt);
     tokio::task::spawn_blocking(move || {
         bcrypt::hash(prehashed, DEFAULT_COST)
-            .unwrap_or("837287777GYGYGY@&!8hdygvg%TTDYVV".to_string())
+            .unwrap()
     })
     .await
     .expect("Spawn Failed")

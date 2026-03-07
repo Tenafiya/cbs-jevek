@@ -25,7 +25,7 @@ pub fn parse_token(token: &str) -> Result<Claims, ApiError> {
         &DecodingKey::from_secret(jwt_key.as_ref()),
         &Validation::new(Algorithm::HS512),
     ) {
-        Ok(v) => v,
+        Ok(value) => value,
         Err(_) => return Err(ApiError::Unauthorized),
     };
 
@@ -77,18 +77,18 @@ pub async fn create_jwt(
 pub async fn verify_jwt(req: &HttpRequest) -> Result<Claims, ApiError> {
     let token = match req.headers().get("Authorization") {
         None => return Err(ApiError::Unauthorized),
-        Some(v) => {
-            if v.len() <= 6 {
+        Some(value) => {
+            if value.len() <= 6 {
                 return Err(ApiError::Unauthorized);
             }
 
-            let v = v.to_str().unwrap_or_default().to_string();
+            let value = value.to_str().unwrap_or_default().to_string();
 
-            if &v[..7] != "Bearer " {
+            if &value[..7] != "Bearer " {
                 return Err(ApiError::Unauthorized);
             }
 
-            String::from(&v[7..])
+            String::from(&value[7..])
         }
     };
 

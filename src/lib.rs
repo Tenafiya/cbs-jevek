@@ -13,6 +13,7 @@ mod middlewares;
 pub mod setup;
 pub mod utils;
 
+use crate::middlewares::request_id::request_id;
 use crate::setup::init_system;
 use crate::setup::postgres::pgdb;
 use crate::{app::app_routes, middlewares::helmet::security_headers};
@@ -59,6 +60,7 @@ pub async fn start_server() -> Result<(), std::io::Error> {
         App::new()
             .app_data(state.clone())
             .wrap(from_fn(security_headers))
+            .wrap(from_fn(request_id))
             .wrap(Logger::new(
                 "%t %a \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\" %T \"%{Content-Type}o\"",
             ))
