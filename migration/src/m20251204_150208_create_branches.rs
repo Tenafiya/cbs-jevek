@@ -175,6 +175,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Staff::TerminationReason).string())
             .col(ColumnDef::new(Staff::RoleId).big_integer())
             .col(ColumnDef::new(Staff::Permissions).json_binary())
+            .col(ColumnDef::new(Staff::Salt).uuid().not_null())
             .col(ColumnDef::new(Staff::PasswordHash).string().not_null())
             .col(ColumnDef::new(Staff::IsPasswordChanged).boolean().default(false))
             .col(ColumnDef::new(Staff::PasswordLastChangedAt).timestamp_with_time_zone())
@@ -368,6 +369,7 @@ pub enum Staff {
     RoleId,
     Permissions,
     IsPasswordChanged,
+    Salt,
     PasswordHash,
     PasswordLastChangedAt,
     IsMfaEnabled,

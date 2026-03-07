@@ -57,7 +57,7 @@ pub async fn get_code(num: i16) -> String {
     code
 }
 
-pub fn gen_string(size: usize) -> String {
+pub async fn gen_string(size: usize) -> String {
     rng()
         .sample_iter(&Alphanumeric)
         .take(size)

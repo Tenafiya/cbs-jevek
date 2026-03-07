@@ -1,9 +1,38 @@
-use sea_orm::FromQueryResult;
+use sea_orm::{FromQueryResult, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use serde_with::{serde_as, DisplayFromStr};
 use validator::Validate;
 
 use crate::utils::validators::validate_operation;
+
+#[serde_as]
+#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[sea_orm(entity = "entity::countries::Entity")]
+pub struct CountryResponseModel {
+    #[serde_as(as = "DisplayFromStr")]
+    #[serde(rename = "_id")] 
+    #[sea_orm(from_col = "id")]
+    pub id: i64,
+    #[sea_orm(from_col = "slug")]
+    pub slug: String,
+    #[sea_orm(from_col = "name")]
+    pub name: String,
+    #[sea_orm(from_col = "official_name")]
+    pub official_name: String,
+    #[sea_orm(from_col = "capital_city")]
+    pub capital_city: String,
+    #[sea_orm(from_col = "call_code")]
+    pub call_code: String,
+    #[sea_orm(from_col = "iso_code")]
+    pub iso_code: String,
+    #[sea_orm(from_col = "flag_url")]
+    pub flag_url: String,
+    #[sea_orm(from_col = "currency")]
+    pub currency: Value,
+    #[sea_orm(from_col = "more_data")]
+    pub more_data: Option<Value>,
+}
 
 // DTO MODELS
 #[derive(Debug, Clone)]
@@ -17,35 +46,6 @@ pub struct AddCountryModel {
     pub currency: Value,
     pub more_data: Option<Value>,
 }
-
-// Impl From
-#[derive(Debug, Clone, Serialize, FromQueryResult)]
-pub struct CountryResponseModel {
-    pub id: String,
-    pub name: String,
-    pub official_name: Option<String>,
-    pub capital_city: Option<String>,
-    pub currency: Option<Value>,
-    pub flag_url: Option<String>,
-    pub call_code: String,
-    pub iso_code: String,
-}
-
-impl From<entity::countries::Model> for CountryResponseModel {
-    fn from(country: entity::countries::Model) -> Self {
-        Self {
-            id: country.slug,
-            name: country.name,
-            official_name: country.official_name,
-            capital_city: country.capital_city,
-            currency: country.currency,
-            flag_url: country.flag_url,
-            call_code: country.call_code,
-            iso_code: country.iso_code,
-        }
-    }
-}
-
 //Params
 #[derive(Debug, Deserialize, Validate)]
 #[serde(deny_unknown_fields)]

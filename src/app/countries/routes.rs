@@ -1,6 +1,6 @@
-use actix_web::web;
+use actix_web::{middleware::from_fn, web};
 
-use crate::{AppState, app::countries};
+use crate::{AppState, app::countries, middlewares::jwt::jwt_auth};
 
 pub fn init(cfg: &mut web::ServiceConfig, _state: web::Data<AppState>) {
     cfg.service(
@@ -13,7 +13,7 @@ pub fn init(cfg: &mut web::ServiceConfig, _state: web::Data<AppState>) {
             )
             .route(
                 "/{id}/operate/{operation}",
-                web::get().to(countries::controllers::operate_country),
+                web::get().to(countries::controllers::operate_country).wrap(from_fn(jwt_auth)),
             ),
     );
 }

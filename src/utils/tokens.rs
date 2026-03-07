@@ -61,7 +61,7 @@ pub async fn create_jwt(
         exp: expiry.timestamp() as usize,
         jid: jid.to_string(),
         sub: session,
-        org: gen_string(32),
+        org: gen_string(32).await,
     };
 
     let token = encode(

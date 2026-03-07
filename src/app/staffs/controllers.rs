@@ -2,18 +2,61 @@ use actix_web::{HttpRequest, HttpResponse, web};
 
 use crate::{
     AppState,
-    app::staffs::{
-        models::{
-            AddStaffModel, AddStaffParams, UpdateStaffModel, UpdateStaffParams,
-            UpdateStaffStatusModel, UpdateStaffStatusParams,
+    app::{
+        institutions::services::init_institution,
+        staffs::{
+            models::{
+                AddInitializerParams, AddStaffModel, AddStaffParams, SetupStaff, UpdateStaffModel,
+                UpdateStaffParams, UpdateStaffStatusModel, UpdateStaffStatusParams,
+            },
+            services,
         },
-        services,
     },
     utils::{
         errors::{ApiCode, ApiError, ApiResponse},
-        models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
+        gen_snow_ids::gen_string,
+        models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel}, password::encrypt_password,
     },
 };
+
+pub async fn setup(
+    _req: HttpRequest,
+    payload: web::Json<AddInitializerParams>,
+    state: web::Data<AppState>,
+) -> Result<HttpResponse, ApiError> {
+    let data = payload.into_inner();
+
+    let institution_name = &data.institution_name;
+
+    let code = gen_string(institution_name.len()).await;
+
+    let institution = match init_institution(&data.institution_name, &code, &state).await {
+        Ok(inst) => inst,
+        Err(err) => return Err(ApiError::Unprocessable(err.to_string())),
+    };
+
+    let salt = uuid::Uuid::new_v4();
+    let password = gen_string(14).await;
+
+    let staff = SetupStaff {
+        institution_id: institution.last_insert_id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone_number: data.phone_number,
+        email: data.email,
+        password: encrypt_password(&password, &salt).await,
+    };
+
+    match services::init_staff(&staff, &state).await {
+        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            {},
+            None,
+        ))),
+        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+    }
+}
 
 pub async fn add_staff(
     _req: HttpRequest,
@@ -21,6 +64,9 @@ pub async fn add_staff(
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     let data = payload.into_inner();
+
+    let salt = uuid::Uuid::new_v4();
+    let password = gen_string(14).await;
 
     let staff = AddStaffModel {
         institution_id: 84897473979,
@@ -33,6 +79,7 @@ pub async fn add_staff(
         nationality: data.nationality,
         job_title: data.job_title,
         hired_date: data.hired_date,
+        password: encrypt_password(&password, &salt).await,
     };
 
     match services::save_staff(&staff, &state).await {

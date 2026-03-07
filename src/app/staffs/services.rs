@@ -7,12 +7,43 @@ use sea_orm::{
 
 use crate::{
     AppState,
-    app::staffs::models::{AddStaffModel, UpdateStaffModel, UpdateStaffStatusModel},
+    app::staffs::models::{AddStaffModel, SetupStaff, StaffResponseModel, UpdateStaffModel, UpdateStaffStatusModel},
     utils::{
         gen_snow_ids::gen_snowflake_slug,
         models::{MetaModel, QueryModel},
     },
 };
+
+pub async fn init_staff(
+    model: &SetupStaff,
+    state: &web::Data<AppState>,
+) -> Result<InsertResult<entity::staff::ActiveModel>, DbErr> {
+    let (id, slug) = match gen_snowflake_slug() {
+        Ok(res) => res,
+        Err(_) => return Err(DbErr::Custom("Failed to generate ID's".to_string())),
+    };
+
+    let data = model.clone();
+
+    let staff = entity::staff::ActiveModel {
+        id: Set(id),
+        institution_id: Set(data.institution_id),
+        first_name: Set(data.first_name),
+        last_name: Set(data.last_name),
+        phone_number: Set(data.phone_number),
+        email_address: Set(data.email),
+        employee_number: Set(slug),
+        password_hash: Set(data.password),
+        ..Default::default()
+    };
+
+    let inserted = entity::staff::Entity::insert(staff)
+        .exec(state.pgdb.get_ref())
+        .await
+        .map_err(|err| DbErr::Custom(err.to_string()))?;
+
+    Ok(inserted)
+}
 
 pub async fn save_staff(
     model: &AddStaffModel,
@@ -38,6 +69,7 @@ pub async fn save_staff(
         nationality: Set(Some(data.nationality)),
         job_title: Set(Some(data.job_title)),
         date_hired: Set(Some(data.hired_date)),
+        password_hash: Set(data.password),
         ..Default::default()
     };
 
@@ -111,8 +143,9 @@ pub async fn update_staff(
 pub async fn get_staff_details(
     id: &i64,
     state: &web::Data<AppState>,
-) -> Result<entity::staff::Model, DbErr> {
+) -> Result<StaffResponseModel, DbErr> {
     let staff = entity::staff::Entity::find_by_id(*id)
+        .into_model::<StaffResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::Custom("Staff not found".into()));
@@ -124,30 +157,29 @@ pub async fn get_staff_list(
     id: &i64,
     query: &QueryModel,
     state: &web::Data<AppState>,
-) -> Result<(Vec<entity::staff::Model>, MetaModel), DbErr> {
+) -> Result<(Vec<StaffResponseModel>, MetaModel), DbErr> {
     let page = query.page;
     let per_page = query.size;
 
     let paginator = entity::staff::Entity::find()
         .filter(entity::staff::Column::InstitutionId.eq(*id))
         .order_by_desc(entity::staff::Column::UpdatedAt)
+        .into_model::<StaffResponseModel>()
         .paginate(state.pgdb.get_ref(), per_page);
 
-    let all_details = paginator.num_items_and_pages().await?;
+    let staffs = paginator.fetch_page(page - 1).await?;
 
-    let items = paginator
-        .fetch_page(page - 1)
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+    let total_items = paginator.num_items().await?;
+    let total_pages = (total_items + per_page - 1) / per_page;
 
     let meta = MetaModel {
-        total_items: all_details.number_of_items,
-        total_pages: all_details.number_of_pages,
+        total_items,
+        total_pages,
         page,
         per_page,
     };
 
-    Ok((items, meta))
+    Ok((staffs, meta))
 }
 
 pub async fn set_supervisor(

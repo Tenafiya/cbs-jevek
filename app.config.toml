@@ -1,6 +1,6 @@
 [app]
 name = "Jevek-CBS"
-port = 4500
+port = 3500
 host = "0.0.0.0"
 environment = "TEST"
 

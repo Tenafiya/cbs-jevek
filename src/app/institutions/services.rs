@@ -13,6 +13,34 @@ use crate::{
     },
 };
 
+pub async fn init_institution(
+    name: &String,
+    code: &String,
+    state: &web::Data<AppState>,
+) -> Result<InsertResult<entity::institutions::ActiveModel>, DbErr> {
+    let (snowflake, _) = match gen_snowflake_slug() {
+        Ok(res) => res,
+        Err(_) => return Err(DbErr::Custom("Failed to generate ID's".to_string())),
+    };
+
+    let institution = entity::institutions::ActiveModel {
+        id: Set(snowflake),
+        code: Set(Some(code.to_string())),
+        name: Set(name.to_string()),
+        ..Default::default()
+    };
+
+    let insert = entity::institutions::Entity::insert(institution)
+        .exec(state.pgdb.get_ref())
+        .await
+        .map_err(|err| {
+            eprintln!("Database insert error: {}", err);
+            DbErr::Custom(err.to_string())
+        })?;
+
+    Ok(insert)
+}
+
 pub async fn save_institution(
     model: &AddInstitutionModel,
     state: &web::Data<AppState>,

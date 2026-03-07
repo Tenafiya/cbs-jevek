@@ -53,6 +53,7 @@ pub async fn get_all(state: &web::Data<AppState>) -> Result<Vec<CountryResponseM
                 .add(entity::countries::Column::IsActive.eq(true))
                 .add(entity::countries::Column::IsDeleted.eq(false)),
         )
+        .into_model::<CountryResponseModel>()
         .all(state.pgdb.as_ref())
         .await
         .map_err(|err| {
@@ -60,12 +61,7 @@ pub async fn get_all(state: &web::Data<AppState>) -> Result<Vec<CountryResponseM
             DbErr::Custom(err.to_string())
         })?;
 
-    let countries: Vec<CountryResponseModel> = results
-        .into_iter()
-        .map(CountryResponseModel::from)
-        .collect();
-
-    Ok(countries)
+    Ok(results)
 }
 
 pub async fn get_one(
@@ -79,13 +75,12 @@ pub async fn get_one(
                 .add(entity::countries::Column::IsActive.eq(true))
                 .add(entity::countries::Column::IsDeleted.eq(false)),
         )
+        .into_model::<CountryResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Country not found".into()));
 
-    let country = result?;
-
-    Ok(CountryResponseModel::from(country))
+    result
 }
 
 pub async fn operate_country(

@@ -78,6 +78,7 @@ uuid = { version = "1.18.1", features = ["v4", "fast-rng", "macro-diagnostics"] 
 validator = { version = "0.20.0", features = ["derive"] }
 anyhow = "1.0.100"
 snowflake_me = "0.5.0"
+serde_with = "3.17.0"
 
 [dev-dependencies]
 testcontainers-modules = { version = "0.14", features = ["postgres"] }
