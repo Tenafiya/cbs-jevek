@@ -17,7 +17,7 @@ impl MigrationTrait for Migration {
                     .not_null()
                     .primary_key(),
             )
-            .col(ColumnDef::new(Institutions::Name).string().not_null())
+            .col(ColumnDef::new(Institutions::Name).string().not_null().unique_key())
             .col(ColumnDef::new(Institutions::Code).string())
             .col(
                 ColumnDef::new(Institutions::CountryId)

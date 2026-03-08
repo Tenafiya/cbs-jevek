@@ -6,7 +6,7 @@ use sea_orm::{
 
 use crate::{
     AppState,
-    app::institutions::models::{AddInstitutionModel, UpdateInstitutionModel},
+    app::institutions::models::{AddInstitutionModel, InstitutionResponseModel, UpdateInstitutionModel},
     utils::{
         gen_snow_ids::gen_snowflake_slug,
         models::{MetaModel, QueryModel},
@@ -32,11 +32,7 @@ pub async fn init_institution(
 
     let insert = entity::institutions::Entity::insert(institution)
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| {
-            eprintln!("Database insert error: {}", err);
-            DbErr::Custom(err.to_string())
-        })?;
+        .await?;
 
     Ok(insert)
 }
@@ -71,11 +67,7 @@ pub async fn save_institution(
 
     let insertion = entity::institutions::Entity::insert(institution)
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| {
-            eprintln!("Database insert error: {}", err);
-            DbErr::Custom(err.to_string())
-        })?;
+        .await?;
 
     Ok(insertion)
 }
@@ -83,8 +75,9 @@ pub async fn save_institution(
 pub async fn get_one(
     id: &i64,
     state: &web::Data<AppState>,
-) -> Result<entity::institutions::Model, DbErr> {
+) -> Result<InstitutionResponseModel, DbErr> {
     let result = entity::institutions::Entity::find_by_id(*id)
+        .into_model::<InstitutionResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Institution not found".into()));
@@ -95,7 +88,7 @@ pub async fn get_one(
 pub async fn get_all(
     query: &QueryModel,
     state: &web::Data<AppState>,
-) -> Result<(Vec<entity::institutions::Model>, MetaModel), DbErr> {
+) -> Result<(Vec<InstitutionResponseModel>, MetaModel), DbErr> {
     let page = query.page.max(1);
     let per_page = query.size.max(1);
 
@@ -106,18 +99,17 @@ pub async fn get_all(
                 .add(entity::institutions::Column::IsDeleted.eq(false)),
         )
         .order_by_desc(entity::institutions::Column::UpdatedAt)
+        .into_model::<InstitutionResponseModel>()
         .paginate(state.pgdb.get_ref(), per_page);
 
-    let all = paginator.num_items_and_pages().await?;
+    let items = paginator.fetch_page(page - 1).await?;
 
-    let items = paginator.fetch_page(page - 1).await.map_err(|err| {
-        eprintln!("Database pagination error: {}", err);
-        DbErr::Custom(err.to_string())
-    })?;
+    let total_items = paginator.num_items().await?;
+    let total_pages = (total_items + per_page - 1) / per_page;
 
     let meta = MetaModel {
-        total_items: all.number_of_items,
-        total_pages: all.number_of_pages,
+        total_items,
+        total_pages,
         page,
         per_page,
     };
@@ -146,12 +138,7 @@ pub async fn update(
     active.timezone = Set(model.timezone.clone());
     active.updated_at = Set(Some(chrono::Utc::now().into()));
 
-    ActiveModelTrait::update(active, state.pgdb.get_ref())
-        .await
-        .map_err(|err| {
-            eprintln!("Database update error: {}", err);
-            DbErr::Custom(err.to_string())
-        })?;
+    ActiveModelTrait::update(active, state.pgdb.get_ref()).await?;
 
     Ok(())
 }

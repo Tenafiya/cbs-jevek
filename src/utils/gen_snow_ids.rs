@@ -1,15 +1,29 @@
 use rand::{Rng, rng};
 use snowflake_me::Snowflake;
 use rand::distr::Alphanumeric;
+use once_cell::sync::Lazy;
+
 
 pub const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+static SNOWFLAKE: Lazy<Snowflake> = Lazy::new(|| {
+    Snowflake::builder()
+        .bit_len_time(41)
+        .bit_len_sequence(12)
+        .bit_len_data_center_id(5)
+        .bit_len_machine_id(5)
+        .machine_id(&|| Ok(15))
+        .data_center_id(&|| Ok(7))
+        .finalize()
+        .expect("failed to initialize snowflake generator")
+});
 
 pub fn base62_encode(mut num: u64) -> String {
     if num == 0 {
         return "0".to_string();
     }
 
-    let mut buf = Vec::new();
+    let mut buf = Vec::with_capacity(11);
 
     while num > 0 {
         let rem = (num % 62) as usize;
@@ -18,31 +32,18 @@ pub fn base62_encode(mut num: u64) -> String {
     }
 
     buf.reverse();
-    String::from_utf8(buf).unwrap()
+
+    unsafe { String::from_utf8_unchecked(buf) }
 }
 
-pub fn gen_snowflake() -> Result<u64, Box<dyn std::error::Error>> {
-    let bit_len_time = 41;
-    let bit_len_sequence = 12;
-    let bit_len_data_center_id = 5;
-    let bit_len_machine_id = 5;
-
-    let sf = Snowflake::builder()
-        .bit_len_time(bit_len_time)
-        .bit_len_sequence(bit_len_sequence)
-        .bit_len_data_center_id(bit_len_data_center_id)
-        .bit_len_machine_id(bit_len_machine_id)
-        .machine_id(&|| Ok(15))
-        .data_center_id(&|| Ok(7))
-        .finalize()?;
-
-    let id = sf.next_id()?;
-
-    Ok(id)
+pub fn gen_snowflake() -> u64 {
+    SNOWFLAKE
+        .next_id()
+        .expect("failed to generate snowflake id")
 }
 
 pub fn gen_snowflake_slug() -> Result<(i64, String), Box<dyn std::error::Error>> {
-    let id = gen_snowflake()?;
+    let id = gen_snowflake();
     let slug = base62_encode(id);
     Ok((id as i64, slug))
 }

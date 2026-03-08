@@ -1,14 +1,13 @@
 use actix_http::header::HeaderValue;
 use actix_web::{
-    Error,
-    HttpMessage,
+    Error, HttpMessage,
     dev::{ServiceRequest, ServiceResponse},
     http::header::HeaderName,
     middleware::Next,
 };
 use std::sync::Arc;
 
-use crate::utils::{errors::ApiError, headers};
+use crate::utils::headers;
 
 pub async fn request_id(
     req: ServiceRequest,
@@ -21,10 +20,7 @@ pub async fn request_id(
 
     req.extensions_mut().insert(Arc::new(request_id.clone()));
 
-    let mut res = next
-        .call(req)
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    let mut res = next.call(req).await?;
 
     if let Ok(value) = HeaderValue::from_str(&request_id) {
         res.headers_mut()

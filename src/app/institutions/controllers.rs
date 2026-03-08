@@ -1,4 +1,5 @@
 use actix_web::{HttpRequest, HttpResponse, web};
+use validator::Validate;
 
 use crate::{
     AppState,
@@ -21,6 +22,8 @@ pub async fn add_institution(
     payload: web::Json<AddInstitutionParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
 
     let country_id = data
@@ -60,6 +63,8 @@ pub async fn get_institution(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = params.into_inner();
 
     let id = data
@@ -83,6 +88,8 @@ pub async fn get_institutions(
     query: web::Query<QueryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    query.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let query = QueryModel {
         size: query.size,
         page: query.page,
@@ -107,6 +114,7 @@ pub async fn update_institution(
     payload: web::Json<UpdateInstitutionParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
     let data = payload.into_inner();
 
     let id = data

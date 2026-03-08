@@ -33,6 +33,7 @@ pub struct Model {
     pub role_id: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub permissions: Option<Json>,
+    pub salt: Uuid,
     pub password_hash: String,
     pub is_password_changed: Option<bool>,
     pub password_last_changed_at: Option<DateTimeWithTimeZone>,

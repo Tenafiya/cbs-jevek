@@ -1,4 +1,5 @@
 use actix_web::{HttpRequest, HttpResponse, web};
+use validator::Validate;
 
 use crate::{
     AppState,
@@ -17,7 +18,10 @@ pub async fn add_country(
     payload: web::Json<AddCountryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
+
     let country = AddCountryModel {
         name: data.name,
         official_name: data.official_name,
@@ -60,6 +64,8 @@ pub async fn get_country(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = params.into_inner();
 
     match services::get_one(&data.id, &state).await {
@@ -78,6 +84,8 @@ pub async fn operate_country(
     params: web::Path<OperationModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    
     let data = params.into_inner();
 
     match services::operate_country(&data.id, &data.operation, &state).await {

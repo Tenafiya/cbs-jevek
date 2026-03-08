@@ -7,7 +7,9 @@ use sea_orm::{
 
 use crate::{
     AppState,
-    app::customers::models::{AddAddressModel, AddCustomerModel, AddNextModel, AddOccupationModel},
+    app::customers::models::{
+        AddAddressModel, AddCustomerModel, AddNextModel, AddOccupationModel, CustomerResponseModel,
+    },
     utils::{
         gen_snow_ids::gen_snowflake_slug,
         models::{MetaModel, QueryModel},
@@ -44,8 +46,7 @@ pub async fn save_customer(
 
     let insertion = entity::customers::Entity::insert(customer)
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     Ok(insertion)
 }
@@ -72,9 +73,7 @@ pub async fn add_address(
 
     active_customer.updated_at = Set(Some(chrono::Utc::now().into()));
 
-    ActiveModelTrait::update(active_customer, state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+    ActiveModelTrait::update(active_customer, state.pgdb.get_ref()).await?;
 
     Ok(())
 }
@@ -100,9 +99,7 @@ pub async fn add_occupation(
 
     active_customer.updated_at = Set(Some(chrono::Utc::now().into()));
 
-    ActiveModelTrait::update(active_customer, state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+    ActiveModelTrait::update(active_customer, state.pgdb.get_ref()).await?;
 
     Ok(())
 }
@@ -126,9 +123,7 @@ pub async fn add_next_details(
 
     active_customer.updated_at = Set(Some(chrono::Utc::now().into()));
 
-    ActiveModelTrait::update(active_customer, state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+    ActiveModelTrait::update(active_customer, state.pgdb.get_ref()).await?;
 
     Ok(())
 }
@@ -149,8 +144,7 @@ pub async fn verify_email(id: &i64, state: &web::Data<AppState>) -> Result<(), D
             Expr::value(chrono::Utc::now()),
         )
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     if customer.rows_affected == 0 {
         return Err(DbErr::Custom("Customer not found".into()));
@@ -175,8 +169,7 @@ pub async fn verify_phone(id: &i64, state: &web::Data<AppState>) -> Result<(), D
             Expr::value(chrono::Utc::now()),
         )
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     if customer.rows_affected == 0 {
         return Err(DbErr::Custom("Customer not found".into()));
@@ -188,8 +181,9 @@ pub async fn verify_phone(id: &i64, state: &web::Data<AppState>) -> Result<(), D
 pub async fn get_details(
     id: &i64,
     state: &web::Data<AppState>,
-) -> Result<entity::customers::Model, DbErr> {
+) -> Result<CustomerResponseModel, DbErr> {
     let customer = entity::customers::Entity::find_by_id(*id)
+        .into_model::<CustomerResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Customer not found".into()));
@@ -201,7 +195,7 @@ pub async fn get_customers(
     id: &i64,
     query: &QueryModel,
     state: &web::Data<AppState>,
-) -> Result<(Vec<entity::customers::Model>, MetaModel), DbErr> {
+) -> Result<(Vec<CustomerResponseModel>, MetaModel), DbErr> {
     let page = query.page.max(1);
     let per_page = query.size.max(1);
 
@@ -212,18 +206,17 @@ pub async fn get_customers(
                 .add(entity::customers::Column::IsBlackListed.eq(false)),
         )
         .order_by_desc(entity::customers::Column::UpdatedAt)
+        .into_model::<CustomerResponseModel>()
         .paginate(state.pgdb.get_ref(), per_page);
 
-    let all = paginator.num_items_and_pages().await?;
+    let items = paginator.fetch_page(page - 1).await?;
 
-    let items = paginator
-        .fetch_page(page - 1)
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+    let total_items = paginator.num_items().await?;
+    let total_pages = (total_items + per_page - 1) / per_page;
 
     let meta = MetaModel {
-        total_items: all.number_of_items,
-        total_pages: all.number_of_pages,
+        total_items,
+        total_pages,
         page,
         per_page,
     };
@@ -255,8 +248,7 @@ pub async fn update_sanctions(
             Expr::value(chrono::Utc::now()),
         )
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     if customer.rows_affected == 0 {
         return Err(DbErr::Custom("Customer not found".into()));
@@ -282,8 +274,7 @@ pub async fn customer_verify(
         )
         .col_expr(entity::customers::Column::VerifiedBy, Expr::value(*user))
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     if customer.rows_affected == 0 {
         return Err(DbErr::Custom("Customer not found".into()));
@@ -308,8 +299,7 @@ pub async fn customer_delete(id: &i64, state: &web::Data<AppState>) -> Result<()
             Expr::value(chrono::Utc::now()),
         )
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     if customer.rows_affected == 0 {
         return Err(DbErr::Custom("Customer not found".into()));

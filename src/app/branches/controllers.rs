@@ -1,4 +1,5 @@
 use actix_web::{HttpRequest, HttpResponse, web};
+use validator::Validate;
 
 use crate::{
     AppState,
@@ -18,6 +19,8 @@ pub async fn add_branch(
     payload: web::Json<AddBranchParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
 
     let institution_id = data
@@ -53,6 +56,8 @@ pub async fn get_branch_details(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = params.into_inner();
 
     let id = data
@@ -77,12 +82,16 @@ pub async fn get_branches(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = params.into_inner();
 
     let id = data
         .id
         .parse::<i64>()
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+
+    query.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let query = QueryModel {
         size: query.size,

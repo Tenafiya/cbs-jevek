@@ -18,30 +18,26 @@ pub struct Claims {
 }
 
 pub fn parse_token(token: &str) -> Result<Claims, ApiError> {
-    let jwt_key = std::env::var("SECRET_KEY").unwrap();
+    let jwt_key = std::env::var("SECRET_KEY").map_err(|_| ApiError::InternalServerError)?;
 
-    let token_res = match decode::<Claims>(
-        &token,
+    let token_res = decode::<Claims>(
+        token,
         &DecodingKey::from_secret(jwt_key.as_ref()),
         &Validation::new(Algorithm::HS512),
-    ) {
-        Ok(value) => value,
-        Err(_) => return Err(ApiError::Unauthorized),
-    };
+    )
+    .map_err(|_| ApiError::Unauthorized)?;
 
-    let claims = token_res.claims;
-
-    Ok(claims)
+    Ok(token_res.claims)
 }
 
 pub async fn create_jwt(
-    session: String,
-    token_type: String,
+    session: &String,
+    token_type: &str,
     state: &web::Data<AppState>,
 ) -> (String, usize) {
     dotenv().unwrap();
 
-    let expire = match token_type.as_str() {
+    let expire = match token_type {
         "NORMAL" => state.config.get::<i64>("jwt.access_expire").unwrap_or(3600),
         "REFRESH" => state
             .config
@@ -60,7 +56,7 @@ pub async fn create_jwt(
         iat: created.timestamp() as usize,
         exp: expiry.timestamp() as usize,
         jid: jid.to_string(),
-        sub: session,
+        sub: session.clone(),
         org: gen_string(32).await,
     };
 
@@ -69,30 +65,24 @@ pub async fn create_jwt(
         &claim,
         &EncodingKey::from_secret(jwt_key.as_ref()),
     )
-    .unwrap();
+    .unwrap_or_default();
 
     (token, claim.exp)
 }
 
 pub async fn verify_jwt(req: &HttpRequest) -> Result<Claims, ApiError> {
-    let token = match req.headers().get("Authorization") {
-        None => return Err(ApiError::Unauthorized),
-        Some(value) => {
-            if value.len() <= 6 {
-                return Err(ApiError::Unauthorized);
-            }
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .ok_or(ApiError::Unauthorized)?
+        .to_str()
+        .map_err(|_| ApiError::Unauthorized)?;
 
-            let value = value.to_str().unwrap_or_default().to_string();
+    if !auth_header.starts_with("Bearer ") {
+        return Err(ApiError::Unauthorized);
+    }
 
-            if &value[..7] != "Bearer " {
-                return Err(ApiError::Unauthorized);
-            }
+    let token = &auth_header[7..];
 
-            String::from(&value[7..])
-        }
-    };
-
-    let claims = parse_token(&token)?;
-
-    Ok(claims)
+    parse_token(token)
 }

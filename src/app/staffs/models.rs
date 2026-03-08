@@ -16,6 +16,7 @@ pub struct SetupStaff {
     pub phone_number: String,
     pub email: String,
     pub password: String,
+    pub salt: uuid::Uuid
 }
 
 #[derive(Debug, Clone)]
@@ -43,9 +44,15 @@ pub struct UpdateStaffStatusModel {
 pub struct UpdateStaffModel {
     pub branch_id: Option<i64>,
     pub phone_number: Option<String>,
-    pub data_of_birth: Option<NaiveDate>,
+    pub date_of_birth: Option<NaiveDate>,
     pub department: Option<String>,
     pub job_title: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct GetAuthModel {
+    pub email: String,
+    pub password: String
 }
 
 #[derive(Debug, Deserialize, Validate)]
@@ -111,6 +118,14 @@ pub struct UpdateStaffParams {
     #[validate(length(min = 2, max = 50, message = "job title is invalid"))]
     #[serde(rename = "jobTitle")]
     pub job_title: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct SignInParams {
+    #[validate(email)]
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Debug, Deserialize, Validate)]

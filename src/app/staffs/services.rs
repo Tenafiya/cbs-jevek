@@ -1,16 +1,20 @@
 use actix_web::web;
 use migration::Expr;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DbErr, EntityTrait, InsertResult,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult,
     PaginatorTrait, QueryFilter, QueryOrder,
 };
 
 use crate::{
     AppState,
-    app::staffs::models::{AddStaffModel, SetupStaff, StaffResponseModel, UpdateStaffModel, UpdateStaffStatusModel},
+    app::staffs::models::{
+        AddStaffModel, GetAuthModel, SetupStaff, StaffResponseModel, UpdateStaffModel,
+        UpdateStaffStatusModel,
+    },
     utils::{
         gen_snow_ids::gen_snowflake_slug,
         models::{MetaModel, QueryModel},
+        password::validate_password,
     },
 };
 
@@ -34,6 +38,7 @@ pub async fn init_staff(
         email_address: Set(data.email),
         employee_number: Set(slug),
         password_hash: Set(data.password),
+        salt: Set(data.salt),
         ..Default::default()
     };
 
@@ -127,7 +132,7 @@ pub async fn update_staff(
     }
 
     active_staff.branch_id = Set(model.branch_id);
-    active_staff.date_of_birth = Set(model.data_of_birth);
+    active_staff.date_of_birth = Set(model.date_of_birth);
     active_staff.department = Set(model.department);
     active_staff.job_title = Set(model.job_title);
 
@@ -207,3 +212,100 @@ pub async fn set_supervisor(
 
     Ok(())
 }
+
+pub async fn update_failed_login(email: &String, state: &web::Data<AppState>) -> Result<(), DbErr> {
+    let staff = entity::staff::Entity::update_many()
+        .filter(entity::staff::Column::EmailAddress.eq(email))
+        .col_expr(
+            entity::staff::Column::FailedLoginAttempts,
+            Expr::col(entity::staff::Column::FailedLoginAttempts).add(1),
+        )
+        .exec(state.pgdb.get_ref())
+        .await?;
+
+    if staff.rows_affected == 0 {
+        return Err(DbErr::Custom("Staff not found".to_string()));
+    };
+
+    Ok(())
+}
+
+pub async fn signin_auth(
+    model: &GetAuthModel,
+    state: &web::Data<AppState>,
+) -> Result<StaffResponseModel, DbErr> {
+    let data = model.clone();
+
+    let staff = entity::staff::Entity::find()
+        .filter(Condition::all().add(entity::staff::Column::EmailAddress.eq(data.email)))
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Staff not found".into()))?;
+
+    let salt = &staff.salt;
+
+    let hashed_password = &staff.password_hash;
+
+    if !validate_password(&data.password, &salt, &hashed_password).await {
+        return Err(DbErr::Custom("Invalid credentials".to_string()));
+    }
+
+    let mut active_users: entity::staff::ActiveModel = staff.into();
+
+    active_users.updated_at = Set(Some(
+        chrono::Utc::now().with_timezone(&chrono::FixedOffset::east_opt(0).unwrap()),
+    ));
+
+    let updated = ActiveModelTrait::update(active_users, state.pgdb.get_ref()).await?;
+
+    let staff_res = StaffResponseModel {
+        id: updated.id,
+        institution_id: updated.institution_id,
+        branch_id: updated.branch_id,
+        employee_number: updated.employee_number,
+        first_name: updated.first_name,
+        last_name: updated.last_name,
+        full_name: updated.full_name,
+        phone_number: updated.phone_number,
+        email_address: updated.email_address,
+        date_of_birth: updated.date_of_birth,
+        gender: updated.gender,
+        job_title: updated.job_title,
+        nationality: updated.nationality,
+        department: updated.department,
+        employment_status: updated.employment_status,
+        date_hired: updated.date_hired,
+        date_terminated: updated.date_terminated,
+        termination_reason: updated.termination_reason,
+        role_id: updated.role_id,
+        permissions: updated.permissions,
+        is_password_changed: updated.is_password_changed,
+        password_last_changed_at: updated.password_last_changed_at,
+        is_mfa_enabled: updated.is_mfa_enabled,
+        performance_rating: updated.performance_rating,
+        last_appraisal_date: updated.last_appraisal_date,
+        supervisor_id: updated.supervisor_id,
+        custom_fields: updated.custom_fields,
+        created_at: updated.created_at,
+        updated_at: updated.updated_at,
+    };
+
+    Ok(staff_res)
+}
+
+// exec_with_returning and into_model usage
+// pub async fn set_supervisor(
+//     id: &i64,
+//     supervisor: &i64,
+//     state: &web::Data<AppState>,
+// ) -> Result<entity::staff::Model, DbErr> {
+//     let updated_staff: Option<entity::staff::Model> = entity::staff::Entity::update_many()
+//         .filter(entity::staff::Column::Id.eq(*id))
+//         .col_expr(entity::staff::Column::SupervisorId, Expr::value(*supervisor))
+//         .col_expr(entity::staff::Column::UpdatedAt, Expr::value(chrono::Utc::now()))
+//         .exec_with_returning(state.pgdb.get_ref())
+//         .await?
+//         .into_model();
+
+//     updated_staff.ok_or_else(|| DbErr::Custom("Staff not found".to_string()))
+// }

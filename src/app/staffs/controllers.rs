@@ -1,4 +1,6 @@
 use actix_web::{HttpRequest, HttpResponse, web};
+use serde_json::json;
+use validator::Validate;
 
 use crate::{
     AppState,
@@ -6,8 +8,9 @@ use crate::{
         institutions::services::init_institution,
         staffs::{
             models::{
-                AddInitializerParams, AddStaffModel, AddStaffParams, SetupStaff, UpdateStaffModel,
-                UpdateStaffParams, UpdateStaffStatusModel, UpdateStaffStatusParams,
+                AddInitializerParams, AddStaffModel, AddStaffParams, GetAuthModel, SetupStaff,
+                SignInParams, UpdateStaffModel, UpdateStaffParams, UpdateStaffStatusModel,
+                UpdateStaffStatusParams,
             },
             services,
         },
@@ -15,7 +18,9 @@ use crate::{
     utils::{
         errors::{ApiCode, ApiError, ApiResponse},
         gen_snow_ids::gen_string,
-        models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel}, password::encrypt_password,
+        models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
+        password::encrypt_password,
+        tokens,
     },
 };
 
@@ -24,6 +29,10 @@ pub async fn setup(
     payload: web::Json<AddInitializerParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
 
     let institution_name = &data.institution_name;
@@ -45,16 +54,17 @@ pub async fn setup(
         phone_number: data.phone_number,
         email: data.email,
         password: encrypt_password(&password, &salt).await,
+        salt,
     };
 
     match services::init_staff(&staff, &state).await {
         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
-            {},
+            json!({ "password": password }),
             None,
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(_) => Err(ApiError::InternalServerError),
     }
 }
 
@@ -63,6 +73,10 @@ pub async fn add_staff(
     payload: web::Json<AddStaffParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
 
     let salt = uuid::Uuid::new_v4();
@@ -98,6 +112,10 @@ pub async fn update_status(
     payload: web::Json<UpdateStaffStatusParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
 
     let stat = UpdateStaffStatusModel {
@@ -125,8 +143,22 @@ pub async fn staff_update(
     payload: web::Json<UpdateStaffParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    let data = payload.into_inner();
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let path = params.into_inner();
+
+    let id = path
+        .id
+        .parse::<i64>()
+        .map_err(|_| ApiError::BadRequest("Invalid staff ID format".to_string()))?;
+
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+    let data = payload.into_inner();
 
     let branch_id = match data.branch_id {
         Some(val) => Some(
@@ -139,15 +171,10 @@ pub async fn staff_update(
     let update = UpdateStaffModel {
         branch_id,
         phone_number: data.phone_number,
-        data_of_birth: data.birth_date,
+        date_of_birth: data.birth_date,
         department: data.department,
         job_title: data.job_title,
     };
-
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid staff ID format".to_string()))?;
 
     match services::update_staff(&id, &update, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -165,6 +192,10 @@ pub async fn staff_details(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let path = params.into_inner();
 
     let id = path
@@ -189,18 +220,25 @@ pub async fn get_staffs(
     query: web::Query<QueryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    query
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let query = query.into_inner();
     let path = params.into_inner();
-
-    let query = QueryModel {
-        size: query.size,
-        page: query.page,
-    };
 
     let id = path
         .id
         .parse::<i64>()
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+
+    let query = QueryModel {
+        size: query.size,
+        page: query.page,
+    };
 
     match services::get_staff_list(&id, &query, &state).await {
         Ok(res) => {
@@ -213,5 +251,46 @@ pub async fn get_staffs(
             )))
         }
         Err(_) => Err(ApiError::NotFound),
+    }
+}
+
+pub async fn signin(
+    _req: HttpRequest,
+    payload: web::Json<SignInParams>,
+    state: web::Data<AppState>,
+) -> Result<HttpResponse, ApiError> {
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+    let data = payload.into_inner();
+
+    let signup = GetAuthModel {
+        email: data.email,
+        password: data.password,
+    };
+
+    match services::signin_auth(&signup, &state).await {
+        Ok(user) => {
+            let (token, exp) = tokens::create_jwt(&user.id.to_string(), "NORMAL", &state).await;
+
+            Ok(HttpResponse::Ok().json(ApiResponse::success(
+                ApiCode::OperationSuccess,
+                "Successful",
+                json!({ "staff": user, "token": { "session": token, "expiry": exp } }),
+                None,
+            )))
+        }
+        Err(_) => {
+            let email = signup.email;
+
+            tokio::spawn(async move {
+                if let Err(e) = services::update_failed_login(&email, &state).await {
+                    tracing::error!(error = ?e, email = %email, "Failed to record login attempt");
+                }
+            });
+
+            Err(ApiError::Unauthorized)
+        }
     }
 }

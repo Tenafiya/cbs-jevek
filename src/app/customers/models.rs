@@ -1,14 +1,119 @@
-use chrono::NaiveDate;
+use chrono::{FixedOffset, DateTime, NaiveDate};
 use entity::sea_orm_active_enums::CustomerType;
-use sea_orm::prelude::Decimal;
-use serde::Deserialize;
+use sea_orm::{FromQueryResult, entity::prelude::*};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use serde_with::{serde_as, DisplayFromStr};
 use validator::Validate;
 
 use crate::utils::{
     models::default_decimal,
     validators::{validate_birth_date, validate_gender, validate_income},
 };
+
+#[serde_as]
+#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[sea_orm(entity = "entity::customers::Entity")]
+pub struct CustomerResponseModel {
+    #[serde_as(as = "DisplayFromStr")]
+    #[serde(rename = "_id")]
+    #[sea_orm(from_col = "id")]
+    pub id: i64,
+    #[serde_as(as = "DisplayFromStr")]
+    #[sea_orm(from_col = "institution_id")]
+    pub institution_id: i64,
+    #[sea_orm(from_col = "customer_type")]
+    pub customer_type: Option<CustomerType>,
+    #[sea_orm(from_col = "customer_number")]
+    pub customer_number: Option<String>,
+     #[sea_orm(from_col = "risk_level")]
+    pub risk_level: Option<String>,
+     #[sea_orm(from_col = "status")]
+    pub status: Option<String>,
+     #[sea_orm(from_col = "is_black_listed")]
+    pub is_black_listed: Option<bool>,
+    #[sea_orm(from_col = "black_list_reason")]
+    pub black_list_reason: Option<String>,
+    #[sea_orm(from_col = "first_name")]
+    pub first_name: Option<String>,
+    #[sea_orm(from_col = "last_name")]
+    pub last_name: Option<String>,
+    #[sea_orm(from_col = "middle_name")]
+    pub middle_name: Option<String>,
+    #[sea_orm(from_col = "date_of_birth")]
+    pub date_of_birth: Option<NaiveDate>,
+    #[sea_orm(from_col = "gender")]
+    pub gender: Option<String>,
+    #[sea_orm(from_col = "nationality")]
+    pub nationality: Option<String>,
+    #[sea_orm(from_col = "phone_number")]
+    pub phone_number: Option<String>,
+    #[sea_orm(from_col = "email")]
+    pub email: Option<String>,
+    #[sea_orm(from_col = "is_phone_verified")]
+    pub is_phone_verified: Option<String>,
+    #[sea_orm(from_col = "is_email_verified")]
+    pub is_email_verified: Option<String>,
+    #[sea_orm(from_col = "phone_verified_at")]
+    pub phone_verified_at: Option<DateTime<FixedOffset>>,
+    #[sea_orm(from_col = "email_verified_at")]
+    pub email_verified_at: Option<DateTime<FixedOffset>>,
+    #[sea_orm(from_col = "residential_address")]
+    pub residential_address: Option<Value>,
+    #[sea_orm(from_col = "postal_address")]
+    pub postal_address: Option<Value>,
+    #[sea_orm(from_col = "city")]
+    pub city: Option<String>,
+    #[sea_orm(from_col = "state_province")]
+    pub state_province: Option<String>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[sea_orm(from_col = "country_id")]
+    pub country_id: Option<i64>,
+    #[sea_orm(from_col = "occupation")]
+    pub occupation: Option<String>,
+    #[sea_orm(from_col = "employer_name")]
+    pub employer_name: Option<String>,
+    #[sea_orm(from_col = "income_source")]
+    pub income_source: Option<String>,
+    #[sea_orm(from_col = "monthly_income")]
+    pub monthly_income: Option<Decimal>,
+    #[sea_orm(from_col = "employee_number")]
+    pub employee_number: Option<String>,
+    #[sea_orm(from_col = "next_of_kin")]
+    pub next_of_kin: Option<Value>,
+    #[sea_orm(from_col = "is_pep")]
+    pub is_pep: Option<bool>,
+    #[sea_orm(from_col = "pep_details")]
+    pub pep_details: Option<Value>,
+    #[sea_orm(from_col = "is_sanctions_check_passed")]
+    pub is_sanctions_check_passed: Option<bool>,
+    #[sea_orm(from_col = "sanctions_check_date")]
+    pub sanctions_check_date: Option<String>,
+    #[sea_orm(from_col = "sanctions_provider")]
+    pub sanctions_provider: Option<String>,
+    #[sea_orm(from_col = "custom_fields")]
+    pub custom_fields: Option<Value>,
+    #[sea_orm(from_col = "tags")]
+    pub tags: Option<Vec<String>>,
+    #[sea_orm(from_col = "verified_at")]
+    pub verified_at: Option<DateTime<FixedOffset>>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[sea_orm(from_col = "created_by")]
+    pub created_by: Option<i64>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[sea_orm(from_col = "verified_by")]
+    pub verified_by: Option<i64>,
+    #[sea_orm(from_col = "kyc_tier")]
+    pub kyc_tier: Option<Value>,
+    #[sea_orm(from_col = "is_deleted")]
+    pub is_deleted: Option<bool>,
+    #[sea_orm(from_col = "deleted_at")]
+    pub deleted_at: Option<DateTime<FixedOffset>>,
+    #[sea_orm(from_col = "created_at")]
+    pub created_at: Option<DateTime<FixedOffset>>,
+    #[sea_orm(from_col = "updated_at")]
+    pub updated_at: Option<DateTime<FixedOffset>>,
+}
 
 #[derive(Debug, Clone)]
 pub struct AddCustomerModel {
