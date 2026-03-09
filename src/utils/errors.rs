@@ -73,7 +73,7 @@ pub enum ApiError {
     #[error("Conflict: {0}")]
     Conflict(String),
 
-    #[error("Validation failed: {0}")]
+    #[error("Unprocessable request: {0}")]
     Unprocessable(String),
 
     #[error("Rate limit exceeded")]
@@ -86,10 +86,9 @@ pub enum ApiError {
 impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {
         match self {
-            ApiError::BadRequest(msg) => HttpResponse::BadRequest().json(ApiResponse::<()>::error(
-                ApiCode::BadRequest,
-                msg,
-            )),
+            ApiError::BadRequest(msg) => {
+                HttpResponse::BadRequest().json(ApiResponse::<()>::error(ApiCode::BadRequest, msg))
+            }
 
             ApiError::Unauthorized => HttpResponse::Unauthorized().json(ApiResponse::<()>::error(
                 ApiCode::Unauthorized,
@@ -106,25 +105,20 @@ impl ResponseError for ApiError {
                 "Resource not found",
             )),
 
-            ApiError::Conflict(msg) => HttpResponse::Conflict().json(ApiResponse::<()>::error(
-                ApiCode::Conflict,
-                msg,
-            )),
+            ApiError::Conflict(msg) => {
+                HttpResponse::Conflict().json(ApiResponse::<()>::error(ApiCode::Conflict, msg))
+            }
 
-            ApiError::Unprocessable(msg) => HttpResponse::UnprocessableEntity().json(
-                ApiResponse::<()>::error(ApiCode::ValidationFailed, msg),
-            ),
+            ApiError::Unprocessable(msg) => HttpResponse::UnprocessableEntity()
+                .json(ApiResponse::<()>::error(ApiCode::ProcessingError, msg)),
 
             ApiError::TooManyRequests => HttpResponse::TooManyRequests().json(
                 ApiResponse::<()>::error(ApiCode::RateLimitExhaused, "Try again later"),
             ),
 
-            ApiError::InternalServerError => {
-                HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
-                    ApiCode::InternalServerError,
-                    "Unexpected server error",
-                ))
-            }
+            ApiError::InternalServerError => HttpResponse::InternalServerError().json(
+                ApiResponse::<()>::error(ApiCode::InternalServerError, "Unexpected server error"),
+            ),
         }
     }
 }

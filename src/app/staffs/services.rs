@@ -44,8 +44,7 @@ pub async fn init_staff(
 
     let inserted = entity::staff::Entity::insert(staff)
         .exec(state.pgdb.get_ref())
-        .await
-        .map_err(|err| DbErr::Custom(err.to_string()))?;
+        .await?;
 
     Ok(inserted)
 }

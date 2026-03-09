@@ -17,7 +17,7 @@ use crate::{
     },
     utils::{
         errors::{ApiCode, ApiError, ApiResponse},
-        gen_snow_ids::gen_string,
+        gen_snow_ids::{gen_string, id_parser},
         models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
         password::encrypt_password,
         tokens,
@@ -59,7 +59,7 @@ pub async fn setup(
 
     match services::init_staff(&staff, &state).await {
         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
+            ApiCode::ResourceCreated,
             "Successful",
             json!({ "password": password }),
         ))),
@@ -82,8 +82,8 @@ pub async fn add_staff(
     let password = gen_string(14).await;
 
     let staff = AddStaffModel {
-        institution_id: 84897473979,
-        branch_id: Some(74737438737),
+        institution_id: id_parser(&data.institution_id, "Institution Id").await?,
+        branch_id: Some(id_parser(&data.branch_id, "Branch Id").await?),
         first_name: data.first_name,
         last_name: data.last_name,
         phone_number: data.phone_number,
@@ -97,7 +97,7 @@ pub async fn add_staff(
 
     match services::save_staff(&staff, &state).await {
         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
+            ApiCode::ResourceCreated,
             "Successful",
             {},
         ))),
@@ -117,10 +117,7 @@ pub async fn update_status(
     let data = payload.into_inner();
 
     let stat = UpdateStaffStatusModel {
-        id: data
-            .staff_id
-            .parse::<i64>()
-            .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?,
+        id: id_parser(&data.staff_id, "Staff Id").await?,
         employment_status: data.status,
     };
 
@@ -146,10 +143,7 @@ pub async fn staff_update(
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid staff ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     payload
         .validate()
@@ -158,10 +152,7 @@ pub async fn staff_update(
     let data = payload.into_inner();
 
     let branch_id = match data.branch_id {
-        Some(val) => Some(
-            val.parse::<i64>()
-                .map_err(|_| ApiError::BadRequest("Invalid branch ID format".to_string()))?,
-        ),
+        Some(val) => Some(id_parser(&val, "Branch Id").await?),
         None => None,
     };
 
@@ -194,10 +185,7 @@ pub async fn staff_details(
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::get_staff_details(&id, &state).await {
         Ok(res) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -225,10 +213,7 @@ pub async fn get_staffs(
     let query = query.into_inner();
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     let query = QueryModel {
         size: query.size,
@@ -266,7 +251,9 @@ pub async fn signin(
 
     match services::signin_auth(&signup, &state).await {
         Ok(user) => {
-            let (token, exp) = tokens::create_jwt(&user.session.unwrap_or_default().into(), "NORMAL", &state).await;
+            let (token, exp) =
+                tokens::create_jwt(&user.session.unwrap_or_default().into(), "NORMAL", &state)
+                    .await;
 
             Ok(HttpResponse::Ok().json(ApiResponse::success(
                 ApiCode::OperationSuccess,

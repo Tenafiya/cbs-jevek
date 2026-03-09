@@ -1,9 +1,9 @@
-use chrono::{FixedOffset, DateTime, NaiveDate};
+use chrono::{DateTime, FixedOffset, NaiveDate};
 use entity::sea_orm_active_enums::CustomerType;
 use sea_orm::{FromQueryResult, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{DisplayFromStr, serde_as};
 use validator::Validate;
 
 use crate::utils::{
@@ -26,11 +26,11 @@ pub struct CustomerResponseModel {
     pub customer_type: Option<CustomerType>,
     #[sea_orm(from_col = "customer_number")]
     pub customer_number: Option<String>,
-     #[sea_orm(from_col = "risk_level")]
+    #[sea_orm(from_col = "risk_level")]
     pub risk_level: Option<String>,
-     #[sea_orm(from_col = "status")]
+    #[sea_orm(from_col = "status")]
     pub status: Option<String>,
-     #[sea_orm(from_col = "is_black_listed")]
+    #[sea_orm(from_col = "is_black_listed")]
     pub is_black_listed: Option<bool>,
     #[sea_orm(from_col = "black_list_reason")]
     pub black_list_reason: Option<String>,
@@ -157,6 +157,8 @@ pub struct AddNextModel {
 #[derive(Debug, Deserialize, Validate)]
 #[serde(deny_unknown_fields)]
 pub struct AddCustomerParams {
+    #[serde(rename = "institutionId")]
+    pub institution_id: String,
     #[serde(rename = "customerType")]
     pub customer_type: CustomerType,
     #[validate(length(min = 1, max = 50, message = "first name cannot be < 1 and > 50"))]

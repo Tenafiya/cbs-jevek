@@ -1,8 +1,8 @@
+use crate::utils::errors::ApiError;
+use once_cell::sync::Lazy;
+use rand::distr::Alphanumeric;
 use rand::{Rng, rng};
 use snowflake_me::Snowflake;
-use rand::distr::Alphanumeric;
-use once_cell::sync::Lazy;
-
 
 pub const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -64,4 +64,9 @@ pub async fn gen_string(size: usize) -> String {
         .take(size)
         .map(char::from)
         .collect()
+}
+
+pub async fn id_parser(val: &str, field: &str) -> Result<i64, ApiError> {
+    val.parse::<i64>()
+        .map_err(|_| ApiError::BadRequest(format!("Invalid {} format", field)))
 }

@@ -12,6 +12,7 @@ use crate::{
     },
     utils::{
         errors::{ApiCode, ApiError, ApiResponse},
+        gen_snow_ids::id_parser,
         models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
@@ -21,12 +22,14 @@ pub async fn add_customer(
     payload: web::Json<AddCustomerParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
     let customer = AddCustomerModel {
-        institution_id: 049430940300,
+        institution_id: id_parser(&data.institution_id, "Institution Id").await?,
         customer_type: data.customer_type,
         first_name: data.first_name,
         last_name: data.last_name,
@@ -42,7 +45,7 @@ pub async fn add_customer(
 
     match services::save_customer(&customer, &state).await {
         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
+            ApiCode::ResourceCreated,
             "Successful",
             {},
         ))),
@@ -56,16 +59,17 @@ pub async fn save_address(
     payload: web::Json<AddAddressParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
@@ -93,16 +97,17 @@ pub async fn save_occupation(
     payload: web::Json<AddOccupationParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
@@ -129,16 +134,17 @@ pub async fn save_kin(
     payload: web::Json<NextOfKinParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
@@ -162,14 +168,13 @@ pub async fn email_verification(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::verify_email(&id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -186,13 +191,12 @@ pub async fn sms_verification(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::verify_phone(&id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -209,13 +213,12 @@ pub async fn customer_details(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::get_details(&id, &state).await {
         Ok(details) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -229,15 +232,22 @@ pub async fn customer_details(
 
 pub async fn all_customers(
     _req: HttpRequest,
+    params: web::Path<PathParamsModel>,
     query: web::Query<QueryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    query.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+    query
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let query_data = query.into_inner();
+    let path = params.into_inner();
 
-    // this id would come from token
-    let id = 93023989384989389;
+    let id = id_parser(&path.id, "Id").await?;
 
     let query = QueryModel {
         size: query_data.size,
@@ -262,14 +272,13 @@ pub async fn update_sanctions(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::update_sanctions(&id, &"BOG".to_string(), &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -286,14 +295,13 @@ pub async fn verify_customer(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::customer_verify(&id, &898989898989, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -310,14 +318,13 @@ pub async fn delete_customer(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let path = params.into_inner();
 
-    let id = path
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&path.id, "Id").await?;
 
     match services::customer_delete(&id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(

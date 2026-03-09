@@ -13,6 +13,7 @@ use crate::{
     utils::{
         self,
         errors::{ApiCode, ApiError, ApiResponse},
+        gen_snow_ids::id_parser,
         models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
@@ -22,14 +23,13 @@ pub async fn add_institution(
     payload: web::Json<AddInstitutionParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
-    let country_id = data
-        .country_id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid Country ID format".to_string()))?;
+    let country_id = id_parser(&data.country_id, "Country Id").await?;
 
     let institution = AddInstitutionModel {
         name: data.name,
@@ -44,12 +44,11 @@ pub async fn add_institution(
         date_time_format: data.date_time_format,
         address: data.address,
         postal_address: data.postal_address,
-        
     };
 
     match services::save_institution(&institution, &state).await {
         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
+            ApiCode::ResourceCreated,
             "Institution Created",
             {},
         ))),
@@ -62,14 +61,13 @@ pub async fn get_institution(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = params.into_inner();
 
-    let id = data
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&data.id, "Id").await?;
 
     match services::get_one(&id, &state).await {
         Ok(ins) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -86,7 +84,9 @@ pub async fn get_institutions(
     query: web::Query<QueryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    query.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    query
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let query = QueryModel {
         size: query.size,
@@ -111,14 +111,13 @@ pub async fn update_institution(
     payload: web::Json<UpdateInstitutionParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
-    
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = payload.into_inner();
 
-    let id = data
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&data.id, "Id").await?;
 
     let update_model = UpdateInstitutionModel {
         name: data.name,

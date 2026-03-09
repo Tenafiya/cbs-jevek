@@ -10,6 +10,7 @@ use crate::{
     utils::{
         self,
         errors::{ApiCode, ApiError, ApiResponse},
+        gen_snow_ids::id_parser,
         models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
     },
 };
@@ -19,14 +20,13 @@ pub async fn add_branch(
     payload: web::Json<AddBranchParams>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
-    let institution_id = data
-        .institution_id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid Institution ID format".to_string()))?;
+    let institution_id = id_parser(&data.institution_id, "Institution Id").await?;
 
     let branch = AddBranchModel {
         name: data.name,
@@ -42,7 +42,7 @@ pub async fn add_branch(
 
     match services::save_branch(&branch, &state).await {
         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
+            ApiCode::ResourceCreated,
             "Successful",
             {},
         ))),
@@ -55,14 +55,13 @@ pub async fn get_branch_details(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = params.into_inner();
 
-    let id = data
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&data.id, "Id").await?;
 
     match services::get_details(&id, &state).await {
         Ok(branch) => Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -80,16 +79,17 @@ pub async fn get_branches(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = params.into_inner();
 
-    let id = data
-        .id
-        .parse::<i64>()
-        .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
+    let id = id_parser(&data.id, "Id").await?;
 
-    query.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    query
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let query = QueryModel {
         size: query.size,

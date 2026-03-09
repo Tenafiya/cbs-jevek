@@ -18,7 +18,9 @@ pub async fn add_country(
     payload: web::Json<AddCountryParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
 
@@ -34,8 +36,8 @@ pub async fn add_country(
     };
 
     match services::save_country(&country, &state).await {
-        Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
-            ApiCode::OperationSuccess,
+        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
+            ApiCode::ResourceCreated,
             "Country Created",
             {},
         ))),
@@ -62,7 +64,9 @@ pub async fn get_country(
     params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = params.into_inner();
 
@@ -81,8 +85,10 @@ pub async fn operate_country(
     params: web::Path<OperationModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
-    params.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
-    
+    params
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
     let data = params.into_inner();
 
     match services::operate_country(&data.id, &data.operation, &state).await {
