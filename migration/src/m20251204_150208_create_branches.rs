@@ -181,6 +181,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Staff::PasswordLastChangedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Staff::IsMfaEnabled).boolean().default(false))
             .col(ColumnDef::new(Staff::MfaSecretEncrypted).string())
+            .col(ColumnDef::new(Staff::Session).uuid())
             .col(
                 ColumnDef::new(Staff::FailedLoginAttempts)
                     .integer()
@@ -370,6 +371,7 @@ pub enum Staff {
     Permissions,
     IsPasswordChanged,
     Salt,
+    Session,
     PasswordHash,
     PasswordLastChangedAt,
     IsMfaEnabled,

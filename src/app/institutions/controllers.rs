@@ -52,7 +52,6 @@ pub async fn add_institution(
             ApiCode::OperationSuccess,
             "Institution Created",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -77,7 +76,6 @@ pub async fn get_institution(
             ApiCode::OperationSuccess,
             "Successful",
             ins,
-            None,
         ))),
         Err(_) => Err(ApiError::NotFound),
     }
@@ -102,7 +100,6 @@ pub async fn get_institutions(
                 ApiCode::OperationSuccess,
                 "Successful",
                 ListResponseModel { items, meta },
-                None,
             )))
         }
         Err(_) => Err(ApiError::NotFound),
@@ -115,6 +112,7 @@ pub async fn update_institution(
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     payload.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    
     let data = payload.into_inner();
 
     let id = data
@@ -134,7 +132,6 @@ pub async fn update_institution(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(_) => Err(ApiError::InternalServerError),
     }

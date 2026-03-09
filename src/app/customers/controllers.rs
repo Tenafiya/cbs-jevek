@@ -45,7 +45,6 @@ pub async fn add_customer(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -83,7 +82,6 @@ pub async fn save_address(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -120,7 +118,6 @@ pub async fn save_occupation(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -155,7 +152,6 @@ pub async fn save_kin(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -180,7 +176,6 @@ pub async fn email_verification(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -204,7 +199,6 @@ pub async fn sms_verification(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -228,7 +222,6 @@ pub async fn customer_details(
             ApiCode::OperationSuccess,
             "Successful",
             details,
-            None,
         ))),
         Err(_) => Err(ApiError::NotFound),
     }
@@ -258,7 +251,6 @@ pub async fn all_customers(
                 ApiCode::OperationSuccess,
                 "Successful",
                 ListResponseModel { items, meta },
-                None,
             )))
         }
         Err(_) => Err(ApiError::NotFound),
@@ -284,7 +276,6 @@ pub async fn update_sanctions(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -309,7 +300,6 @@ pub async fn verify_customer(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -334,7 +324,6 @@ pub async fn delete_customer(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }

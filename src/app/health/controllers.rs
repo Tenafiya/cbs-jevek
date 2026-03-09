@@ -11,7 +11,6 @@ pub async fn engine_check() -> HttpResponse {
         ApiCode::OperationSuccess,
         "Health Check Success",
         {},
-        None,
     ))
 }
 
@@ -27,7 +26,6 @@ pub async fn run_migrations(
             ApiCode::OperationSuccess,
             "Health Check Success",
             {},
-            None,
         ))),
         Err(_) => Err(ApiError::InternalServerError),
     }

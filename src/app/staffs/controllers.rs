@@ -62,7 +62,6 @@ pub async fn setup(
             ApiCode::OperationSuccess,
             "Successful",
             json!({ "password": password }),
-            None,
         ))),
         Err(_) => Err(ApiError::InternalServerError),
     }
@@ -101,7 +100,6 @@ pub async fn add_staff(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -131,7 +129,6 @@ pub async fn update_status(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -181,7 +178,6 @@ pub async fn staff_update(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -208,7 +204,6 @@ pub async fn staff_details(
             ApiCode::OperationSuccess,
             "Successful",
             res,
-            None,
         ))),
         Err(_) => Err(ApiError::NotFound),
     }
@@ -247,7 +242,6 @@ pub async fn get_staffs(
                 ApiCode::OperationSuccess,
                 "Successful",
                 ListResponseModel { items, meta },
-                None,
             )))
         }
         Err(_) => Err(ApiError::NotFound),
@@ -272,13 +266,12 @@ pub async fn signin(
 
     match services::signin_auth(&signup, &state).await {
         Ok(user) => {
-            let (token, exp) = tokens::create_jwt(&user.id.to_string(), "NORMAL", &state).await;
+            let (token, exp) = tokens::create_jwt(&user.session.unwrap_or_default().into(), "NORMAL", &state).await;
 
             Ok(HttpResponse::Ok().json(ApiResponse::success(
                 ApiCode::OperationSuccess,
                 "Successful",
                 json!({ "staff": user, "token": { "session": token, "expiry": exp } }),
-                None,
             )))
         }
         Err(_) => {

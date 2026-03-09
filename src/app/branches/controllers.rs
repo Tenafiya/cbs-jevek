@@ -45,7 +45,6 @@ pub async fn add_branch(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -70,7 +69,6 @@ pub async fn get_branch_details(
             ApiCode::OperationSuccess,
             "Successful",
             branch,
-            None,
         ))),
         Err(_) => Err(ApiError::NotFound),
     }
@@ -105,7 +103,6 @@ pub async fn get_branches(
                 ApiCode::OperationSuccess,
                 "Successful",
                 ListResponseModel { items, meta },
-                None,
             )))
         }
         Err(_) => Err(ApiError::NotFound),

@@ -38,7 +38,6 @@ pub async fn add_country(
             ApiCode::OperationSuccess,
             "Country Created",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
@@ -53,7 +52,6 @@ pub async fn get_countries(
             ApiCode::OperationSuccess,
             "Successful",
             countries,
-            None,
         ))),
         Err(_) => Err(ApiError::NotFound),
     }
@@ -73,7 +71,6 @@ pub async fn get_country(
             ApiCode::OperationSuccess,
             "Successful",
             country,
-            None,
         ))),
         Err(_) => Err(ApiError::NotFound),
     }
@@ -93,7 +90,6 @@ pub async fn operate_country(
             ApiCode::OperationSuccess,
             "Successful",
             {},
-            None,
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }

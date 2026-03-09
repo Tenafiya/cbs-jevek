@@ -193,6 +193,8 @@ pub struct StaffResponseModel {
     pub password_last_changed_at: Option<DateTime<FixedOffset>>,
     #[sea_orm(from_col = "is_mfa_enabled")]
     pub is_mfa_enabled: Option<bool>,
+    #[sea_orm(from_col = "session")]
+    pub session: Option<uuid::Uuid>,
     #[sea_orm(from_col = "performance_rating")]
     pub performance_rating: Option<Decimal>,
     #[sea_orm(from_col = "last_appraisal_date")]

@@ -34,27 +34,24 @@ pub struct ApiResponse<T> {
     pub code: ApiCode,
     pub message: String,
     pub data: Option<T>,
-    pub request_id: Option<String>,
 }
 
 impl<T> ApiResponse<T> {
-    pub fn success(code: ApiCode, message: &str, data: T, request_id: Option<String>) -> Self {
+    pub fn success(code: ApiCode, message: &str, data: T) -> Self {
         Self {
             success: true,
             code,
             message: message.to_string(),
             data: Some(data),
-            request_id,
         }
     }
 
-    pub fn error(code: ApiCode, message: &str, request_id: Option<String>) -> Self {
+    pub fn error(code: ApiCode, message: &str) -> Self {
         Self {
             success: false,
             code,
             message: message.to_string(),
             data: None,
-            request_id,
         }
     }
 }
@@ -92,46 +89,40 @@ impl ResponseError for ApiError {
             ApiError::BadRequest(msg) => HttpResponse::BadRequest().json(ApiResponse::<()>::error(
                 ApiCode::BadRequest,
                 msg,
-                None,
             )),
 
             ApiError::Unauthorized => HttpResponse::Unauthorized().json(ApiResponse::<()>::error(
                 ApiCode::Unauthorized,
                 "Missing or invalid credentials",
-                None,
             )),
 
             ApiError::Forbidden => HttpResponse::Forbidden().json(ApiResponse::<()>::error(
                 ApiCode::Forbidden,
                 "Access denied",
-                None,
             )),
 
             ApiError::NotFound => HttpResponse::NotFound().json(ApiResponse::<()>::error(
                 ApiCode::NotFound,
                 "Resource not found",
-                None,
             )),
 
             ApiError::Conflict(msg) => HttpResponse::Conflict().json(ApiResponse::<()>::error(
                 ApiCode::Conflict,
                 msg,
-                None,
             )),
 
             ApiError::Unprocessable(msg) => HttpResponse::UnprocessableEntity().json(
-                ApiResponse::<()>::error(ApiCode::ValidationFailed, msg, None),
+                ApiResponse::<()>::error(ApiCode::ValidationFailed, msg),
             ),
 
             ApiError::TooManyRequests => HttpResponse::TooManyRequests().json(
-                ApiResponse::<()>::error(ApiCode::RateLimitExhaused, "Try again later", None),
+                ApiResponse::<()>::error(ApiCode::RateLimitExhaused, "Try again later"),
             ),
 
             ApiError::InternalServerError => {
                 HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
                     ApiCode::InternalServerError,
                     "Unexpected server error",
-                    None,
                 ))
             }
         }

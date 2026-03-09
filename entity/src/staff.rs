@@ -39,6 +39,7 @@ pub struct Model {
     pub password_last_changed_at: Option<DateTimeWithTimeZone>,
     pub is_mfa_enabled: Option<bool>,
     pub mfa_secret_encrypted: Option<String>,
+    pub session: Option<Uuid>,
     pub failed_login_attempts: Option<i32>,
     pub locked_until: Option<DateTimeWithTimeZone>,
     #[sea_orm(column_type = "Decimal(Some((5, 2)))", nullable)]

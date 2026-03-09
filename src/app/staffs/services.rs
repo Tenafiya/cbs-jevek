@@ -252,6 +252,7 @@ pub async fn signin_auth(
 
     let mut active_users: entity::staff::ActiveModel = staff.into();
 
+    active_users.session = Set(Some(uuid::Uuid::new_v4()));
     active_users.updated_at = Set(Some(
         chrono::Utc::now().with_timezone(&chrono::FixedOffset::east_opt(0).unwrap()),
     ));
@@ -282,6 +283,7 @@ pub async fn signin_auth(
         is_password_changed: updated.is_password_changed,
         password_last_changed_at: updated.password_last_changed_at,
         is_mfa_enabled: updated.is_mfa_enabled,
+        session: updated.session,
         performance_rating: updated.performance_rating,
         last_appraisal_date: updated.last_appraisal_date,
         supervisor_id: updated.supervisor_id,
