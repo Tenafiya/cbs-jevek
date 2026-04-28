@@ -93,6 +93,7 @@ pub async fn add_staff(
         job_title: data.job_title,
         hired_date: data.hired_date,
         password: encrypt_password(&password, &salt).await,
+        salt,
     };
 
     match services::save_staff(&staff, &state).await {

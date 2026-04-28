@@ -1,10 +1,10 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use entity::sea_orm_active_enums::{StaffEmploymentEnum, StaffGenderEnum};
-use sea_orm::{FromQueryResult, prelude::Decimal, entity::prelude::*};
+use sea_orm::{FromQueryResult, entity::prelude::*, prelude::Decimal};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use serde_with::{DisplayFromStr, serde_as};
 use validator::Validate;
-use serde_with::{serde_as, DisplayFromStr};
 
 use crate::utils::validators::validate_birth_date;
 
@@ -16,7 +16,7 @@ pub struct SetupStaff {
     pub phone_number: String,
     pub email: String,
     pub password: String,
-    pub salt: uuid::Uuid
+    pub salt: uuid::Uuid,
 }
 
 #[derive(Debug, Clone)]
@@ -32,6 +32,7 @@ pub struct AddStaffModel {
     pub job_title: String,
     pub hired_date: NaiveDate,
     pub password: String,
+    pub salt: uuid::Uuid,
 }
 
 #[derive(Debug, Clone)]
@@ -52,7 +53,7 @@ pub struct UpdateStaffModel {
 #[derive(Debug, Clone)]
 pub struct GetAuthModel {
     pub email: String,
-    pub password: String
+    pub password: String,
 }
 
 #[derive(Debug, Deserialize, Validate)]

@@ -74,6 +74,7 @@ pub async fn save_staff(
         job_title: Set(Some(data.job_title)),
         date_hired: Set(Some(data.hired_date)),
         password_hash: Set(data.password),
+        salt: Set(data.salt),
         ..Default::default()
     };
 
