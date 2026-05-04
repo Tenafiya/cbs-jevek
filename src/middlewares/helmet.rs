@@ -4,6 +4,7 @@ use actix_web::{
     http,
     middleware::Next,
 };
+use http::header::HeaderValue;
 
 pub async fn security_headers(
     req: ServiceRequest,
@@ -14,24 +15,27 @@ pub async fn security_headers(
     let headers = res.headers_mut();
     headers.insert(
         http::header::STRICT_TRANSPORT_SECURITY,
-        "max-age=31536000; includeSubDomains".parse().unwrap(),
+        HeaderValue::from_static("max-age=31536000; includeSubDomains"),
     );
-    headers.insert(http::header::X_FRAME_OPTIONS, "DENY".parse().unwrap());
+    headers.insert(
+        http::header::X_FRAME_OPTIONS,
+        HeaderValue::from_static("DENY"),
+    );
     headers.insert(
         http::header::X_CONTENT_TYPE_OPTIONS,
-        "nosniff".parse().unwrap(),
+        HeaderValue::from_static("nosniff"),
     );
     headers.insert(
         http::header::X_XSS_PROTECTION,
-        "1; mode=block".parse().unwrap(),
+        HeaderValue::from_static("1; mode=block"),
     );
     headers.insert(
         http::header::CONTENT_SECURITY_POLICY,
-        "default-src 'self'".parse().unwrap(),
+        HeaderValue::from_static("default-src 'self'"),
     );
     headers.insert(
         http::header::REFERRER_POLICY,
-        "no-referrer".parse().unwrap(),
+        HeaderValue::from_static("no-referrer"),
     );
 
     Ok(res)
