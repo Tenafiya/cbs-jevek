@@ -138,7 +138,7 @@ pub struct UpdateStaffStatusParams {
 }
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromQueryResult, DerivePartialModel)]
 #[sea_orm(entity = "entity::staff::Entity")]
 pub struct StaffResponseModel {
     #[serde_as(as = "DisplayFromStr")]

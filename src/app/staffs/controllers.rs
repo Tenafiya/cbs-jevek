@@ -8,9 +8,7 @@ use crate::{
         institutions::services::init_institution,
         staffs::{
             models::{
-                AddInitializerParams, AddStaffModel, AddStaffParams, GetAuthModel, SetupStaff,
-                SignInParams, UpdateStaffModel, UpdateStaffParams, UpdateStaffStatusModel,
-                UpdateStaffStatusParams,
+                AddInitializerParams, AddStaffModel, AddStaffParams, GetAuthModel, SetupStaff, SignInParams, StaffResponseModel, UpdateStaffModel, UpdateStaffParams, UpdateStaffStatusModel, UpdateStaffStatusParams
             },
             services,
         },
@@ -70,6 +68,7 @@ pub async fn setup(
 pub async fn add_staff(
     _req: HttpRequest,
     payload: web::Json<AddStaffParams>,
+    _staff: web::ReqData<StaffResponseModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     payload
@@ -82,8 +81,8 @@ pub async fn add_staff(
     let password = gen_string(14).await;
 
     let staff = AddStaffModel {
-        institution_id: id_parser(&data.institution_id, "Institution Id").await?,
-        branch_id: Some(id_parser(&data.branch_id, "Branch Id").await?),
+        institution_id: id_parser(&data.institution_id, "Institution Id")?,
+        branch_id: Some(id_parser(&data.branch_id, "Branch Id")?),
         first_name: data.first_name,
         last_name: data.last_name,
         phone_number: data.phone_number,
@@ -118,7 +117,7 @@ pub async fn update_status(
     let data = payload.into_inner();
 
     let stat = UpdateStaffStatusModel {
-        id: id_parser(&data.staff_id, "Staff Id").await?,
+        id: id_parser(&data.staff_id, "Staff Id")?,
         employment_status: data.status,
     };
 
@@ -144,7 +143,7 @@ pub async fn staff_update(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
     payload
         .validate()
@@ -153,7 +152,7 @@ pub async fn staff_update(
     let data = payload.into_inner();
 
     let branch_id = match data.branch_id {
-        Some(val) => Some(id_parser(&val, "Branch Id").await?),
+        Some(val) => Some(id_parser(&val, "Branch Id")?),
         None => None,
     };
 
@@ -165,7 +164,7 @@ pub async fn staff_update(
         job_title: data.job_title,
     };
 
-    match services::update_staff(&id, &update, &state).await {
+    match services::update_staff(id, &update, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -186,9 +185,9 @@ pub async fn staff_details(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
-    match services::get_staff_details(&id, &state).await {
+    match services::get_staff_details(id, &state).await {
         Ok(res) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -214,14 +213,14 @@ pub async fn get_staffs(
     let query = query.into_inner();
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
     let query = QueryModel {
         size: query.size,
         page: query.page,
     };
 
-    match services::get_staff_list(&id, &query, &state).await {
+    match services::get_staff_list(id, &query, &state).await {
         Ok(res) => {
             let (items, meta) = res;
             Ok(HttpResponse::Ok().json(ApiResponse::success(

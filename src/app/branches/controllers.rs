@@ -26,7 +26,7 @@ pub async fn add_branch(
 
     let data = payload.into_inner();
 
-    let institution_id = id_parser(&data.institution_id, "Institution Id").await?;
+    let institution_id = id_parser(&data.institution_id, "Institution Id")?;
 
     let branch = AddBranchModel {
         name: data.name,
@@ -61,9 +61,9 @@ pub async fn get_branch_details(
 
     let data = params.into_inner();
 
-    let id = id_parser(&data.id, "Id").await?;
+    let id = id_parser(&data.id, "Id")?;
 
-    match services::get_details(&id, &state).await {
+    match services::get_details(id, &state).await {
         Ok(branch) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -85,7 +85,7 @@ pub async fn get_branches(
 
     let data = params.into_inner();
 
-    let id = id_parser(&data.id, "Id").await?;
+    let id = id_parser(&data.id, "Id")?;
 
     query
         .validate()
@@ -96,7 +96,7 @@ pub async fn get_branches(
         page: query.page,
     };
 
-    match services::get_all(&id, &query, &state).await {
+    match services::get_all(id, &query, &state).await {
         Ok(res) => {
             let (items, meta) = res;
             Ok(HttpResponse::Ok().json(ApiResponse::success(

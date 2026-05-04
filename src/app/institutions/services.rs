@@ -73,10 +73,10 @@ pub async fn save_institution(
 }
 
 pub async fn get_one(
-    id: &i64,
+    id: i64,
     state: &web::Data<AppState>,
 ) -> Result<InstitutionResponseModel, DbErr> {
-    let result = entity::institutions::Entity::find_by_id(*id)
+    let result = entity::institutions::Entity::find_by_id(id)
         .into_model::<InstitutionResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
@@ -118,11 +118,11 @@ pub async fn get_all(
 }
 
 pub async fn update(
-    id: &i64,
+    id: i64,
     model: &UpdateInstitutionModel,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
-    let institution = entity::institutions::Entity::find_by_id(*id)
+    let institution = entity::institutions::Entity::find_by_id(id)
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Institution not found".into()))?;

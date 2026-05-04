@@ -77,3 +77,21 @@ pub fn validate_income(value: &Decimal) -> Result<(), ValidationError> {
 
     Ok(())
 }
+
+pub fn validate_snowflake(id: &str) -> Result<(), ValidationError> {
+    if id.is_empty() || id.len() > 19 {
+        return Err(ValidationError::new("Invalid snowflake").with_message("Invalid ID".into()));
+    }
+
+    match id.parse::<i64>() {
+        Ok(val) if val > 0 => Ok(()),
+        _ => Err(ValidationError::new("Invalid snowflake").with_message("Invalid ID".into())),
+    }
+}
+
+pub fn validate_acc_cat_type(cat: &str) -> Result<(), ValidationError> {
+    match cat {
+        "SAVINGS" | "CURRENT" | "FIXED_DEPOSIT" | "LOAN" | "WALLET" | "AGENT_FLOAT" | "SUSU" => Ok(()),
+        _ => Err(ValidationError::new("ACCOUNT_CATEGORY_TYPE").with_message("Invalid account category type".into()))
+    }
+}

@@ -1,5 +1,5 @@
 use actix_web::web;
-use migration::Expr;
+use migration::{Expr, ExprTrait};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult,
     PaginatorTrait, QueryFilter, QueryOrder,
@@ -114,11 +114,11 @@ pub async fn update_emp_status(
 }
 
 pub async fn update_staff(
-    id: &i64,
+    id: i64,
     model: &UpdateStaffModel,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
-    let staff = entity::staff::Entity::find_by_id(*id)
+    let staff = entity::staff::Entity::find_by_id(id)
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Staff not found".into()))?;
@@ -146,10 +146,24 @@ pub async fn update_staff(
 }
 
 pub async fn get_staff_details(
-    id: &i64,
+    id: i64,
     state: &web::Data<AppState>,
 ) -> Result<StaffResponseModel, DbErr> {
-    let staff = entity::staff::Entity::find_by_id(*id)
+    let staff = entity::staff::Entity::find_by_id(id)
+        .into_model::<StaffResponseModel>()
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Staff not found".into()));
+
+    staff
+}
+
+pub async fn get_staff_by_session(
+    session: uuid::Uuid,
+    state: &web::Data<AppState>,
+) -> Result<StaffResponseModel, DbErr> {
+    let staff = entity::staff::Entity::find()
+        .filter(Condition::all().and(entity::staff::Column::Session.eq(session)))
         .into_model::<StaffResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
@@ -159,7 +173,7 @@ pub async fn get_staff_details(
 }
 
 pub async fn get_staff_list(
-    id: &i64,
+    id: i64,
     query: &QueryModel,
     state: &web::Data<AppState>,
 ) -> Result<(Vec<StaffResponseModel>, MetaModel), DbErr> {
@@ -167,7 +181,7 @@ pub async fn get_staff_list(
     let per_page = query.size;
 
     let paginator = entity::staff::Entity::find()
-        .filter(entity::staff::Column::InstitutionId.eq(*id))
+        .filter(entity::staff::Column::InstitutionId.eq(id))
         .order_by_desc(entity::staff::Column::UpdatedAt)
         .into_model::<StaffResponseModel>()
         .paginate(state.pgdb.get_ref(), per_page);
@@ -188,15 +202,15 @@ pub async fn get_staff_list(
 }
 
 pub async fn set_supervisor(
-    id: &i64,
-    supervisor: &i64,
+    id: i64,
+    supervisor: i64,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
     let staff = entity::staff::Entity::update_many()
-        .filter(entity::staff::Column::Id.eq(*id))
+        .filter(entity::staff::Column::Id.eq(id))
         .col_expr(
             entity::staff::Column::SupervisorId,
-            Expr::value(*supervisor),
+            Expr::value(supervisor),
         )
         .col_expr(
             entity::staff::Column::UpdatedAt,

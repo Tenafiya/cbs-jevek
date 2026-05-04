@@ -2,6 +2,8 @@ use crate::utils::errors::ApiError;
 use once_cell::sync::Lazy;
 use rand::distr::Alphanumeric;
 use rand::{Rng, rng};
+use serde::Serialize;
+use serde_json::Value;
 use snowflake_me::Snowflake;
 
 pub const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -66,7 +68,15 @@ pub async fn gen_string(size: usize) -> String {
         .collect()
 }
 
-pub async fn id_parser(val: &str, field: &str) -> Result<i64, ApiError> {
+pub fn id_parser(val: &str, field: &str) -> Result<i64, ApiError> {
     val.parse::<i64>()
         .map_err(|_| ApiError::BadRequest(format!("Invalid {} format", field)))
+}
+
+pub fn get_serde_value<T: Serialize>(value: &Option<T>) -> Result<Option<Value>, ApiError> {
+    value
+        .as_ref()
+        .map(|v| serde_json::to_value(v))
+        .transpose()
+        .map_err(|_| ApiError::InternalServerError)
 }

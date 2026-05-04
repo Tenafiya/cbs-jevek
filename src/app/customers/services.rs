@@ -41,6 +41,7 @@ pub async fn save_customer(
         phone_country_code: Set(Some(data.phone_country_code)),
         email: Set(data.email),
         created_by: Set(Some(data.created_by)),
+        customer_type: Set(Some(data.customer_type)),
         ..Default::default()
     };
 
@@ -52,11 +53,11 @@ pub async fn save_customer(
 }
 
 pub async fn add_address(
-    id: &i64,
+    id: i64,
     model: &AddAddressModel,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
-    let customer = entity::customers::Entity::find_by_id(*id)
+    let customer = entity::customers::Entity::find_by_id(id)
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Customer not found".into()))?;
@@ -79,11 +80,11 @@ pub async fn add_address(
 }
 
 pub async fn add_occupation(
-    id: &i64,
+    id: i64,
     model: &AddOccupationModel,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
-    let customer = entity::customers::Entity::find_by_id(*id)
+    let customer = entity::customers::Entity::find_by_id(id)
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Customer not found".into()))?;
@@ -105,11 +106,11 @@ pub async fn add_occupation(
 }
 
 pub async fn add_next_details(
-    id: &i64,
+    id: i64,
     model: &AddNextModel,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
-    let customer = entity::customers::Entity::find_by_id(*id)
+    let customer = entity::customers::Entity::find_by_id(id)
         .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::RecordNotFound("Customer not found".into()))?;
@@ -128,11 +129,11 @@ pub async fn add_next_details(
     Ok(())
 }
 
-pub async fn verify_email(id: &i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
+pub async fn verify_email(id: i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
     let customer = entity::customers::Entity::update_many()
         .filter(
             Condition::all()
-                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::Id.eq(id))
                 .add(entity::customers::Column::IsEmailVerified.eq(false)),
         )
         .col_expr(
@@ -153,11 +154,11 @@ pub async fn verify_email(id: &i64, state: &web::Data<AppState>) -> Result<(), D
     Ok(())
 }
 
-pub async fn verify_phone(id: &i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
+pub async fn verify_phone(id: i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
     let customer = entity::customers::Entity::update_many()
         .filter(
             Condition::all()
-                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::Id.eq(id))
                 .add(entity::customers::Column::IsPhoneVerified.eq(false)),
         )
         .col_expr(
@@ -179,10 +180,10 @@ pub async fn verify_phone(id: &i64, state: &web::Data<AppState>) -> Result<(), D
 }
 
 pub async fn get_details(
-    id: &i64,
+    id: i64,
     state: &web::Data<AppState>,
 ) -> Result<CustomerResponseModel, DbErr> {
-    let customer = entity::customers::Entity::find_by_id(*id)
+    let customer = entity::customers::Entity::find_by_id(id)
         .into_model::<CustomerResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
@@ -192,7 +193,7 @@ pub async fn get_details(
 }
 
 pub async fn get_customers(
-    id: &i64,
+    id: i64,
     query: &QueryModel,
     state: &web::Data<AppState>,
 ) -> Result<(Vec<CustomerResponseModel>, MetaModel), DbErr> {
@@ -202,7 +203,7 @@ pub async fn get_customers(
     let paginator = entity::customers::Entity::find()
         .filter(
             Condition::all()
-                .add(entity::customers::Column::InstitutionId.eq(*id))
+                .add(entity::customers::Column::InstitutionId.eq(id))
                 .add(entity::customers::Column::IsBlackListed.eq(false)),
         )
         .order_by_desc(entity::customers::Column::UpdatedAt)
@@ -225,14 +226,14 @@ pub async fn get_customers(
 }
 
 pub async fn update_sanctions(
-    id: &i64,
+    id: i64,
     provider: &String,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
     let customer = entity::customers::Entity::update_many()
         .filter(
             Condition::all()
-                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::Id.eq(id))
                 .add(entity::customers::Column::IsSanctionsCheckPassed.eq(false)),
         )
         .col_expr(
@@ -258,21 +259,21 @@ pub async fn update_sanctions(
 }
 
 pub async fn customer_verify(
-    id: &i64,
-    user: &i64,
+    id: i64,
+    staff: i64,
     state: &web::Data<AppState>,
 ) -> Result<(), DbErr> {
     let customer = entity::customers::Entity::update_many()
         .filter(
             Condition::all()
-                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::Id.eq(id))
                 .add(entity::customers::Column::VerifiedAt.is_null()),
         )
         .col_expr(
             entity::customers::Column::VerifiedAt,
             Expr::value(chrono::Utc::now()),
         )
-        .col_expr(entity::customers::Column::VerifiedBy, Expr::value(*user))
+        .col_expr(entity::customers::Column::VerifiedBy, Expr::value(staff))
         .exec(state.pgdb.get_ref())
         .await?;
 
@@ -283,11 +284,11 @@ pub async fn customer_verify(
     Ok(())
 }
 
-pub async fn customer_delete(id: &i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
+pub async fn customer_delete(id: i64, state: &web::Data<AppState>) -> Result<(), DbErr> {
     let customer = entity::customers::Entity::update_many()
         .filter(
             Condition::all()
-                .add(entity::customers::Column::Id.eq(*id))
+                .add(entity::customers::Column::Id.eq(id))
                 .add(entity::customers::Column::IsDeleted.eq(false)),
         )
         .col_expr(

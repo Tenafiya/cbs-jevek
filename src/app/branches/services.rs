@@ -47,10 +47,10 @@ pub async fn save_branch(
 }
 
 pub async fn get_details(
-    id: &i64,
+    id: i64,
     state: &web::Data<AppState>,
 ) -> Result<BranchResponseModel, DbErr> {
-    let result = entity::branches::Entity::find_by_id(*id)
+    let result = entity::branches::Entity::find_by_id(id)
         .into_model::<BranchResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
@@ -60,11 +60,11 @@ pub async fn get_details(
 }
 
 pub async fn get_via_ins(
-    id: &i64,
+    id: i64,
     state: &web::Data<AppState>,
 ) -> Result<BranchResponseModel, DbErr> {
     let result = entity::branches::Entity::find()
-        .filter(Condition::all().add(entity::branches::Column::InstitutionId.eq(*id)))
+        .filter(Condition::all().add(entity::branches::Column::InstitutionId.eq(id)))
         .into_model::<BranchResponseModel>()
         .one(state.pgdb.get_ref())
         .await?
@@ -74,7 +74,7 @@ pub async fn get_via_ins(
 }
 
 pub async fn get_all(
-    id: &i64,
+    id: i64,
     query: &QueryModel,
     state: &web::Data<AppState>,
 ) -> Result<(Vec<BranchResponseModel>, MetaModel), DbErr> {
@@ -84,7 +84,7 @@ pub async fn get_all(
     let paginator = entity::branches::Entity::find()
         .filter(
             Condition::all()
-                .add(entity::branches::Column::InstitutionId.eq(*id))
+                .add(entity::branches::Column::InstitutionId.eq(id))
                 .add(entity::branches::Column::IsDeleted.eq(false)),
         )
         .order_by_desc(entity::branches::Column::UpdatedAt)

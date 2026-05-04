@@ -2,6 +2,7 @@ use actix_web::web::{self, ServiceConfig};
 
 use crate::AppState;
 
+pub mod account_charts;
 pub mod branches;
 pub mod countries;
 pub mod customers;
@@ -17,5 +18,6 @@ pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig)
         cfg.configure(|c| branches::routes::init(c, state.clone()));
         cfg.configure(|c| customers::routes::init(c, state.clone()));
         cfg.configure(|c| staffs::routes::init(c, state.clone()));
+        cfg.configure(|c| account_charts::routes::init(c, state.clone()));
     }
 }

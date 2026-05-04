@@ -5,3 +5,4 @@ pub mod validators;
 pub mod password;
 pub mod tokens;
 pub mod headers;
+pub mod conversions;

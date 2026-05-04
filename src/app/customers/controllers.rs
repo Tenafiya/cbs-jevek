@@ -3,13 +3,13 @@ use validator::Validate;
 
 use crate::{
     AppState,
-    app::customers::{
+    app::{customers::{
         models::{
             AddAddressModel, AddAddressParams, AddCustomerModel, AddCustomerParams, AddNextModel,
             AddOccupationModel, AddOccupationParams, NextOfKinParams,
         },
         services,
-    },
+    }, staffs::models::StaffResponseModel},
     utils::{
         errors::{ApiCode, ApiError, ApiResponse},
         gen_snow_ids::id_parser,
@@ -20,16 +20,19 @@ use crate::{
 pub async fn add_customer(
     _req: HttpRequest,
     payload: web::Json<AddCustomerParams>,
+    staff: web::ReqData<StaffResponseModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     payload
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
+    let StaffResponseModel { institution_id, ..} = staff.into_inner();
+
     let data = payload.into_inner();
 
     let customer = AddCustomerModel {
-        institution_id: id_parser(&data.institution_id, "Institution Id").await?,
+        institution_id: id_parser(&data.institution_id, "Institution Id")?,
         customer_type: data.customer_type,
         first_name: data.first_name,
         last_name: data.last_name,
@@ -40,7 +43,7 @@ pub async fn add_customer(
         phone_country_code: data.phone_country_code,
         phone_number: data.phone_number,
         email: data.email,
-        created_by: 9849898989898,
+        created_by: institution_id,
     };
 
     match services::save_customer(&customer, &state).await {
@@ -65,7 +68,7 @@ pub async fn save_address(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
     payload
         .validate()
@@ -81,7 +84,7 @@ pub async fn save_address(
         country_id: Some(data.country_id.parse().unwrap_or(0)),
     };
 
-    match services::add_address(&id, &address, &state).await {
+    match services::add_address(id, &address, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -103,7 +106,7 @@ pub async fn save_occupation(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
     payload
         .validate()
@@ -118,7 +121,7 @@ pub async fn save_occupation(
         monthly_income: data.monthly_income,
     };
 
-    match services::add_occupation(&id, &occupation, &state).await {
+    match services::add_occupation(id, &occupation, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -140,7 +143,7 @@ pub async fn save_kin(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
     payload
         .validate()
@@ -153,7 +156,7 @@ pub async fn save_kin(
         pep_details: data.pep_details,
     };
 
-    match services::add_next_details(&id, &next_details, &state).await {
+    match services::add_next_details(id, &next_details, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -174,9 +177,9 @@ pub async fn email_verification(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
-    match services::verify_email(&id, &state).await {
+    match services::verify_email(id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -196,9 +199,9 @@ pub async fn sms_verification(
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
-    match services::verify_phone(&id, &state).await {
+    match services::verify_phone(id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -218,9 +221,9 @@ pub async fn customer_details(
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
-    match services::get_details(&id, &state).await {
+    match services::get_details(id, &state).await {
         Ok(details) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -247,14 +250,14 @@ pub async fn all_customers(
     let query_data = query.into_inner();
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
     let query = QueryModel {
         size: query_data.size,
         page: query_data.page,
     };
 
-    match services::get_customers(&id, &query, &state).await {
+    match services::get_customers(id, &query, &state).await {
         Ok(res) => {
             let (items, meta) = res;
             Ok(HttpResponse::Ok().json(ApiResponse::success(
@@ -278,9 +281,9 @@ pub async fn update_sanctions(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
-    match services::update_sanctions(&id, &"BOG".to_string(), &state).await {
+    match services::update_sanctions(id, &"BOG".to_string(), &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -293,6 +296,7 @@ pub async fn update_sanctions(
 pub async fn verify_customer(
     _req: HttpRequest,
     params: web::Path<PathParamsModel>,
+    staff: web::ReqData<StaffResponseModel>,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     params
@@ -301,9 +305,11 @@ pub async fn verify_customer(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let StaffResponseModel { id, .. } = staff.into_inner();
 
-    match services::customer_verify(&id, &898989898989, &state).await {
+    let cus_id = id_parser(&path.id, "Id")?;
+
+    match services::customer_verify(cus_id, id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -324,9 +330,9 @@ pub async fn delete_customer(
 
     let path = params.into_inner();
 
-    let id = id_parser(&path.id, "Id").await?;
+    let id = id_parser(&path.id, "Id")?;
 
-    match services::customer_delete(&id, &state).await {
+    match services::customer_delete(id, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",

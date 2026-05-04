@@ -2,6 +2,16 @@ use sea_orm::prelude::Decimal;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountCategorySummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub name: Option<String>,
+    pub category_type: Option<String>,
+    pub description: Option<String>,
+    pub is_active: Option<bool>,
+}
+
 #[derive(Debug, Clone)]
 pub struct QueryModel {
     pub size: u64,

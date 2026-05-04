@@ -29,7 +29,7 @@ pub async fn add_institution(
 
     let data = payload.into_inner();
 
-    let country_id = id_parser(&data.country_id, "Country Id").await?;
+    let country_id = id_parser(&data.country_id, "Country Id")?;
 
     let institution = AddInstitutionModel {
         name: data.name,
@@ -67,9 +67,9 @@ pub async fn get_institution(
 
     let data = params.into_inner();
 
-    let id = id_parser(&data.id, "Id").await?;
+    let id = id_parser(&data.id, "Id")?;
 
-    match services::get_one(&id, &state).await {
+    match services::get_one(id, &state).await {
         Ok(ins) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",
@@ -117,7 +117,7 @@ pub async fn update_institution(
 
     let data = payload.into_inner();
 
-    let id = id_parser(&data.id, "Id").await?;
+    let id = id_parser(&data.id, "Id")?;
 
     let update_model = UpdateInstitutionModel {
         name: data.name,
@@ -126,7 +126,7 @@ pub async fn update_institution(
         regulation_num: data.regulation_num,
     };
 
-    match services::update(&id, &update_model, &state).await {
+    match services::update(id, &update_model, &state).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ApiResponse::success(
             ApiCode::OperationSuccess,
             "Successful",

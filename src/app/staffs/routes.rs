@@ -1,8 +1,8 @@
 use actix_web::{middleware::from_fn, web};
 
-use crate::{AppState, app::staffs::controllers, middlewares::jwt::jwt_auth};
+use crate::{AppState, app::staffs::controllers, middlewares::{account, jwt::jwt_auth}};
 
-pub fn init(cfg: &mut web::ServiceConfig, _state: web::Data<AppState>) {
+pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
     cfg.service(
         web::scope("/v1/staff")
             .route("/setup", web::post().to(controllers::setup))
@@ -11,6 +11,7 @@ pub fn init(cfg: &mut web::ServiceConfig, _state: web::Data<AppState>) {
                 "/add",
                 web::post()
                     .to(controllers::add_staff)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
