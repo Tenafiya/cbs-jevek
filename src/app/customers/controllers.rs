@@ -27,7 +27,7 @@ pub async fn add_customer(
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
-    let StaffResponseModel { institution_id, ..} = staff.into_inner();
+    let StaffResponseModel { id, ..} = staff.into_inner();
 
     let data = payload.into_inner();
 
@@ -43,7 +43,7 @@ pub async fn add_customer(
         phone_country_code: data.phone_country_code,
         phone_number: data.phone_number,
         email: data.email,
-        created_by: institution_id,
+        created_by: id,
     };
 
     match services::save_customer(&customer, &state).await {
