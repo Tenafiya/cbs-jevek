@@ -9,6 +9,7 @@ pub mod customers;
 pub mod health;
 pub mod institutions;
 pub mod staffs;
+pub mod accounts;
 
 pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig) + Clone {
     move |cfg: &mut web::ServiceConfig| {

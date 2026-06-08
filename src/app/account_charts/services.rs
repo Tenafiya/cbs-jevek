@@ -175,3 +175,55 @@ pub async fn get_account_types(
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect())
 }
+
+pub async fn get_account_type(
+    id: i64,
+    state: &web::Data<AppState>,
+) -> Result<AccountTypeRow, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT 
+            at.id,
+            at.institution_id,
+            at.name,
+            at.code,
+            at.description,
+            at.currency,
+            at.minimum_balance,
+            at.maximum_balance,
+            at.interest_rate,
+            at.interest_rate_calc_method,
+            at.kyc_tier,
+            at.interest_payout_frequency,
+            at.is_overdraft_allowable,
+            at.overdraft_limit,
+            at.overdraft_interest_rate,
+            at.dormancy_period_days,
+            at.maintenance_fee,
+            at.withdrawal_fee,
+            at.status,
+            at.custom_fields,
+            at.created_at,
+            at.updated_at,
+            at.category_id,
+
+            ac.id AS category_id,
+            ac.name AS category_name,
+            ac.category_type AS category_category_type,
+            ac.description AS category_description,
+            ac.is_active AS category_is_active
+
+        FROM account_types at
+        JOIN account_categories ac ON at.category_id = ac.id
+        WHERE at.id = $1
+        "#,
+        vec![id.into()],
+    );
+
+    AccountTypeFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Account type not found".to_string()))
+        .map(|row| row.into())
+}

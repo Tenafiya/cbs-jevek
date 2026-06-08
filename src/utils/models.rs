@@ -1,5 +1,7 @@
+use entity::sea_orm_active_enums::CustomerType;
 use sea_orm::prelude::Decimal;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use validator::Validate;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -12,10 +14,61 @@ pub struct AccountCategorySummary {
     pub is_active: Option<bool>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountTypeSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub institution_id: String,
+    pub name: Option<String>,
+    pub code: Option<String>,
+    pub description: Option<String>,
+    pub minimum_balance: Option<i64>,
+    pub maximum_balance: Option<i64>,
+    pub interest_rate: Option<Decimal>,
+    pub maintenance_fee: Option<i64>,
+    pub withdrawal_fee: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustomerSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub customer_type: Option<CustomerType>,
+    pub customer_number: Option<String>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub acccount_number: Option<String>,
+    pub account_name: Option<String>,
+    pub currency: Option<Value>,
+    pub current_balance: Option<i64>,
+    pub available_balance: Option<i64>,
+    pub ledger_balance: Option<i64>,
+    pub hold_balance: Option<i64>,
+}
+
 #[derive(Debug, Clone)]
 pub struct QueryModel {
     pub size: u64,
     pub page: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct CursorModel {
+    pub cursor: Option<i64>,
+    pub limit: u64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CursorMetaModel {
+    pub next_cursor: Option<String>,
+    pub has_next: bool,
+    pub limit: u64,
 }
 
 #[derive(Debug, Validate, Deserialize)]

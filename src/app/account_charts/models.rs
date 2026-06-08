@@ -95,7 +95,7 @@ pub struct AccountTypeRow {
     pub created_at: Option<DateTime<FixedOffset>>,
     pub updated_at: Option<DateTime<FixedOffset>>,
 
-    pub category_id: AccountCategorySummary
+    pub category: AccountCategorySummary
 }
 
 #[derive(FromQueryResult, Debug, Clone)]
@@ -304,7 +304,7 @@ impl From<AccountTypeFlat> for AccountTypeRow {
             created_at: flat.created_at,
             updated_at: flat.updated_at,
 
-            category_id: AccountCategorySummary {
+            category: AccountCategorySummary {
                 id: flat.category_id.to_string(),
                 name: flat.category_name,
                 category_type: flat.category_category_type,

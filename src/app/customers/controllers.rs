@@ -19,9 +19,9 @@ use crate::{
 
 pub async fn add_customer(
     _req: HttpRequest,
-    payload: web::Json<AddCustomerParams>,
-    staff: web::ReqData<StaffResponseModel>,
     state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+    payload: web::Json<AddCustomerParams>,
 ) -> Result<HttpResponse, ApiError> {
     payload
         .validate()
@@ -58,9 +58,9 @@ pub async fn add_customer(
 
 pub async fn save_address(
     _req: HttpRequest,
+    state: web::Data<AppState>,
     params: web::Path<PathParamsModel>,
     payload: web::Json<AddAddressParams>,
-    state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -96,9 +96,9 @@ pub async fn save_address(
 
 pub async fn save_occupation(
     _req: HttpRequest,
+    state: web::Data<AppState>,
     params: web::Path<PathParamsModel>,
     payload: web::Json<AddOccupationParams>,
-    state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -133,9 +133,9 @@ pub async fn save_occupation(
 
 pub async fn save_kin(
     _req: HttpRequest,
+    state: web::Data<AppState>,
     params: web::Path<PathParamsModel>,
     payload: web::Json<NextOfKinParams>,
-    state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -168,8 +168,8 @@ pub async fn save_kin(
 
 pub async fn email_verification(
     _req: HttpRequest,
-    params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
+    params: web::Path<PathParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -191,8 +191,8 @@ pub async fn email_verification(
 
 pub async fn sms_verification(
     _req: HttpRequest,
-    params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
+    params: web::Path<PathParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -213,8 +213,8 @@ pub async fn sms_verification(
 
 pub async fn customer_details(
     _req: HttpRequest,
-    params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
+    params: web::Path<PathParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -235,9 +235,9 @@ pub async fn customer_details(
 
 pub async fn all_customers(
     _req: HttpRequest,
+    state: web::Data<AppState>,
     params: web::Path<PathParamsModel>,
     query: web::Query<QueryParamsModel>,
-    state: web::Data<AppState>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -272,8 +272,8 @@ pub async fn all_customers(
 
 pub async fn update_sanctions(
     _req: HttpRequest,
-    params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
+    params: web::Path<PathParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -295,9 +295,9 @@ pub async fn update_sanctions(
 
 pub async fn verify_customer(
     _req: HttpRequest,
-    params: web::Path<PathParamsModel>,
-    staff: web::ReqData<StaffResponseModel>,
     state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+    params: web::Path<PathParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()
@@ -321,8 +321,8 @@ pub async fn verify_customer(
 
 pub async fn delete_customer(
     _req: HttpRequest,
-    params: web::Path<PathParamsModel>,
     state: web::Data<AppState>,
+    params: web::Path<PathParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
     params
         .validate()

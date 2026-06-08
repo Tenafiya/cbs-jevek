@@ -1,6 +1,10 @@
 use actix_web::{middleware::from_fn, web};
 
-use crate::{AppState, app::customers::controllers, middlewares::{account, jwt::jwt_auth}};
+use crate::{
+    AppState,
+    app::customers::controllers,
+    middlewares::{account, jwt::jwt_auth},
+};
 
 pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
     cfg.service(
@@ -9,23 +13,29 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                 "/add",
                 web::post()
                     .to(controllers::add_customer)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
                 "/{id}/add-address",
                 web::put()
                     .to(controllers::save_address)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
                 "/{id}/add-occupation",
                 web::put()
                     .to(controllers::save_occupation)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
                 "/{id}/add-kin",
-                web::put().to(controllers::save_kin).wrap(from_fn(jwt_auth)),
+                web::put()
+                    .to(controllers::save_kin)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
+                    .wrap(from_fn(jwt_auth)),
             )
             .route(
                 "/email/{id}/verify",
@@ -49,12 +59,14 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                 "/all",
                 web::get()
                     .to(controllers::all_customers)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
                 "/{id}/sanctions",
                 web::get()
                     .to(controllers::update_sanctions)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
@@ -68,6 +80,7 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                 "/{id}",
                 web::delete()
                     .to(controllers::delete_customer)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             ),
     );
