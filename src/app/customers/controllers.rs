@@ -1,4 +1,5 @@
 use actix_web::{HttpRequest, HttpResponse, web};
+use serde_json::json;
 use validator::Validate;
 
 use crate::{
@@ -47,10 +48,10 @@ pub async fn add_customer(
     };
 
     match services::save_customer(&customer, &state).await {
-        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
+        Ok(res) => Ok(HttpResponse::Created().json(ApiResponse::success(
             ApiCode::ResourceCreated,
             "Successful",
-            {},
+            json!({ "customerId": res.last_insert_id.to_string() }),
         ))),
         Err(err) => Err(ApiError::BadRequest(err.to_string())),
     }
