@@ -86,6 +86,14 @@ pub struct QueryParamsModel {
     pub page: u64,
 }
 
+#[derive(Debug, Validate, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CursorQueryParams {
+    pub cursor: Option<String>,
+    #[serde(default = "default_limit")]
+    pub limit: u64,
+}
+
 #[derive(Debug, Serialize)]
 pub struct MetaModel {
     pub total_items: u64,
@@ -95,9 +103,9 @@ pub struct MetaModel {
 }
 
 #[derive(Debug, Serialize)]
-pub struct ListResponseModel<T> {
+pub struct ListResponseModel<T, F> {
     pub items: T,
-    pub meta: MetaModel,
+    pub meta: F,
 }
 
 fn default_page() -> u64 {
@@ -110,4 +118,8 @@ fn default_per_page() -> u64 {
 
 pub fn default_decimal() -> Decimal {
     Decimal::ZERO
+}
+
+fn default_limit() -> u64 {
+    20
 }

@@ -105,3 +105,17 @@ pub async fn get_all(
 
     Ok((items, meta))
 }
+
+pub async fn get_int_branch(
+    branch_id: Option<i64>,
+    inst_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<entity::branches::Model, DbErr> {
+    let branch = branch_id.ok_or(DbErr::Custom("branch_id is required".into()))?;
+
+    entity::branches::Entity::find_by_id(branch)
+        .filter(entity::branches::Column::InstitutionId.eq(inst_id))
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Branch not found".to_string()))
+}

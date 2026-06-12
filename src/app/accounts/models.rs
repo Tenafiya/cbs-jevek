@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::Deserialize;
 use validator::Validate;
 
 use crate::utils::validators::validate_snowflake;
@@ -19,7 +19,7 @@ pub struct AddAccountModel {
 // ==============================================
 // Params
 // ==============================================
-#[derive(Debug, Serialize, Validate)]
+#[derive(Debug, Deserialize, Validate)]
 #[serde(deny_unknown_fields)]
 pub struct AddAccountParams {
     #[validate(custom(function = "validate_snowflake"))]

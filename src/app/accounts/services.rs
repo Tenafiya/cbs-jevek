@@ -72,7 +72,7 @@ pub async fn activate_account(
 
 pub async fn get_accounts(
     institution_id: i64,
-    model: CursorModel,
+    model: &CursorModel,
     state: &web::Data<AppState>,
 ) -> Result<(Vec<AccountRow>, CursorMetaModel), DbErr> {
     let data = model.clone();
@@ -90,7 +90,7 @@ pub async fn get_accounts(
             acc.available_balance,
             acc.ledger_balance,
             acc.hold_balance,
-            acc.status,
+            acc.status::TEXT AS status,
             acc.activation_date,
             acc.dormancy_date,
             acc.frozen_at,
@@ -121,7 +121,7 @@ pub async fn get_accounts(
             at.withdrawal_fee AS account_type_withdrawal_fee,
 
             cu.id AS customer_id,
-            cu.customer_type,
+            cu.customer_type::TEXT AS customer_type,
             cu.customer_number,
             cu.first_name AS customer_first_name,
             cu.last_name AS customer_last_name,
@@ -166,7 +166,7 @@ pub async fn get_accounts(
 }
 
 pub async fn fetch_customer_acc(
-    institution_id: i64,
+    customer_id: i64,
     state: &web::Data<AppState>,
 ) -> Result<Option<AccountRow>, DbErr> {
     let stmt = Statement::from_sql_and_values(
@@ -182,7 +182,7 @@ pub async fn fetch_customer_acc(
             acc.available_balance,
             acc.ledger_balance,
             acc.hold_balance,
-            acc.status,
+            acc.status::TEXT AS status,
             acc.activation_date,
             acc.dormancy_date,
             acc.frozen_at,
@@ -213,7 +213,7 @@ pub async fn fetch_customer_acc(
             at.withdrawal_fee AS account_type_withdrawal_fee,
 
             cu.id AS customer_id,
-            cu.customer_type,
+            cu.customer_type::TEXT AS customer_type,
             cu.customer_number,
             cu.first_name AS customer_first_name,
             cu.last_name AS customer_last_name,
@@ -222,9 +222,9 @@ pub async fn fetch_customer_acc(
         JOIN account_types at ON acc.account_type_id = at.id
         JOIN customers cu ON acc.customer_id = cu.id
         LEFT JOIN accounts pa ON acc.parent_account_id = pa.id
-        acc.institution_id = $1
+        WHHERE acc.customer_id = $1
         "#,
-        vec![institution_id.into()],
+        vec![customer_id.into()],
     );
 
     AccountFlat::find_by_statement(stmt)

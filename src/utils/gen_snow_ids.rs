@@ -80,3 +80,32 @@ pub fn get_serde_value<T: Serialize>(value: &Option<T>) -> Result<Option<Value>,
         .transpose()
         .map_err(|_| ApiError::InternalServerError)
 }
+
+fn luhn_check_digit(number: &str) -> u8 {
+    let mut sum = 0;
+    let mut double = true;
+
+    for c in number.chars().rev() {
+        let mut digit = c.to_digit(10).unwrap() as u8;
+
+        if double {
+            digit *= 2;
+            if digit > 9 {
+                digit -= 9;
+            }
+        }
+
+        sum += digit as u32;
+        double = !double;
+    }
+
+    ((10 - (sum % 10)) % 10) as u8
+}
+
+pub fn generate_account_number(branch_code: i64, customer_id: i64) -> String {
+    let base = format!("{:06}{:08}", branch_code, customer_id);
+
+    let check_digit = luhn_check_digit(&base);
+
+    format!("{}{}", base, check_digit)
+}
