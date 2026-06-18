@@ -237,21 +237,16 @@ pub async fn customer_details(
 pub async fn all_customers(
     _req: HttpRequest,
     state: web::Data<AppState>,
-    params: web::Path<PathParamsModel>,
+    staff: web::ReqData<StaffResponseModel>,
     query: web::Query<QueryParamsModel>,
 ) -> Result<HttpResponse, ApiError> {
-    params
-        .validate()
-        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
-
     query
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
-    let query_data = query.into_inner();
-    let path = params.into_inner();
+    let StaffResponseModel { id, .. } = staff.into_inner();
 
-    let id = id_parser(&path.id, "Id")?;
+    let query_data = query.into_inner();
 
     let query = QueryModel {
         size: query_data.size,
