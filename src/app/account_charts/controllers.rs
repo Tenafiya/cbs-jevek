@@ -56,7 +56,10 @@ pub async fn add_acc_chart(
             "Successful",
             {},
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to add account charts");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -87,7 +90,10 @@ pub async fn add_acc_cat(
             "Successful",
             {},
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to add account category");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -101,7 +107,10 @@ pub async fn fetch_charts(
             "Successful",
             res,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to fetch account charts");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -118,7 +127,10 @@ pub async fn fetch_categories(
             "Successful",
             res,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to fetch account categories");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -171,7 +183,10 @@ pub async fn add_acc_types(
             "Successful",
             {},
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to add account types");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -188,6 +203,9 @@ pub async fn fetch_account_types(
             "Successful",
             res,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to fetch account types");
+            Err(ApiError::NotFound)
+        },
     }
 }
