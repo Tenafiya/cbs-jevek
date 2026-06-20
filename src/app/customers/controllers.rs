@@ -244,7 +244,7 @@ pub async fn all_customers(
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
-    let StaffResponseModel { id, .. } = staff.into_inner();
+    let StaffResponseModel { institution_id, .. } = staff.into_inner();
 
     let query_data = query.into_inner();
 
@@ -253,7 +253,7 @@ pub async fn all_customers(
         page: query_data.page,
     };
 
-    match services::get_customers(id, &query, &state).await {
+    match services::get_customers(institution_id, &query, &state).await {
         Ok(res) => {
             let (items, meta) = res;
             Ok(HttpResponse::Ok().json(ApiResponse::success(
