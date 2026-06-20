@@ -46,20 +46,33 @@ pub async fn add_customer_account(
 
     let customer = customers::services::get_details(customer_id, &state)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "failed to get customer");
+            ApiError::InternalServerError
+        })?;
 
     account_charts::services::get_account_type(acc_type_id, &state)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "account type error");
+            ApiError::InternalServerError
+        })?;
 
     let code: i64 = branch
         .code
         .as_ref()
-        .ok_or(ApiError::InternalServerError)?
+        .ok_or({
+            tracing::error!("failed to flatten code");
+            ApiError::InternalServerError
+        })?
         .parse::<i64>()
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "failed to parse code");
+            ApiError::InternalServerError
+        })?;
 
     if code == 0 {
+        tracing::error!("account code is 0");
         return Err(ApiError::InternalServerError);
     }
 
@@ -87,7 +100,10 @@ pub async fn add_customer_account(
             "Successful",
             {},
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to add customer account");
+            Err(ApiError::InternalServerError)
+        }
     }
 }
 
@@ -125,7 +141,10 @@ pub async fn get_all_cus_accounts(
                 ListResponseModel { items, meta },
             )))
         }
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to get account list");
+            Err(ApiError::NotFound)
+        }
     }
 }
 
@@ -148,6 +167,9 @@ pub async fn get_cus_account(
             "Successful",
             res,
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to customer account");
+            Err(ApiError::NotFound)
+        }
     }
 }
