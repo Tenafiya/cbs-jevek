@@ -39,7 +39,10 @@ pub async fn add_customer_account(
 
     let branch = branches::services::get_int_branch(branch_id, institution_id, &state)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "failed to get branch");
+            ApiError::InternalServerError
+        })?;
 
     let customer_id = gen_snow_ids::id_parser(&data.customer_id, "Customer ID")?;
     let acc_type_id = gen_snow_ids::id_parser(&data.account_type_id, "Account Type ID")?;

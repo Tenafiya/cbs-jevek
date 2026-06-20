@@ -14,7 +14,7 @@ PROJECT_DIR="$HOME/cbs-jevek"
 SOURCE_BINARY="$PROJECT_DIR/target/release/cbs-jevek"
 TARGET_BINARY="/opt/cbs-api"
 
-DEFAULT_SSH_KEY="$HOME/.ssh/id_tenafiya_github"
+DEFAULT_SSH_KEY="$HOME/.ssh/id"
 
 ###############################################################################
 # Helpers
@@ -161,7 +161,16 @@ stage_logs() {
 
     log "Opening logs"
 
-    cbs-jevek-logs
+    if command -v cbs-jevek-logs >/dev/null 2>&1; then
+        cbs-jevek-logs
+        return
+    fi
+
+    if command -v ccze >/dev/null 2>&1; then
+        journalctl -u "$SERVICE_NAME" -f --output=cat | ccze -A
+    else
+        journalctl -u "$SERVICE_NAME" -f --output=cat
+    fi
 }
 
 stage_full() {
