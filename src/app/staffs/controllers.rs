@@ -8,7 +8,9 @@ use crate::{
         institutions::services::init_institution,
         staffs::{
             models::{
-                AddInitializerParams, AddStaffModel, AddStaffParams, GetAuthModel, SetupStaff, SignInParams, StaffResponseModel, UpdateStaffModel, UpdateStaffParams, UpdateStaffStatusModel, UpdateStaffStatusParams
+                AddInitializerParams, AddStaffModel, AddStaffParams, GetAuthModel, SetupStaff,
+                SignInParams, StaffResponseModel, UpdateStaffModel, UpdateStaffParams,
+                UpdateStaffStatusModel, UpdateStaffStatusParams,
             },
             services,
         },
