@@ -51,9 +51,9 @@ pub struct CustomerResponseModel {
     #[sea_orm(from_col = "email")]
     pub email: Option<String>,
     #[sea_orm(from_col = "is_phone_verified")]
-    pub is_phone_verified: Option<String>,
+    pub is_phone_verified: Option<bool>,
     #[sea_orm(from_col = "is_email_verified")]
-    pub is_email_verified: Option<String>,
+    pub is_email_verified: Option<bool>,
     #[sea_orm(from_col = "phone_verified_at")]
     pub phone_verified_at: Option<DateTime<FixedOffset>>,
     #[sea_orm(from_col = "email_verified_at")]

@@ -262,7 +262,10 @@ pub async fn all_customers(
                 ListResponseModel { items, meta },
             )))
         }
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "failed to get customers");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
