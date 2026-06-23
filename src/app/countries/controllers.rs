@@ -41,7 +41,10 @@ pub async fn add_country(
             "Country Created",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save country");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -55,7 +58,10 @@ pub async fn get_countries(
             "Successful",
             countries,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get countries");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -76,7 +82,10 @@ pub async fn get_country(
             "Successful",
             country,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get country");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -97,6 +106,9 @@ pub async fn operate_country(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to operate country");
+            Err(ApiError::InternalServerError)
+        },
     }
 }

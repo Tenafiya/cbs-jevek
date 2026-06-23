@@ -41,7 +41,10 @@ pub async fn setup(
 
     let institution = match init_institution(&data.institution_name, &code, &state).await {
         Ok(inst) => inst,
-        Err(err) => return Err(ApiError::Unprocessable(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to find institution");
+            return Err(ApiError::Unprocessable(err.to_string()))
+        },
     };
 
     let salt = uuid::Uuid::new_v4();
@@ -63,7 +66,10 @@ pub async fn setup(
             "Successful",
             json!({ "password": password }),
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to setup staff");
+            Err(ApiError::InternalServerError)
+        }
     }
 }
 
@@ -103,7 +109,10 @@ pub async fn add_staff(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to add staff");
+            Err(ApiError::InternalServerError)
+        }
     }
 }
 
@@ -129,7 +138,10 @@ pub async fn update_status(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to update status");
+            Err(ApiError::InternalServerError)
+        }
     }
 }
 
@@ -172,7 +184,10 @@ pub async fn staff_update(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to update staff");
+            Err(ApiError::InternalServerError)
+        }
     }
 }
 
@@ -195,7 +210,10 @@ pub async fn staff_details(
             "Successful",
             res,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get staff details");
+            Err(ApiError::NotFound)
+        }
     }
 }
 
@@ -231,7 +249,10 @@ pub async fn get_staffs(
                 ListResponseModel { items, meta },
             )))
         }
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get staff list");
+            Err(ApiError::NotFound)
+        }
     }
 }
 
@@ -263,7 +284,7 @@ pub async fn signin(
                 json!({ "staff": user, "token": { "session": token, "expiry": exp } }),
             )))
         }
-        Err(_) => {
+        Err(e) => {
             let email = signup.email;
 
             tokio::spawn(async move {
@@ -271,6 +292,8 @@ pub async fn signin(
                     tracing::error!(error = ?e, email = %email, "Failed to record login attempt");
                 }
             });
+
+            tracing::error!(error = ?e, "Failed to sign staff in");
 
             Err(ApiError::Unauthorized)
         }

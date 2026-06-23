@@ -29,6 +29,7 @@ pub async fn save_acc_chart(
         account_type: Set(Some(data.acc_code)),
         parent_account_id: Set(data.parent_acc_id),
         is_system_account: Set(Some(data.is_system_acc)),
+        institution_id: Set(data.institution_id),
         ..Default::default()
     };
 

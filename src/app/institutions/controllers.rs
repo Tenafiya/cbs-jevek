@@ -52,7 +52,10 @@ pub async fn add_institution(
             "Institution Created",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save institution");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -75,7 +78,10 @@ pub async fn get_institution(
             "Successful",
             ins,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get institution");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -102,7 +108,10 @@ pub async fn get_institutions(
                 ListResponseModel { items, meta },
             )))
         }
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get institutions");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -132,6 +141,9 @@ pub async fn update_institution(
             "Successful",
             {},
         ))),
-        Err(_) => Err(ApiError::InternalServerError),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to update institution");
+            Err(ApiError::InternalServerError)
+        },
     }
 }

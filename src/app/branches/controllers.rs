@@ -46,7 +46,10 @@ pub async fn add_branch(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save branch");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -69,7 +72,10 @@ pub async fn get_branch_details(
             "Successful",
             branch,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch branch details");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -105,6 +111,9 @@ pub async fn get_branches(
                 ListResponseModel { items, meta },
             )))
         }
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to get branch list");
+            Err(ApiError::NotFound)
+        },
     }
 }

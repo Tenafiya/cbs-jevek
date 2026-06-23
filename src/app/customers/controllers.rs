@@ -53,7 +53,10 @@ pub async fn add_customer(
             "Successful",
             json!({ "customerId": res.last_insert_id.to_string() }),
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save customer");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -91,7 +94,10 @@ pub async fn save_address(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save address");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -128,7 +134,10 @@ pub async fn save_occupation(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save occupation");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -163,7 +172,10 @@ pub async fn save_kin(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to save next of kin");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -186,7 +198,10 @@ pub async fn email_verification(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to verify email");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -208,7 +223,10 @@ pub async fn sms_verification(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to verify phone");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -230,7 +248,10 @@ pub async fn customer_details(
             "Successful",
             details,
         ))),
-        Err(_) => Err(ApiError::NotFound),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch customer details");
+            Err(ApiError::NotFound)
+        },
     }
 }
 
@@ -288,7 +309,10 @@ pub async fn update_sanctions(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to update sanctions");
+            Err(ApiError::InternalServerError)
+        }
     }
 }
 
@@ -314,7 +338,10 @@ pub async fn verify_customer(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to verify customer");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
 
@@ -337,6 +364,9 @@ pub async fn delete_customer(
             "Successful",
             {},
         ))),
-        Err(err) => Err(ApiError::BadRequest(err.to_string())),
+        Err(err) => {
+            tracing::error!(error = ?err, "Failed to delete customer");
+            Err(ApiError::InternalServerError)
+        },
     }
 }
