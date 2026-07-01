@@ -4,7 +4,7 @@ use std::panic;
 use actix_web::{
     App, HttpServer,
     middleware::{Logger, NormalizePath, from_fn},
-    web::Data,
+    web::{Data, JsonConfig},
 };
 use config::Config;
 
@@ -59,6 +59,9 @@ pub async fn start_server() -> Result<(), std::io::Error> {
 
         App::new()
             .app_data(state.clone())
+            .app_data(
+                JsonConfig::default().limit(64 * 1024),
+            )
             .wrap(from_fn(security_headers))
             .wrap(from_fn(request_id))
             .wrap(Logger::new(
