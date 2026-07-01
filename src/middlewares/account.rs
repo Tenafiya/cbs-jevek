@@ -10,7 +10,11 @@ use actix_web::{
 
 use serde::{Serialize, de::DeserializeOwned};
 
-use crate::{AppState, app::staffs::{models::StaffResponseModel, services::get_staff_by_session}, utils::{errors::ApiError, tokens::Claims}};
+use crate::{
+    AppState,
+    app::staffs::{models::StaffResponseModel, services::get_staff_by_session},
+    utils::{errors::ApiError, tokens::Claims},
+};
 
 pub trait AuthSubject: DeserializeOwned + Serialize + Send + Sync + Debug + 'static {
     const CACHE_PREFIX: &'static str;
@@ -59,7 +63,7 @@ where
             let account = S::fetch(session, &state).await?;
 
             req.extensions_mut().insert(account);
-            
+
             Ok(next.call(req).await?)
         })
     }
