@@ -125,6 +125,39 @@ impl MigrationTrait for Migration {
 
         manager.create_table(agents).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_agents_institution ON agents(institution_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_agents_phone ON agents(phone_number);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_agents_status ON agents(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

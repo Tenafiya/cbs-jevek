@@ -103,6 +103,61 @@ impl MigrationTrait for Migration {
 
         manager.create_table(audit_trails).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_audit_trails_institution ON audit_trails(institution_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_audit_trails_user ON audit_trails(user_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_audit_trails_resource ON audit_trails(resource_type, resource_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_audit_trails_event_type ON audit_trails(event_type);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_audit_trails_timestamp ON audit_trails(event_timestamp);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

@@ -83,6 +83,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(mems).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE group_saving_members
+                    ADD CONSTRAINT unique_saving_mems_cus_goal
+                    UNIQUE (group_goal_id, customer_id);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

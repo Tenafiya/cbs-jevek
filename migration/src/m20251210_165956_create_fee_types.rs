@@ -119,6 +119,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(fee_types).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE fee_types
+                    ADD CONSTRAINT unique_fee_type_insti_code
+                    UNIQUE (institution_id, fee_code);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

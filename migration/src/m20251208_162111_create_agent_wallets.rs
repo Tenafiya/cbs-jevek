@@ -91,6 +91,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(agent_wals).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE agent_wallets
+                    ADD CONSTRAINT unique_agent_wal_agent_wal_type
+                    UNIQUE (agent_id, wallet_type);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

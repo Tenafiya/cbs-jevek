@@ -1,5 +1,5 @@
 use chrono::{DateTime, FixedOffset};
-use entity::sea_orm_active_enums::{AccTypeStatus, CustomerType};
+use entity::sea_orm_active_enums::{AccLinkType, AccTypeStatus, CustomerType};
 use sea_orm::{FromQueryResult, prelude::Decimal};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -31,7 +31,7 @@ pub struct AccountRow {
     pub parent_account: Option<AccountSummary>,
 
     pub account_type: AccountTypeSummary,
-    pub customer: CustomerSummary
+    pub customer: CustomerSummary,
 }
 
 #[derive(FromQueryResult, Debug, Clone)]
@@ -136,6 +136,111 @@ impl From<AccountFlat> for AccountRow {
                 customer_number: flat.customer_number,
                 first_name: flat.customer_first_name,
                 last_name: flat.customer_last_name,
+            },
+        }
+    }
+}
+
+#[derive(FromQueryResult, Debug, Clone, Serialize, Deserialize)]
+pub struct AccountLimitRow {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub account_id: String,
+    pub limit_type: String,
+    pub limit_unit: String,
+    pub limit_value: i64,
+    pub current_value: i64,
+    pub last_reset_at: Option<DateTime<FixedOffset>>,
+    pub is_active: Option<bool>,
+    pub effective_from: DateTime<FixedOffset>,
+    pub effective_to: DateTime<FixedOffset>,
+    pub created_at: Option<DateTime<FixedOffset>>,
+    pub updated_at: Option<DateTime<FixedOffset>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LinkedAccountRow {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub institution_id: String,
+    pub link_type: AccLinkType,
+    pub relationship: Option<String>,
+    pub authorized_limit: Option<i64>,
+    pub is_credit_allowed: Option<bool>,
+    pub is_debit_allowed: Option<bool>,
+    pub status: Option<AccTypeStatus>,
+    pub created_by: Option<String>,
+
+    pub parent_account: AccountSummary,
+    pub linked_account: AccountSummary,
+}
+
+#[derive(FromQueryResult, Debug, Clone)]
+pub struct LinkedAccountFlat {
+    pub id: i64,
+    pub institution_id: i64,
+    pub link_type: AccLinkType,
+    pub relationship: Option<String>,
+    pub authorized_limit: Option<i64>,
+    pub is_credit_allowed: Option<bool>,
+    pub is_debit_allowed: Option<bool>,
+    pub status: Option<AccTypeStatus>,
+    pub created_by: Option<i64>,
+
+    pub parent_account_id: i64,
+    pub parent_account_acccount_number: Option<String>,
+    pub parent_account_account_name: Option<String>,
+    pub parent_account_currency: Option<Value>,
+    pub parent_account_current_balance: Option<i64>,
+    pub parent_account_available_balance: Option<i64>,
+    pub parent_account_ledger_balance: Option<i64>,
+    pub parent_account_hold_balance: Option<i64>,
+
+    pub linked_account_id: i64,
+    pub linked_account_acccount_number: Option<String>,
+    pub linked_account_account_name: Option<String>,
+    pub linked_account_currency: Option<Value>,
+    pub linked_account_current_balance: Option<i64>,
+    pub linked_account_available_balance: Option<i64>,
+    pub linked_account_ledger_balance: Option<i64>,
+    pub linked_account_hold_balance: Option<i64>,
+}
+
+impl From<LinkedAccountFlat> for LinkedAccountRow {
+    fn from(flat: LinkedAccountFlat) -> Self {
+        Self {
+            id: flat.id.to_string(),
+            institution_id: flat.institution_id.to_string(),
+            link_type: flat.link_type,
+            relationship: flat.relationship,
+            authorized_limit: flat.authorized_limit,
+            is_credit_allowed: flat.is_credit_allowed,
+            is_debit_allowed: flat.is_debit_allowed,
+            status: flat.status,
+            created_by: flat
+                .created_by
+                .and_then(|created| Some(created.to_string())),
+
+            parent_account: AccountSummary {
+                id: flat.parent_account_id.to_string(),
+                acccount_number: flat.parent_account_acccount_number,
+                account_name: flat.parent_account_account_name,
+                currency: flat.parent_account_currency,
+                current_balance: flat.parent_account_current_balance,
+                available_balance: flat.parent_account_available_balance,
+                ledger_balance: flat.parent_account_ledger_balance,
+                hold_balance: flat.parent_account_hold_balance,
+            },
+
+            linked_account: AccountSummary {
+                id: flat.linked_account_id.to_string(),
+                acccount_number: flat.linked_account_acccount_number,
+                account_name: flat.linked_account_account_name,
+                currency: flat.linked_account_currency,
+                current_balance: flat.linked_account_current_balance,
+                available_balance: flat.linked_account_available_balance,
+                ledger_balance: flat.linked_account_ledger_balance,
+                hold_balance: flat.linked_account_hold_balance,
             },
         }
     }

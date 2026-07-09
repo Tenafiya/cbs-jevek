@@ -107,6 +107,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(disputes).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    CREATE UNIQUE INDEX unique_open_dispute
+                    ON transaction_disputes (transaction_id, dispute_type, status)
+                    WHERE status IN ('OPEN', 'INVESTIGATION');
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

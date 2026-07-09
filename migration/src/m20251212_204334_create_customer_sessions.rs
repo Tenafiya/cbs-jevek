@@ -45,6 +45,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(CustomerSessions::SessionTokenHash)
                     .string()
+                    .unique_key()
                     .not_null(),
             )
             .col(ColumnDef::new(CustomerSessions::RefreshTokenHash).string())

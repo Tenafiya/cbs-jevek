@@ -152,6 +152,39 @@ impl MigrationTrait for Migration {
 
         manager.create_table(loan_apps).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_apps_institution ON loan_applications(institution_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_apps_customer ON loan_applications(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_apps_status ON loan_applications(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

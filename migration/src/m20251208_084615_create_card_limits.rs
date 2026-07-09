@@ -74,6 +74,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(limit).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE card_limits
+                    ADD CONSTRAINT unique_card_lim_card_lim_type
+                    UNIQUE (card_id, limit_type);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

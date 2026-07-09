@@ -12,7 +12,7 @@ impl MigrationTrait for Migration {
             .get_connection()
             .execute(Statement::from_string(
                 manager.get_database_backend(),
-                "CREATE TYPE acc_limit_type AS ENUM ('DAILY_DEBIT', 'DAILY_CREDIT', 'DAILY_TRANSACTION_COUNT', 'WEEKLY_DEBIT', 'MONTHLY_DEBIT')".to_string(),
+                "CREATE TYPE acc_limit_type AS ENUM ('DAILY_DEBIT', 'DAILY_CREDIT', 'DAILY_COUNT', 'WEEKLY_DEBIT', 'WEEKLY_CREDIT', 'WEEKLY_COUNT', 'MONTHLY_DEBIT', 'MONTHLY_CREDIT', 'MONTHLY_COUNT')".to_string(),
             ))
             .await?;
 
@@ -20,8 +20,7 @@ impl MigrationTrait for Migration {
             .get_connection()
             .execute(Statement::from_string(
                 manager.get_database_backend(),
-                "CREATE TYPE acc_reset_freq_type AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY')"
-                    .to_string(),
+                "CREATE TYPE acc_limit_unit AS ENUM ('AMOUNT', 'COUNT')".to_string(),
             ))
             .await?;
 
@@ -44,22 +43,20 @@ impl MigrationTrait for Migration {
                     .custom("acc_limit_type")
                     .not_null(),
             )
-            .col(ColumnDef::new(AccountLimits::LimitAmount).big_integer())
-            .col(ColumnDef::new(AccountLimits::LimitCount).integer())
             .col(
-                ColumnDef::new(AccountLimits::CurrentUsage)
+                ColumnDef::new(AccountLimits::LimitUnit)
+                    .custom("acc_limit_unit")
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(AccountLimits::LimitValue)
                     .big_integer()
-                    .default(0),
+                    .not_null(),
             )
             .col(
-                ColumnDef::new(AccountLimits::CurrentCount)
-                    .integer()
-                    .default(0),
-            )
-            .col(
-                ColumnDef::new(AccountLimits::ResetFrequency)
-                    .custom("acc_reset_freq_type")
-                    .default("DAILY"),
+                ColumnDef::new(AccountLimits::CurrentValue)
+                    .big_integer()
+                    .not_null(),
             )
             .col(
                 ColumnDef::new(AccountLimits::LastResetAt)
@@ -71,8 +68,16 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .default(true),
             )
-            .col(ColumnDef::new(AccountLimits::EffectiveFrom).timestamp_with_time_zone())
-            .col(ColumnDef::new(AccountLimits::EffectiveTo).timestamp_with_time_zone())
+            .col(
+                ColumnDef::new(AccountLimits::EffectiveFrom)
+                    .timestamp_with_time_zone()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(AccountLimits::EffectiveTo)
+                    .timestamp_with_time_zone()
+                    .not_null(),
+            )
             .col(
                 ColumnDef::new(AccountLimits::CreatedAt)
                     .timestamp_with_time_zone()
@@ -93,6 +98,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(acc_limits).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE account_limits
+                    ADD CONSTRAINT unique_acc_limit_acc_id_limit_type
+                    UNIQUE (account_id, limit_type);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 
@@ -109,11 +127,9 @@ pub enum AccountLimits {
     Id,
     AccountId,
     LimitType,
-    LimitAmount,
-    LimitCount,
-    CurrentUsage,
-    CurrentCount,
-    ResetFrequency,
+    LimitUnit,
+    LimitValue,
+    CurrentValue,
     LastResetAt,
     IsActive,
     EffectiveFrom,

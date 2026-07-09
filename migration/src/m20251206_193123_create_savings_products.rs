@@ -190,6 +190,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(save_prods).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE savings_products
+                    ADD CONSTRAINT unique_savings_prod_insti_code
+                    UNIQUE (institution_id, code);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

@@ -101,6 +101,28 @@ impl MigrationTrait for Migration {
 
         manager.create_table(cus_iden).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_customer_identities_customer ON customer_identifications(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_customer_identities_status ON customer_identifications(verification_status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

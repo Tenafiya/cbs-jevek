@@ -15,6 +15,7 @@ pub struct Model {
     pub device_type: Option<String>,
     pub device_os: Option<String>,
     pub device_fingerprint: Option<String>,
+    #[sea_orm(unique)]
     pub session_token_hash: String,
     pub refresh_token_hash: Option<String>,
     pub mfa_verified: Option<bool>,

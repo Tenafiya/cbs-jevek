@@ -110,6 +110,39 @@ impl MigrationTrait for Migration {
 
         manager.create_table(notification_queue).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_notification_queue_status ON notification_queue(status) WHERE status = 'PENDING';
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_notification_queue_scheduled ON notification_queue(scheduled_at) WHERE status = 'PENDING';
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_notification_queue_customer ON notification_queue(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

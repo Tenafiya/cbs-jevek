@@ -104,6 +104,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(acc_links).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE account_links
+                    ADD CONSTRAINT unique_acc_links_pri_link
+                    UNIQUE (primary_account_id, linked_account_id);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

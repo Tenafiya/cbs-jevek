@@ -15,6 +15,7 @@ pub struct Model {
     pub institution_id: i64,
     pub customer_id: i64,
     pub account_id: i64,
+    #[sea_orm(unique)]
     pub card_number_hashed: String,
     pub card_number_masked: String,
     pub card_form_factor: Option<CardForm>,

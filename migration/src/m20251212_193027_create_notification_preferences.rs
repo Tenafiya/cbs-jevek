@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_orm::Statement;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -93,6 +94,19 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(notification_preferences).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE notification_preferences
+                    ADD CONSTRAINT unique_noti_pref_insti_cust
+                    UNIQUE (institution_id, customer_id);
+                "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }

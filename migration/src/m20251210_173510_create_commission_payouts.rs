@@ -103,6 +103,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(commission_payouts).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE commission_payouts
+                    ADD CONSTRAINT unique_comm_payout_insti_pay_cycle
+                    UNIQUE (institution_id, payout_cycle);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

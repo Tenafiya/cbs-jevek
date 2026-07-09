@@ -20,6 +20,14 @@ impl MigrationTrait for Migration {
             ))
             .await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                "CREATE TYPE customer_status AS ENUM ('ACTIVE', 'INACTIVE', 'BLOCKED')".to_string(),
+            ))
+            .await?;
+
         let customer = Table::create()
             .table(Customers::Table)
             .if_not_exists()
@@ -45,7 +53,11 @@ impl MigrationTrait for Migration {
                     .unique_key(),
             )
             .col(ColumnDef::new(Customers::RiskLevel).string())
-            .col(ColumnDef::new(Customers::Status).string())
+            .col(
+                ColumnDef::new(Customers::Status)
+                    .custom("customer_status")
+                    .default("ACTIVE"),
+            )
             .col(
                 ColumnDef::new(Customers::IsBlackListed)
                     .boolean()
@@ -146,6 +158,50 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(customer).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_customers_institution ON customers(institution_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_customers_phone ON customers(phone_number);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_customers_email ON customers(email);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_customers_status ON customers(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }

@@ -109,6 +109,39 @@ impl MigrationTrait for Migration {
 
         manager.create_table(card_trans).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_card_txns_card ON card_transactions(card_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_card_txns_ref ON card_transactions(transaction_reference);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_card_txns_date ON card_transactions(transaction_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

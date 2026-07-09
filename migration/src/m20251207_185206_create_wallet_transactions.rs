@@ -130,6 +130,39 @@ impl MigrationTrait for Migration {
 
         manager.create_table(wal_trans).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_wallet_txns_wallet ON wallet_transactions(wallet_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_wallet_txns_ref ON wallet_transactions(transaction_reference);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_wallet_txns_date ON wallet_transactions(created_at);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

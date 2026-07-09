@@ -63,7 +63,6 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(SavingGoals::ContributionFreq).custom("savings_product_freq"))
             .col(ColumnDef::new(SavingGoals::Status).custom("saving_goals_status"))
             .col(ColumnDef::new(SavingGoals::CompletionDate).date())
-            .col(ColumnDef::new(SavingGoals::ProgressPercentage).integer())
             .col(
                 ColumnDef::new(SavingGoals::IsGroupSavings)
                     .boolean()
@@ -115,6 +114,47 @@ impl MigrationTrait for Migration {
 
         manager.create_table(save_goals).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE saving_goals
+                    ADD COLUMN progress_percentage DECIMAL(5,2)
+                    GENERATED ALWAYS AS (
+                        CASE
+                            WHEN target_amount > 0
+                            THEN (current_amount / target_amount) * 100
+                            ELSE 0
+                        END
+                    ) STORED;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_savings_goals_customer ON saving_goals(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_savings_goals_status ON saving_goals(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 
@@ -136,7 +176,6 @@ pub enum SavingGoals {
     GoalName,
     TargetAmount,
     CurrentAmount,
-    ProgressPercentage,
     StartDate,
     TargetCompletionDate,
     ContributionAmount,

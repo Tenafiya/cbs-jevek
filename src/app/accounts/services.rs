@@ -1,15 +1,18 @@
 use actix_web::web;
+use chrono::NaiveDate;
 use entity::sea_orm_active_enums::AccTypeStatus;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DatabaseBackend, DbErr,
-    EntityTrait, FromQueryResult, InsertResult, QueryFilter, Statement,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, ConnectionTrait, DatabaseBackend,
+    DatabaseTransaction, DbErr, EntityTrait, FromQueryResult, InsertResult, QueryFilter, Statement,
 };
 
 use crate::{
     AppState,
     app::accounts::{
-        mapper::{AccountFlat, AccountRow},
-        models::AddAccountModel,
+        mapper::{AccountFlat, AccountLimitRow, AccountRow},
+        models::{
+            AddAccountBalanceModel, AddAccountLimitModel, AddAccountLinkModel, AddAccountModel,
+        },
     },
     utils::{
         gen_snow_ids,
@@ -231,4 +234,215 @@ pub async fn fetch_customer_acc(
         .one(state.pgdb.get_ref())
         .await
         .map(|opt_row| opt_row.map(Into::into))
+}
+
+pub async fn is_customer_subscribed(
+    customer_id: i64,
+    acc_type_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<Option<entity::accounts::Model>, DbErr> {
+    use entity::accounts::{Column, Entity};
+
+    let account = Entity::find()
+        .filter(
+            Condition::all()
+                .add(Column::CustomerId.eq(customer_id))
+                .add(Column::AccountTypeId.eq(acc_type_id)),
+        )
+        .one(state.pgdb.get_ref())
+        .await;
+
+    account
+}
+
+pub async fn add_acc_balance(
+    model: &AddAccountBalanceModel,
+    state: &web::Data<AppState>,
+) -> Result<InsertResult<entity::account_balances::ActiveModel>, DbErr> {
+    use entity::account_balances::{ActiveModel, Entity};
+
+    let (snowflake, _) =
+        gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
+
+    let data = model.clone();
+
+    let bal = ActiveModel {
+        id: Set(snowflake),
+        account_id: Set(data.account_id),
+        balance_date: Set(data.balance_date),
+        opening_balance: Set(data.opening_balance),
+        ..Default::default()
+    };
+
+    Entity::insert(bal).exec(state.pgdb.get_ref()).await
+}
+
+pub async fn add_acc_links(
+    model: &AddAccountLinkModel,
+    state: &web::Data<AppState>,
+) -> Result<InsertResult<entity::account_links::ActiveModel>, DbErr> {
+    use entity::account_links::{ActiveModel, Entity};
+
+    let (snowflake, _) =
+        gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
+
+    let data = model.clone();
+
+    let link = ActiveModel {
+        id: Set(snowflake),
+        institution_id: Set(data.institution_id),
+        primary_account_id: Set(data.prim_account_id),
+        linked_account_id: Set(data.link_account_id),
+        link_type: Set(data.link_type),
+        relationship: Set(data.relationship),
+        authorized_limit: Set(data.authorized_limit),
+        ..Default::default()
+    };
+
+    Entity::insert(link).exec(state.pgdb.get_ref()).await
+}
+
+pub async fn update_total_credits(
+    credit: i64,
+    acc_id: i64,
+    bal_date: NaiveDate,
+    trn: &DatabaseTransaction,
+) -> Result<(), DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        UPDATE account_balances
+        SET
+            total_credits = COALESCE(total_credits, 0) + $1,
+            updated_at = NOW()
+        WHERE
+            account_id = $2
+            AND balance_date = $3;
+        "#,
+        vec![credit.into(), acc_id.into(), bal_date.into()],
+    );
+
+    let result = trn.execute(stmt).await?;
+
+    if result.rows_affected() == 0 {
+        return Err(DbErr::Custom("Could not update total credits".to_string()));
+    }
+
+    Ok(())
+}
+
+pub async fn update_total_debits(
+    debit: i64,
+    acc_id: i64,
+    bal_date: NaiveDate,
+    trn: &DatabaseTransaction,
+) -> Result<(), DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        UPDATE account_balances
+        SET
+            total_debits = COALESCE(total_debits, 0) + $1,
+            updated_at = NOW()
+        WHERE
+            account_id = $2
+            AND balance_date = $3;
+        "#,
+        vec![debit.into(), acc_id.into(), bal_date.into()],
+    );
+
+    let result = trn.execute(stmt).await?;
+
+    if result.rows_affected() == 0 {
+        return Err(DbErr::Custom("Could not update total debits".to_string()));
+    };
+
+    Ok(())
+}
+
+pub async fn add_acc_limits(
+    model: &AddAccountLimitModel,
+    state: &web::Data<AppState>,
+) -> Result<InsertResult<entity::account_limits::ActiveModel>, DbErr> {
+    use entity::account_limits::{ActiveModel, Entity};
+
+    let (snowflake, _) =
+        gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
+
+    let data = model.clone();
+
+    let limit = ActiveModel {
+        id: Set(snowflake),
+        limit_type: Set(data.limit_type),
+        limit_unit: Set(data.limit_unit),
+        limit_value: Set(data.limit_value),
+        current_value: Set(data.current_value),
+        effective_from: Set(data.effective_from.into()),
+        effective_to: Set(data.effective_to.into()),
+        ..Default::default()
+    };
+
+    Entity::insert(limit).exec(state.pgdb.get_ref()).await
+}
+
+pub async fn fetch_limit_for_update(
+    acc_id: i64,
+    trn: &DatabaseTransaction,
+) -> Result<Option<AccountLimitRow>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+            SELECT
+                id::TEXT as id,
+                account_id::TEXT as account_id,
+                limit_type::TEXT as limit_type,
+                limit_unit::TEXT as limit_unit,
+                limit_value,
+                current_value,
+                last_reset_at,
+                is_active,
+                effective_from,
+                effective_to,
+                created_at,
+                updated_at
+            FROM account_limits
+            WHERE account_id = $1
+            FOR UPDATE
+        "#,
+        vec![acc_id.into()],
+    );
+
+    AccountLimitRow::find_by_statement(stmt).one(trn).await
+}
+
+pub async fn get_account_limit(
+    acc_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<AccountLimitRow, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+            SELECT
+                id::TEXT as id,
+                account_id::TEXT as account_id,
+                limit_type::TEXT as limit_type,
+                limit_unit::TEXT as limit_unit,
+                limit_value,
+                current_value,
+                last_reset_at,
+                is_active,
+                effective_from,
+                effective_to,
+                created_at,
+                updated_at
+            FROM account_limits
+            WHERE account_id = $1
+        "#,
+        vec![acc_id.into()],
+    );
+
+    AccountLimitRow::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("account limit not found".to_string()))
 }

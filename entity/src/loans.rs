@@ -104,7 +104,7 @@ pub enum Relation {
     LoanRepayments,
     #[sea_orm(has_one = "super::loan_rescheduling::Entity")]
     LoanRescheduling,
-    #[sea_orm(has_many = "super::loan_write_offs::Entity")]
+    #[sea_orm(has_one = "super::loan_write_offs::Entity")]
     LoanWriteOffs,
     #[sea_orm(
         belongs_to = "super::staff::Entity",

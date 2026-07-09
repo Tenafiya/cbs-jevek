@@ -75,6 +75,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(vault).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE vaults
+                    ADD CONSTRAINT unique_vault_insti_code
+                    UNIQUE (institution_id, vault_code);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

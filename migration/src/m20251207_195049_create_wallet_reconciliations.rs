@@ -98,6 +98,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(recon).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE wallet_reconciliations
+                    ADD CONSTRAINT unique_wal_recon_insti_prov_date
+                    UNIQUE (institution_id, wallet_provider_id, reconciliation_date);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

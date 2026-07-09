@@ -147,6 +147,50 @@ impl MigrationTrait for Migration {
 
         manager.create_table(support_tickets).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_support_tickets_customer ON support_tickets(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_support_tickets_status ON support_tickets(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_support_tickets_assigned ON support_tickets(assigned_to);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_support_tickets_priority ON support_tickets(priority) WHERE status NOT IN ('RESOLVED', 'CLOSED');
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

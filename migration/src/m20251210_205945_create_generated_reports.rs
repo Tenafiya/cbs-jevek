@@ -114,6 +114,28 @@ impl MigrationTrait for Migration {
 
         manager.create_table(generated_reports).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_generated_reports_period ON generated_reports(report_period_start, report_period_end);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_generated_reports_type ON generated_reports(report_type);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

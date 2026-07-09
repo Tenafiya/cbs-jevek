@@ -83,6 +83,28 @@ impl MigrationTrait for Migration {
 
         manager.create_table(field_officer_visits).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_field_visits_customer ON field_officer_visits(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_field_visits_date ON field_officer_visits(arrival_time);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

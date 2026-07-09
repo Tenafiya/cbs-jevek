@@ -88,6 +88,8 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Institutions,
+    #[sea_orm(has_many = "super::ledger_entries::Entity")]
+    LedgerEntries,
     #[sea_orm(has_many = "super::loan_repayments::Entity")]
     LoanRepayments,
     #[sea_orm(has_many = "super::loans::Entity")]
@@ -177,6 +179,12 @@ impl Related<super::fee_applications::Entity> for Entity {
 impl Related<super::institutions::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Institutions.def()
+    }
+}
+
+impl Related<super::ledger_entries::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::LedgerEntries.def()
     }
 }
 

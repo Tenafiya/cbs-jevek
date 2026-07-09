@@ -59,7 +59,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Cards::CustomerId).big_integer().not_null())
             .col(ColumnDef::new(Cards::AccountId).big_integer().not_null())
-            .col(ColumnDef::new(Cards::CardNumberHashed).string().not_null())
+            .col(ColumnDef::new(Cards::CardNumberHashed).string().unique_key().not_null())
             .col(ColumnDef::new(Cards::CardNumberMasked).string().not_null())
             .col(
                 ColumnDef::new(Cards::CardFormFactor)
@@ -124,6 +124,39 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(cards).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_cards_customer ON cards(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_cards_account ON cards(account_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_cards_status ON cards(card_status);
+            "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }

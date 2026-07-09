@@ -20,6 +20,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(LoanWriteOffs::LoanId)
                     .big_integer()
+                    .unique_key()
                     .not_null(),
             )
             .col(

@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_orm::Statement;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -68,6 +69,17 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(provisioning).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_provisioning_date ON loan_provisioning(provision_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }

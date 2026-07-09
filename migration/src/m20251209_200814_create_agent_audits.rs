@@ -90,6 +90,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(agent_audits).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE agent_audits
+                    ADD CONSTRAINT unique_agent_aud_agent_aud_date
+                    UNIQUE (agent_id, audit_date);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

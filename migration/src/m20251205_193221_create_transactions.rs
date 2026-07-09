@@ -87,6 +87,7 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .default(0),
             )
+            .col(ColumnDef::new(Transactions::TransactionGroupId).uuid())
             .col(ColumnDef::new(Transactions::TransactionType).custom("transaction_type"))
             .col(
                 ColumnDef::new(Transactions::TransactionCategory)
@@ -95,7 +96,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Transactions::Description).string())
             .col(ColumnDef::new(Transactions::Narrative).string())
             .col(ColumnDef::new(Transactions::ExternalReference).string())
-            .col(ColumnDef::new(Transactions::Status).custom("transaction_status"))
+            .col(ColumnDef::new(Transactions::Status).custom("transaction_status").default("PENDING"))
             .col(ColumnDef::new(Transactions::PostedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Transactions::CompletedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Transactions::FailedAt).timestamp_with_time_zone())
@@ -182,6 +183,105 @@ impl MigrationTrait for Migration {
 
         manager.create_table(trans).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_institution ON transactions(institution_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_ref ON transactions(transaction_reference);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_debit_account ON transactions(debit_account_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_credit_account ON transactions(credit_account_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_customer ON transactions(debit_customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_status ON transactions(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_date ON transactions(value_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_external_ref ON transactions(external_reference);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_transactions_posted_at ON transactions(posted_at) WHERE status = 'COMPLETED';
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 
@@ -212,6 +312,7 @@ pub enum Transactions {
     TotalAmount,
     TransactionType,
     TransactionCategory,
+    TransactionGroupId,
     Description,
     Narrative,
     ExternalReference,

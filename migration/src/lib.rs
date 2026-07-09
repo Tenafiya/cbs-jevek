@@ -107,12 +107,11 @@ mod m20251212_204011_create_kyc_provider_checks;
 mod m20251212_204334_create_customer_sessions;
 mod m20251212_204801_create_customer_app_preferences;
 mod m20251212_205056_create_customer_education_contents;
-mod m20251212_205422_create_super_admins;
-mod m20251212_205650_create_admin_audit_logs;
 mod m20251212_210040_create_health_n_maintenance;
 mod m20251212_210457_create_data_backups;
 mod m20251212_210901_create_regulatory_reporting_exports;
 mod m20260304_182449_create_currencies;
+mod m20260707_194619_create_ledger_entries;
 
 pub struct Migrator;
 
@@ -227,12 +226,11 @@ impl MigratorTrait for Migrator {
             Box::new(m20251212_204334_create_customer_sessions::Migration),
             Box::new(m20251212_204801_create_customer_app_preferences::Migration),
             Box::new(m20251212_205056_create_customer_education_contents::Migration),
-            Box::new(m20251212_205422_create_super_admins::Migration),
-            Box::new(m20251212_205650_create_admin_audit_logs::Migration),
             Box::new(m20251212_210040_create_health_n_maintenance::Migration),
             Box::new(m20251212_210457_create_data_backups::Migration),
             Box::new(m20251212_210901_create_regulatory_reporting_exports::Migration),
             Box::new(m20260304_182449_create_currencies::Migration),
+            Box::new(m20260707_194619_create_ledger_entries::Migration),
         ]
     }
 }

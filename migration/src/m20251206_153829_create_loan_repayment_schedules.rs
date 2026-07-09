@@ -98,6 +98,41 @@ impl MigrationTrait for Migration {
 
         manager.create_table(schedule).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE loan_repayment_schedules
+                    ADD CONSTRAINT unique_loan_repay_install_loan
+                    UNIQUE (loan_id, installment_number);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_schedules_loan ON loan_repayment_schedules(loan_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_schedules_due_date ON loan_repayment_schedules(due_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

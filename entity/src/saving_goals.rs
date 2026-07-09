@@ -23,13 +23,14 @@ pub struct Model {
     pub contribution_freq: Option<SavingsProductFreq>,
     pub status: Option<SavingGoalsStatus>,
     pub completion_date: Option<Date>,
-    pub progress_percentage: Option<i32>,
     pub is_group_savings: Option<bool>,
     pub group_owner_id: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub custom_fields: Option<Json>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
+    #[sea_orm(column_type = "Decimal(Some((5, 2)))", nullable)]
+    pub progress_percentage: Option<Decimal>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

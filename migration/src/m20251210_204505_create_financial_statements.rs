@@ -111,6 +111,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(financial_statements).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE financial_statements
+                    ADD CONSTRAINT unique_fs_insti_state_type_period
+                    UNIQUE (institution_id, statement_type, statement_period);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

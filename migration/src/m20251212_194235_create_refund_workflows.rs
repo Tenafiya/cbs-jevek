@@ -150,6 +150,28 @@ impl MigrationTrait for Migration {
 
         manager.create_table(refund_workflows).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_refunds_transaction ON refund_workflows(transaction_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_refunds_status ON refund_workflows(approval_status) WHERE approval_status = 'PENDING';
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

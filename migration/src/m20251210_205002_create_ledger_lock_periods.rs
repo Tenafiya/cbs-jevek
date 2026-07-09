@@ -86,6 +86,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(ledger_lock_periods).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE ledger_lock_periods
+                    ADD CONSTRAINT unique_llp_insti_dates
+                    UNIQUE (institution_id, start_date, end_date);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

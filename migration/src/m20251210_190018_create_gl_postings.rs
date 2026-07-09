@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_orm::Statement;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -101,6 +102,63 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(gl_postings).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    CREATE UNIQUE INDEX unique_transaction_id_not_null
+                    ON gl_postings (transaction_id)
+                    WHERE transaction_id IS NOT NULL;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_gl_postings_debit_account ON gl_postings(debit_account_id, value_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_gl_postings_credit_account ON gl_postings(credit_account_id, value_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_gl_postings_transaction ON gl_postings(transaction_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_gl_postings_date ON gl_postings(value_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }

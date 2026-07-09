@@ -103,6 +103,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(cash_drawers).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE teller_cash_drawers
+                    ADD CONSTRAINT unique_tel_cash_teller_opened
+                    UNIQUE (teller_id, opened_at);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

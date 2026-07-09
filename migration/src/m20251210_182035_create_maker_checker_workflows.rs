@@ -125,6 +125,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(maker_checker_workflows).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"  
+                    CREATE UNIQUE INDEX unique_mcflows_ref_type_stat
+                    ON maker_checker_workflows (reference_type, reference_id, status)
+                    WHERE status = 'PENDING';
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

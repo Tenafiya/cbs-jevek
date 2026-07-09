@@ -105,6 +105,17 @@ impl MigrationTrait for Migration {
 
         manager.create_table(tax_withholding).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_tax_withholding_period ON tax_withholding(tax_period) WHERE is_remitted_to_tax_authority = FALSE;
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

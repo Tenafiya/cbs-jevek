@@ -61,6 +61,25 @@ pub async fn add_customer_account(
             ApiError::InternalServerError
         })?;
 
+    match services::is_customer_subscribed(customer_id, acc_type_id, &state).await {
+        Ok(Some(_)) => {
+            return Err(ApiError::Conflict(
+                "Customer already has a subscription for this account type".into(),
+            ));
+        }
+        Ok(None) => {}
+        Err(e) => {
+            tracing::error!(
+                error = ?e,
+                customer_id = %customer_id,
+                account_type_id = %acc_type_id,
+                "Failed to check customer subscription"
+            );
+
+            return Err(ApiError::InternalServerError);
+        }
+    }
+
     let code: i64 = branch
         .code
         .as_ref()

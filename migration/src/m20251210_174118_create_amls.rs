@@ -203,6 +203,50 @@ impl MigrationTrait for Migration {
 
         manager.create_table(aml_alerts).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_aml_alerts_institution ON aml_alerts(institution_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_aml_alerts_customer ON aml_alerts(customer_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_aml_alerts_status ON aml_alerts(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_aml_alerts_date ON aml_alerts(created_at);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

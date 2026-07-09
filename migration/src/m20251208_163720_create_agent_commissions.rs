@@ -199,6 +199,39 @@ impl MigrationTrait for Migration {
 
         manager.create_table(comms).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_agent_commissions_agent ON agent_commissions(agent_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_agent_commissions_date ON agent_commissions(created_at);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_agent_commissions_status ON agent_commissions(status);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

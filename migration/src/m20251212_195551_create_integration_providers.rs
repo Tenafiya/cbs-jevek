@@ -118,6 +118,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(integration_providers).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE integration_providers
+                    ADD CONSTRAINT unique_int_prov_insti_code
+                    UNIQUE (institution_id, provider_code);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

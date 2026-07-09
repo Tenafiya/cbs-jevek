@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_orm::Statement;
 
 use crate::m20251204_150208_create_branches::Staff;
 
@@ -60,6 +61,19 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(staff_attendance).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE staff_attendance
+                    ADD CONSTRAINT unique_staff_attend_staff_attend_date
+                    UNIQUE (staff_id, attendance_date);
+                "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }

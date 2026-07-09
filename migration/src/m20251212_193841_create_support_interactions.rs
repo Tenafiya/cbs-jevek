@@ -81,6 +81,17 @@ impl MigrationTrait for Migration {
 
         manager.create_table(ticket_interactions).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_ticket_interactions_ticket ON ticket_interactions(ticket_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

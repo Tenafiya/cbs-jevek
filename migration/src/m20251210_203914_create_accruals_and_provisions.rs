@@ -130,6 +130,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(accruals_and_provisions).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    CREATE UNIQUE INDEX unique_accrued_accrual
+                    ON accruals_and_provisions (accrual_type, reference_id, accrual_date)
+                    WHERE status = 'ACCRUED';
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

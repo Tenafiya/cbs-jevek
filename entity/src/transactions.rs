@@ -26,6 +26,7 @@ pub struct Model {
     pub fee_amount: Option<i64>,
     pub vat_amount: Option<i64>,
     pub total_amount: Option<i64>,
+    pub transaction_group_id: Option<Uuid>,
     pub transaction_type: Option<TransactionType>,
     pub transaction_category: Option<TransactionCategoryType>,
     pub description: Option<String>,
@@ -97,7 +98,7 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Customers1,
-    #[sea_orm(has_many = "super::gl_postings::Entity")]
+    #[sea_orm(has_one = "super::gl_postings::Entity")]
     GlPostings,
     #[sea_orm(
         belongs_to = "super::institutions::Entity",
@@ -107,7 +108,9 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Institutions,
-    #[sea_orm(has_many = "super::loan_repayments::Entity")]
+    #[sea_orm(has_many = "super::ledger_entries::Entity")]
+    LedgerEntries,
+    #[sea_orm(has_one = "super::loan_repayments::Entity")]
     LoanRepayments,
     #[sea_orm(has_many = "super::refund_workflows::Entity")]
     RefundWorkflows,
@@ -190,6 +193,12 @@ impl Related<super::gl_postings::Entity> for Entity {
 impl Related<super::institutions::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Institutions.def()
+    }
+}
+
+impl Related<super::ledger_entries::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::LedgerEntries.def()
     }
 }
 

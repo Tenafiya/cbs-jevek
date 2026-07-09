@@ -152,6 +152,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(agent_settlements).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE agent_settlements
+                    ADD CONSTRAINT unique_agent_settle_agent_settle_cycle
+                    UNIQUE (agent_id, settlement_cycle);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

@@ -106,6 +106,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(notification_templates).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE notification_templates
+                    ADD CONSTRAINT unique_noti_temp_insti_temp_code_lang
+                    UNIQUE (institution_id, template_code, language_code);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

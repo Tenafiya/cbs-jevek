@@ -94,6 +94,19 @@ impl MigrationTrait for Migration {
 
         manager.create_table(currency_transaction_reports).await?;
 
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                    ALTER TABLE currency_transaction_reports
+                    ADD CONSTRAINT unique_cur_trans_reps_insti_rep_date_time
+                    UNIQUE (institution_id, report_date, report_type);
+                "#
+                .to_string(),
+            ))
+            .await?;
+
         Ok(())
     }
 

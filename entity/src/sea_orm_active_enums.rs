@@ -10,12 +10,28 @@ pub enum AccLimitType {
     DailyDebit,
     #[sea_orm(string_value = "DAILY_CREDIT")]
     DailyCredit,
-    #[sea_orm(string_value = "DAILY_TRANSACTION_COUNT")]
-    DailyTransactionCount,
+    #[sea_orm(string_value = "DAILY_COUNT")]
+    DailyCount,
     #[sea_orm(string_value = "WEEKLY_DEBIT")]
     WeeklyDebit,
+    #[sea_orm(string_value = "WEEKLY_CREDIT")]
+    WeeklyCredit,
+    #[sea_orm(string_value = "WEEKLY_COUNT")]
+    WeeklyCount,
     #[sea_orm(string_value = "MONTHLY_DEBIT")]
     MonthlyDebit,
+    #[sea_orm(string_value = "MONTHLY_CREDIT")]
+    MonthlyCredit,
+    #[sea_orm(string_value = "MONTHLY_COUNT")]
+    MonthlyCount,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_limit_unit")]
+pub enum AccLimitUnit {
+    #[sea_orm(string_value = "AMOUNT")]
+    Amount,
+    #[sea_orm(string_value = "COUNT")]
+    Count,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_link_type")]
@@ -26,20 +42,6 @@ pub enum AccLinkType {
     Trust,
     #[sea_orm(string_value = "CORPORATE")]
     Corporate,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(
-    rs_type = "String",
-    db_type = "Enum",
-    enum_name = "acc_reset_freq_type"
-)]
-pub enum AccResetFreqType {
-    #[sea_orm(string_value = "DAILY")]
-    Daily,
-    #[sea_orm(string_value = "WEEKLY")]
-    Weekly,
-    #[sea_orm(string_value = "MONTHLY")]
-    Monthly,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "acc_type_int_calc")]
@@ -630,6 +632,16 @@ pub enum CustomerSessionsStatus {
     Active,
     #[sea_orm(string_value = "INACTIVE")]
     Inactive,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "customer_status")]
+pub enum CustomerStatus {
+    #[sea_orm(string_value = "ACTIVE")]
+    Active,
+    #[sea_orm(string_value = "INACTIVE")]
+    Inactive,
+    #[sea_orm(string_value = "BLOCKED")]
+    Blocked,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "customer_type")]
@@ -1568,14 +1580,6 @@ pub enum StatementType {
     ProfitLoss,
     #[sea_orm(string_value = "CASH_FLOW")]
     CashFlow,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "super_admin_status")]
-pub enum SuperAdminStatus {
-    #[sea_orm(string_value = "ACTIVE")]
-    Active,
-    #[sea_orm(string_value = "INACTIVE")]
-    Inactive,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(

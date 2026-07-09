@@ -42,8 +42,6 @@ pub enum Relation {
     Accounts,
     #[sea_orm(has_many = "super::accruals_and_provisions::Entity")]
     AccrualsAndProvisions,
-    #[sea_orm(has_many = "super::admin_audit_logs::Entity")]
-    AdminAuditLogs,
     #[sea_orm(has_many = "super::agent_audits::Entity")]
     AgentAudits,
     #[sea_orm(has_many = "super::agent_commission_rules::Entity")]
@@ -140,6 +138,8 @@ pub enum Relation {
     IntegrationWebhooks,
     #[sea_orm(has_many = "super::kyc_provider_checks::Entity")]
     KycProviderChecks,
+    #[sea_orm(has_many = "super::ledger_entries::Entity")]
+    LedgerEntries,
     #[sea_orm(has_many = "super::ledger_lock_periods::Entity")]
     LedgerLockPeriods,
     #[sea_orm(has_many = "super::loan_applications::Entity")]
@@ -237,12 +237,6 @@ impl Related<super::accounts::Entity> for Entity {
 impl Related<super::accruals_and_provisions::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AccrualsAndProvisions.def()
-    }
-}
-
-impl Related<super::admin_audit_logs::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::AdminAuditLogs.def()
     }
 }
 
@@ -513,6 +507,12 @@ impl Related<super::integration_webhooks::Entity> for Entity {
 impl Related<super::kyc_provider_checks::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::KycProviderChecks.def()
+    }
+}
+
+impl Related<super::ledger_entries::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::LedgerEntries.def()
     }
 }
 

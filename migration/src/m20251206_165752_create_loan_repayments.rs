@@ -56,6 +56,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(LoanRepayments::TransactionId)
                     .big_integer()
+                    .unique_key()
                     .not_null(),
             )
             .col(
@@ -133,6 +134,28 @@ impl MigrationTrait for Migration {
             .to_owned();
 
         manager.create_table(repay).await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_repayments_loan ON loan_repayments(loan_id);
+            "#
+                .to_string(),
+            ))
+            .await?;
+
+        manager
+            .get_connection()
+            .execute(Statement::from_string(
+                manager.get_database_backend(),
+                r#"
+                CREATE INDEX idx_loan_repayments_date ON loan_repayments(repayment_date);
+            "#
+                .to_string(),
+            ))
+            .await?;
 
         Ok(())
     }
