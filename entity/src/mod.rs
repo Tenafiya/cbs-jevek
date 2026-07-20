@@ -51,6 +51,7 @@ pub mod fee_types;
 pub mod fee_waiver_workflows;
 pub mod field_officer_routes;
 pub mod field_officer_visits;
+pub mod file_uploads;
 pub mod financial_statements;
 pub mod fixed_deposit_accounts;
 pub mod generated_reports;

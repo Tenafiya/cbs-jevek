@@ -8,6 +8,7 @@ pub struct Migration;
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         let uploads = Table::create()
+            .table(FileUploads::Table)
             .if_not_exists()
             .col(
                 ColumnDef::new(FileUploads::Id)

@@ -8,12 +8,12 @@ use crate::utils::validators::{
 #[derive(Debug, Clone)]
 pub struct SetupFileUploader {
     pub owner_id: i64,
+    pub uploaded_by: i64,
     pub file_key: String,
     pub file_name: String,
     pub mime_type: String,
     pub file_type: String,
     pub presigned_url: String,
-    pub assigned_entity: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -56,8 +56,8 @@ pub struct PreSignPayload {
     pub file_space: String,
 
     #[validate(custom(function = "validate_snowflake"))]
-    #[serde(rename = "entityId")]
-    pub entity_id: Option<String>,
+    #[serde(rename = "ownerId")]
+    pub entity_id: String,
 
     #[serde(default = "default_entity")]
     #[validate(custom(function = "validate_file_entity"))]

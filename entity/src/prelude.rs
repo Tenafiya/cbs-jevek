@@ -49,6 +49,7 @@ pub use super::fee_types::Entity as FeeTypes;
 pub use super::fee_waiver_workflows::Entity as FeeWaiverWorkflows;
 pub use super::field_officer_routes::Entity as FieldOfficerRoutes;
 pub use super::field_officer_visits::Entity as FieldOfficerVisits;
+pub use super::file_uploads::Entity as FileUploads;
 pub use super::financial_statements::Entity as FinancialStatements;
 pub use super::fixed_deposit_accounts::Entity as FixedDepositAccounts;
 pub use super::generated_reports::Entity as GeneratedReports;
