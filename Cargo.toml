@@ -79,6 +79,8 @@ validator = { version = "0.20.0", features = ["derive"] }
 anyhow = "1.0.100"
 snowflake_me = "0.5.0"
 serde_with = "3.17.0"
+aws-config = "1.8.16"
+aws-sdk-s3 = "1.132.0"
 
 [dev-dependencies]
 testcontainers-modules = { version = "0.14", features = ["postgres"] }

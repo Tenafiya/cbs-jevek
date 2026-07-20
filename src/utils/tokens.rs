@@ -1,6 +1,5 @@
 use actix_web::{HttpRequest, web};
 use chrono::{Duration, Utc};
-use dotenvy::dotenv;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use serde::{Deserialize, Serialize};
 
@@ -35,8 +34,6 @@ pub async fn create_jwt(
     token_type: &str,
     state: &web::Data<AppState>,
 ) -> (String, usize) {
-    dotenv().unwrap();
-
     let expire = match token_type {
         "NORMAL" => state.config.get::<i64>("jwt.access_expire").unwrap_or(3600),
         "REFRESH" => state

@@ -112,6 +112,7 @@ mod m20251212_210457_create_data_backups;
 mod m20251212_210901_create_regulatory_reporting_exports;
 mod m20260304_182449_create_currencies;
 mod m20260707_194619_create_ledger_entries;
+mod m20260719_080844_file_uploads;
 
 pub struct Migrator;
 
@@ -231,6 +232,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20251212_210901_create_regulatory_reporting_exports::Migration),
             Box::new(m20260304_182449_create_currencies::Migration),
             Box::new(m20260707_194619_create_ledger_entries::Migration),
+            Box::new(m20260719_080844_file_uploads::Migration),
         ]
     }
 }

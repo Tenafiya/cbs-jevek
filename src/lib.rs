@@ -12,7 +12,9 @@ pub mod app;
 mod middlewares;
 pub mod setup;
 pub mod utils;
+pub mod fileskit;
 
+use crate::fileskit::config::StorageService;
 use crate::middlewares::request_id::request_id;
 use crate::setup::init_system;
 use crate::setup::postgres::pgdb;
@@ -22,15 +24,18 @@ use crate::{app::app_routes, middlewares::helmet::security_headers};
 pub struct AppState {
     pub config: Config,
     pub pgdb: Data<sea_orm::DatabaseConnection>,
+    pub storage: Data<StorageService>
 }
 
 async fn setup_app_state() -> Result<Data<AppState>, Box<dyn std::error::Error>> {
     let settings = init_system::load_config()?;
     let pg_conn = Data::new(pgdb::connector(&settings).await);
+    let storager = Data::new(StorageService::new().await);
 
     Ok(Data::new(AppState {
         config: settings,
         pgdb: pg_conn,
+        storage: storager,
     }))
 }
 

@@ -1,5 +1,5 @@
 use actix_web::{body::to_bytes, web};
-use cbs_jevek::AppState;
+use cbs_jevek::{AppState, fileskit::config::StorageService};
 use cbs_jevek::setup::init_system::load_config;
 use sea_orm::{Database, DatabaseConnection};
 use serde_json::Value;
@@ -33,10 +33,12 @@ async fn start_postgres() -> Option<String> {
 pub async fn build_state(db_url: &str) -> web::Data<AppState> {
     let db: DatabaseConnection = Database::connect(db_url).await.unwrap();
     let settings = load_config().expect("config");
+    let storage = StorageService::new().await;
 
     let state = AppState {
         pgdb: web::Data::new(db),
         config: settings,
+        storage: web::Data::new(storage),
     };
 
     web::Data::new(state)

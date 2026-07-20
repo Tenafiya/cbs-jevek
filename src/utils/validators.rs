@@ -95,3 +95,46 @@ pub fn validate_acc_cat_type(cat: &str) -> Result<(), ValidationError> {
         _ => Err(ValidationError::new("ACCOUNT_CATEGORY_TYPE").with_message("Invalid account category type".into()))
     }
 }
+
+pub fn validate_file_space(space: &str) -> Result<(), ValidationError> {
+    match space {
+        "identities" | "address" => Ok(()),
+        _ => {
+            Err(ValidationError::new("Invalid File Space")
+                .with_message("File space is invalid".into()))
+        }
+    }
+}
+
+pub fn validate_file_entity(entity: &str) -> Result<(), ValidationError> {
+    match entity {
+        "CUS" => Ok(()),
+        _ => Err(ValidationError::new("File entity").with_message("Invalid file entity".into())),
+    }
+}
+
+pub fn validate_content_type(content_type: &str) -> Result<(), ValidationError> {
+    let valid_content_types = [
+        // Images
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        // Audio
+        "audio/mpeg",
+        "audio/aac",
+        // Video
+        "video/mp4",
+        "video/mpeg",
+        "video/webm",
+        "video/quicktime",
+    ];
+
+    if !valid_content_types.contains(&content_type) {
+        return Err(
+            ValidationError::new("Content Type").with_message("Invalid content type".into())
+        );
+    };
+
+    Ok(())
+}
