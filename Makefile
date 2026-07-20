@@ -45,29 +45,30 @@ help:
 	@printf "  make dev-logs-real    Follow logs\n\n"
 
 	@printf "$(YELLOW)Production$(RESET)\n"
-	@printf "  make prod-start\n"
-	@printf "  make prod-stop\n"
-	@printf "  make prod-down\n\n"
+	@printf "  make prod-start      Run prod podman containers\n"
+	@printf "  make prod-stop       Stop prod podman containers\n"
+	@printf "  make prod-down       Drop prod podman containers\n\n"
 
 	@printf "$(YELLOW)Cargo$(RESET)\n"
-	@printf "  make debug\n"
-	@printf "  make release\n"
-	@printf "  make release-lto\n"
-	@printf "  make run-debug\n"
-	@printf "  make run-release\n"
-	@printf "  make run-lto\n"
-	@printf "  make clean\n\n"
+	@printf "  make debug          Build application in debug mode\n"
+	@printf "  make release        Build application in release mode\n"
+	@printf "  make release-lto    Build application in release lto mode\n"
+	@printf "  make run-debug      Run application in debug mode\n"
+	@printf "  make run-release    Run application in release mode\n"
+	@printf "  make run-lto        Run application in release lto mode\n"
+	@printf "  make clean          Clean application\n\n"
 
 	@printf "$(YELLOW)SeaORM$(RESET)\n"
-	@printf "  make seaorm-entity\n"
-	@printf "  make seaorm-status\n"
-	@printf "  make migrate-init\n"
-	@printf "  make migrate-up\n"
-	@printf "  make migrate-down\n"
-	@printf "  make migrate-refresh\n\n"
+	@printf "  make seaorm-entity  Generate seaorm entity\n"
+	@printf "  make seaorm-status  Check seaorm status\n"
+	@printf "  make migrate-init   Initialize seaorm cli\n"
+	@printf "  make migrate-up     Run seaorm migration in up mode\n"
+	@printf "  make migrate-down   Run seaorm migration in down mode\n"
+	@printf "  make migrate-refresh Refresh seaorm migration\n\n"
 
 	@printf "$(YELLOW)Git$(RESET)\n"
-	@printf "  make git-release\n\n"
+	@printf "  make git-release   Git release commands\n"
+	@printf "  make git-debug     Git debug commands\n\n"
 
 # ==========================================================
 # Setup
@@ -75,6 +76,10 @@ help:
 
 setup:
 	cargo init
+
+# ==========================================================
+# Validation
+# ==========================================================
 
 check-test-env:
 	@if [ ! -f app.config.toml ]; then \
@@ -92,18 +97,6 @@ check-test-env:
 		echo "Current environment: $$ENV"; \
 		exit 1; \
 	fi
-
-install-deps: check-test-env
-	cargo add serde --features "derive"
-	cargo add actix-web snowflake_me anyhow actix-rt actix-http chrono thiserror tracing-subscriber chrono-tz futures-util futures actix-cors tokio-util tracing config regex rand env_logger log serde_json serde_with sha2 md5 hex bcrypt base64 dotenvy aes-gcm lettre once_cell
-	cargo add uuid --features "v4 fast-rng macro-diagnostics"
-	cargo add sea-orm --features "sqlx-postgres runtime-tokio-rustls macros"
-	cargo add tokio --features "full"
-	cargo add validator --features "derive"
-	cargo add reqwest --features json
-	cargo add openssl --features "vendored"
-	cargo add jsonwebtoken --features "rust_crypto"
-	cargo add tracing-subscriber --features "env-filter fmt json"
 
 # ==========================================================
 # Cargo
@@ -221,3 +214,27 @@ git-release: version-bump
 	git add . && \
 	git commit -m "$$MSG" && \
 	git push -u origin main
+
+git-debug:
+	@printf "Commit message: "
+	@read MSG; \
+	git status && \
+	git add . && \
+	git commit -m "$$MSG" && \
+	git push -u origin main
+
+# ==========================================================
+# Installer
+# ==========================================================
+
+install-deps: check-test-env
+	cargo add serde --features "derive"
+	cargo add actix-web snowflake_me anyhow actix-rt actix-http chrono thiserror tracing-subscriber chrono-tz futures-util futures actix-cors tokio-util tracing config regex rand env_logger log serde_json serde_with sha2 md5 hex bcrypt base64 dotenvy aes-gcm lettre once_cell
+	cargo add uuid --features "v4 fast-rng macro-diagnostics"
+	cargo add sea-orm --features "sqlx-postgres runtime-tokio-rustls macros"
+	cargo add tokio --features "full"
+	cargo add validator --features "derive"
+	cargo add reqwest --features json
+	cargo add openssl --features "vendored"
+	cargo add jsonwebtoken --features "rust_crypto"
+	cargo add tracing-subscriber --features "env-filter fmt json"
