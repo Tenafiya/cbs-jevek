@@ -61,7 +61,10 @@ pub async fn handle_presign(
         .storage
         .generate_upload_url(&genner)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to generate upload url");
+            ApiError::InternalServerError
+        })?;
 
     let uploader = SetupFileUploader {
         owner_id,
@@ -76,7 +79,10 @@ pub async fn handle_presign(
 
     let res = services::create_file(&uploader, &state)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to create file metadata");
+            ApiError::InternalServerError
+        })?;
 
     Ok(HttpResponse::Ok().json(ApiResponse::success(
         ApiCode::OperationSuccess,
@@ -100,16 +106,17 @@ pub async fn handle_upload_confirm(
 
     let data = payload.into_inner();
 
-    let txn = state
-        .pgdb
-        .get_ref()
-        .begin()
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    let txn = state.pgdb.get_ref().begin().await.map_err(|e| {
+        tracing::error!(error = ?e, "Failed to create db transaction");
+        ApiError::InternalServerError
+    })?;
 
     let upload = services::upload_exists(&data.upload_id, &txn)
         .await
-        .map_err(|_| ApiError::NotFound)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Upload metadata not found");
+            ApiError::NotFound
+        })?;
 
     let path = format!("/v1/media/{}", upload.slug);
 
@@ -127,19 +134,25 @@ pub async fn handle_upload_confirm(
         .storage
         .file_exists(&storage_exist)
         .await
-        .map_err(|_| ApiError::NotFound)?
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to find file in storage");
+            ApiError::NotFound
+        })?
     {
         return Err(ApiError::NotFound);
     };
 
     services::set_upload_completion(&upload.slug, &txn)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e , "Failed to update upload completion");
+            ApiError::InternalServerError
+        })?;
 
     let updater = FieldUpdaterModel {
         tb: upload
             .assigned_entity
-            .ok_or_else(|| ApiError::InternalServerError)?,
+            .ok_or_else(|| ApiError::Unprocessable("Updater processing error".to_string()))?,
         field: data
             .field
             .ok_or_else(|| ApiError::BadRequest("Field is needed".to_string()))?,
@@ -149,13 +162,15 @@ pub async fn handle_upload_confirm(
             .ok_or_else(|| ApiError::BadRequest("Owner is missing".to_string()))?,
     };
 
-    services::field_updater(&updater, &txn)
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    services::field_updater(&updater, &txn).await.map_err(|e| {
+        tracing::error!(error = ?e, "Failed to update entity field");
+        ApiError::InternalServerError
+    })?;
 
-    txn.commit()
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    txn.commit().await.map_err(|e| {
+        tracing::error!(error = ?e, "Failed to commit db transaction");
+        ApiError::InternalServerError
+    })?;
 
     Ok(HttpResponse::Ok().json(ApiResponse::success(
         ApiCode::OperationSuccess,
@@ -175,20 +190,22 @@ pub async fn file_redirect(
 
     let path = params.into_inner();
 
-    let txn = state
-        .pgdb
-        .get_ref()
-        .begin()
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    let txn = state.pgdb.get_ref().begin().await.map_err(|e| {
+        tracing::error!(error = ?e, "Failed to create db transaction");
+        ApiError::InternalServerError
+    })?;
 
     let upload = services::upload_exists(&path.slug, &txn)
         .await
-        .map_err(|_| ApiError::NotFound)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Upload metadata not found");
+            ApiError::NotFound
+        })?;
 
-    txn.commit()
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    txn.commit().await.map_err(|e| {
+        tracing::error!(error = ?e, "Failed to commit db transaction");
+        ApiError::InternalServerError
+    })?;
 
     let expires_in = chrono::Duration::minutes(60);
 
@@ -206,7 +223,10 @@ pub async fn file_redirect(
         .storage
         .generate_download_url(&genner)
         .await
-        .map_err(|_| ApiError::InternalServerError)?;
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to generate download url");
+            ApiError::InternalServerError
+        })?;
 
     Ok(HttpResponse::TemporaryRedirect()
         .append_header((header::LOCATION, presigned_url))
