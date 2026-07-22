@@ -1,46 +1,16 @@
-version: "3.9"
-
 services:
-  postgres:
-    container_name: postgres
-    image: docker.io/postgis/postgis:16-3.4
+  rustfs:
+    container_name: rustfs
+    image: rustfs/rustfs:latest
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpass
-      POSTGRES_DB: mydb
+    env_file:
+      - .env
+    command: server /data --console-address ":9001"
     ports:
-      - "5432:5432"
+      - "9000:9000"
+      - "9001:9001"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d mydb -U dbuser"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-    pgadmin:
-      container_name: pgadmin
-      image: docker.io/dpage/pgadmin4
-      restart: unless-stopped
-      environment:
-        PGADMIN_DEFAULT_EMAIL: dbuser@pgadmin.com
-        PGADMIN_DEFAULT_PASSWORD: dbpass
-      ports:
-        - "5040:80"
-      volumes:
-        - pgadmin_data:/var/lib/pgadmin
-      depends_on:
-        postgres:
-          condition: service_healthy
-      healthcheck:
-        test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
-        interval: 30s
-        timeout: 10s
-        retries: 3
+      - rustfs_data:/data
 
 volumes:
-  postgres_data:
-    driver: local
-  pgadmin_data:
-    driver: local
+  rustfs_data:

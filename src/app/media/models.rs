@@ -14,6 +14,7 @@ pub struct SetupFileUploader {
     pub mime_type: String,
     pub file_type: String,
     pub presigned_url: String,
+    pub assigned_entity: Option<String>
 }
 
 #[derive(Debug, Serialize)]

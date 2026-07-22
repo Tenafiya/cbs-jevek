@@ -22,5 +22,6 @@ pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig)
         cfg.configure(|c| staffs::routes::init(c, state.clone()));
         cfg.configure(|c| account_charts::routes::init(c, state.clone()));
         cfg.configure(|c| accounts::routes::init(c, state.clone()));
+        cfg.configure(|c| media::routes::init(c, state.clone()));
     }
 }

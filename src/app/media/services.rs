@@ -23,6 +23,13 @@ pub async fn create_file(
 
     let data = model.clone();
 
+    let assigned_entity = data
+        .assigned_entity
+        .as_deref()
+        .map(get_file_entity)
+        .transpose()?
+        .ok_or(DbErr::Custom("Invalid entity".to_string()))?;
+
     let uploader = ActiveModel {
         id: Set(snowflake),
         slug: Set(slug.clone()),
@@ -33,6 +40,7 @@ pub async fn create_file(
         file_type: Set(Some(data.file_type)),
         presigned_url: Set(data.presigned_url),
         uploaded_by: Set(data.uploaded_by),
+        assigned_entity: Set(Some(assigned_entity.to_string())),
         url_expires_at: Set((now + chrono::Duration::minutes(15)).into()),
         ..Default::default()
     };
@@ -107,4 +115,12 @@ pub async fn field_updater(
     }
 
     Ok(())
+}
+
+#[inline(always)]
+fn get_file_entity(entity: &str) -> Result<&'static str, DbErr> {
+    match entity {
+        "CUS" => Ok("customers"),
+        _ => Err(DbErr::Custom(format!("Unknown entity: {}", entity))),
+    }
 }

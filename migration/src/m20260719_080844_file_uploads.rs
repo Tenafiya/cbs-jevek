@@ -32,6 +32,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(FileUploads::FileName).string().not_null())
             .col(ColumnDef::new(FileUploads::FileSize).big_integer())
             .col(ColumnDef::new(FileUploads::MimeType).string())
+            .col(ColumnDef::new(FileUploads::AssignedEntity).string())
             .col(ColumnDef::new(FileUploads::FileType).string())
             .col(
                 ColumnDef::new(FileUploads::PresignedUrl)
@@ -120,6 +121,7 @@ pub enum FileUploads {
     FileSize,
     MimeType,
     FileType,
+    AssignedEntity,
     PresignedUrl,
     UrlExpiresAt,
     UploadedAt,

@@ -16,6 +16,7 @@ pub struct Model {
     pub file_name: String,
     pub file_size: Option<i64>,
     pub mime_type: Option<String>,
+    pub assigned_entity: Option<String>,
     pub file_type: Option<String>,
     pub presigned_url: String,
     pub url_expires_at: DateTimeWithTimeZone,

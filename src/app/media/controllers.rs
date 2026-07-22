@@ -71,6 +71,7 @@ pub async fn handle_presign(
         file_type: data.file_space,
         presigned_url: upload_url.clone(),
         uploaded_by: id,
+        assigned_entity: data.entity,
     };
 
     let res = services::create_file(&uploader, &state)
@@ -136,7 +137,9 @@ pub async fn handle_upload_confirm(
         .map_err(|_| ApiError::InternalServerError)?;
 
     let updater = FieldUpdaterModel {
-        tb: "TB NAME HERE".to_string(),
+        tb: upload
+            .assigned_entity
+            .ok_or_else(|| ApiError::InternalServerError)?,
         field: data
             .field
             .ok_or_else(|| ApiError::BadRequest("Field is needed".to_string()))?,
