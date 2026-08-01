@@ -57,6 +57,7 @@ pub use super::gl_daily_balances::Entity as GlDailyBalances;
 pub use super::gl_postings::Entity as GlPostings;
 pub use super::gl_reversals::Entity as GlReversals;
 pub use super::group_saving_members::Entity as GroupSavingMembers;
+pub use super::idempotency_keys::Entity as IdempotencyKeys;
 pub use super::institutions::Entity as Institutions;
 pub use super::integration_api_keys::Entity as IntegrationApiKeys;
 pub use super::integration_logs::Entity as IntegrationLogs;

@@ -128,6 +128,8 @@ pub enum Relation {
     GlPostings,
     #[sea_orm(has_many = "super::gl_reversals::Entity")]
     GlReversals,
+    #[sea_orm(has_many = "super::idempotency_keys::Entity")]
+    IdempotencyKeys,
     #[sea_orm(has_many = "super::integration_api_keys::Entity")]
     IntegrationApiKeys,
     #[sea_orm(has_many = "super::integration_logs::Entity")]
@@ -477,6 +479,12 @@ impl Related<super::gl_postings::Entity> for Entity {
 impl Related<super::gl_reversals::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::GlReversals.def()
+    }
+}
+
+impl Related<super::idempotency_keys::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::IdempotencyKeys.def()
     }
 }
 

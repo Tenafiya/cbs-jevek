@@ -80,6 +80,8 @@ pub enum Relation {
     Customers,
     #[sea_orm(has_many = "super::fee_applications::Entity")]
     FeeApplications,
+    #[sea_orm(has_many = "super::idempotency_keys::Entity")]
+    IdempotencyKeys,
     #[sea_orm(
         belongs_to = "super::institutions::Entity",
         from = "Column::InstitutionId",
@@ -173,6 +175,12 @@ impl Related<super::customers::Entity> for Entity {
 impl Related<super::fee_applications::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::FeeApplications.def()
+    }
+}
+
+impl Related<super::idempotency_keys::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::IdempotencyKeys.def()
     }
 }
 

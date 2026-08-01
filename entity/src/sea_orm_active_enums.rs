@@ -886,6 +886,140 @@ pub enum HealthStatus {
     Unhealthy,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "idem_key_status")]
+pub enum IdemKeyStatus {
+    #[sea_orm(string_value = "PENDING")]
+    Pending,
+    #[sea_orm(string_value = "COMPLETED")]
+    Completed,
+    #[sea_orm(string_value = "PROCESSING")]
+    Processing,
+    #[sea_orm(string_value = "FAILED")]
+    Failed,
+    #[sea_orm(string_value = "EXPIRED")]
+    Expired,
+    #[sea_orm(string_value = "CANCELLED")]
+    Cancelled,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "idempotency_channel"
+)]
+pub enum IdempotencyChannel {
+    #[sea_orm(string_value = "WEB")]
+    Web,
+    #[sea_orm(string_value = "MOBILE_APP")]
+    MobileApp,
+    #[sea_orm(string_value = "API")]
+    Api,
+    #[sea_orm(string_value = "OPEN_BANKING")]
+    OpenBanking,
+    #[sea_orm(string_value = "ATM")]
+    Atm,
+    #[sea_orm(string_value = "POS")]
+    Pos,
+    #[sea_orm(string_value = "BRANCH")]
+    Branch,
+    #[sea_orm(string_value = "TELLER")]
+    Teller,
+    #[sea_orm(string_value = "CALL_CENTER")]
+    CallCenter,
+    #[sea_orm(string_value = "BACK_OFFICE")]
+    BackOffice,
+    #[sea_orm(string_value = "ADMIN_PORTAL")]
+    AdminPortal,
+    #[sea_orm(string_value = "BATCH_JOB")]
+    BatchJob,
+    #[sea_orm(string_value = "SCHEDULED_TASK")]
+    ScheduledTask,
+    #[sea_orm(string_value = "MESSAGE_QUEUE")]
+    MessageQueue,
+    #[sea_orm(string_value = "WEBHOOK")]
+    Webhook,
+    #[sea_orm(string_value = "USSD")]
+    Ussd,
+    #[sea_orm(string_value = "SMS")]
+    Sms,
+    #[sea_orm(string_value = "AGENT_BANKING")]
+    AgentBanking,
+    #[sea_orm(string_value = "THIRD_PARTY")]
+    ThirdParty,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "idempotency_operation"
+)]
+pub enum IdempotencyOperation {
+    #[sea_orm(string_value = "ACCOUNT_CREATE")]
+    AccountCreate,
+    #[sea_orm(string_value = "ACCOUNT_UPDATE")]
+    AccountUpdate,
+    #[sea_orm(string_value = "ACCOUNT_CLOSE")]
+    AccountClose,
+    #[sea_orm(string_value = "ACCOUNT_FREEZE")]
+    AccountFreeze,
+    #[sea_orm(string_value = "ACCOUNT_UNFREEZE")]
+    AccountUnfreeze,
+    #[sea_orm(string_value = "DEPOSIT")]
+    Deposit,
+    #[sea_orm(string_value = "WITHDRAWAL")]
+    Withdrawal,
+    #[sea_orm(string_value = "TRANSFER")]
+    Transfer,
+    #[sea_orm(string_value = "INTERNAL_TRANSFER")]
+    InternalTransfer,
+    #[sea_orm(string_value = "EXTERNAL_TRANSFER")]
+    ExternalTransfer,
+    #[sea_orm(string_value = "PAYMENT")]
+    Payment,
+    #[sea_orm(string_value = "BILL_PAYMENT")]
+    BillPayment,
+    #[sea_orm(string_value = "CARD_PAYMENT")]
+    CardPayment,
+    #[sea_orm(string_value = "CARD_ISSUE")]
+    CardIssue,
+    #[sea_orm(string_value = "CARD_REPLACEMENT")]
+    CardReplacement,
+    #[sea_orm(string_value = "CARD_BLOCK")]
+    CardBlock,
+    #[sea_orm(string_value = "CARD_UNBLOCK")]
+    CardUnblock,
+    #[sea_orm(string_value = "LOAN_APPLICATION")]
+    LoanApplication,
+    #[sea_orm(string_value = "LOAN_DISBURSEMENT")]
+    LoanDisbursement,
+    #[sea_orm(string_value = "LOAN_REPAYMENT")]
+    LoanRepayment,
+    #[sea_orm(string_value = "INTEREST_POSTING")]
+    InterestPosting,
+    #[sea_orm(string_value = "FEE_POSTING")]
+    FeePosting,
+    #[sea_orm(string_value = "REVERSAL")]
+    Reversal,
+    #[sea_orm(string_value = "REFUND")]
+    Refund,
+    #[sea_orm(string_value = "STANDING_ORDER")]
+    StandingOrder,
+    #[sea_orm(string_value = "DIRECT_DEBIT")]
+    DirectDebit,
+    #[sea_orm(string_value = "FOREIGN_EXCHANGE")]
+    ForeignExchange,
+    #[sea_orm(string_value = "CHEQUE_DEPOSIT")]
+    ChequeDeposit,
+    #[sea_orm(string_value = "CHEQUE_CLEARING")]
+    ChequeClearing,
+    #[sea_orm(string_value = "CASH_DEPOSIT")]
+    CashDeposit,
+    #[sea_orm(string_value = "CASH_WITHDRAWAL")]
+    CashWithdrawal,
+    #[sea_orm(string_value = "MERCHANT_SETTLEMENT")]
+    MerchantSettlement,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",

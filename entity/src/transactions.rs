@@ -100,6 +100,8 @@ pub enum Relation {
     Customers1,
     #[sea_orm(has_one = "super::gl_postings::Entity")]
     GlPostings,
+    #[sea_orm(has_many = "super::idempotency_keys::Entity")]
+    IdempotencyKeys,
     #[sea_orm(
         belongs_to = "super::institutions::Entity",
         from = "Column::InstitutionId",
@@ -187,6 +189,12 @@ impl Related<super::contributions::Entity> for Entity {
 impl Related<super::gl_postings::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::GlPostings.def()
+    }
+}
+
+impl Related<super::idempotency_keys::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::IdempotencyKeys.def()
     }
 }
 

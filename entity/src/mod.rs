@@ -59,6 +59,7 @@ pub mod gl_daily_balances;
 pub mod gl_postings;
 pub mod gl_reversals;
 pub mod group_saving_members;
+pub mod idempotency_keys;
 pub mod institutions;
 pub mod integration_api_keys;
 pub mod integration_logs;

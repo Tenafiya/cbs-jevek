@@ -10,7 +10,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - rustfs_data:/data
+      - jevek_fs:/data
 
 volumes:
-  rustfs_data:
+  jevek_fs:
