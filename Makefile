@@ -7,7 +7,7 @@ VERSION := $(shell grep '^version =' Cargo.toml | head -n1 | sed -E 's/version =
 
 DEV_COMPOSE := dev.docker-compose.yaml
 PROD_COMPOSE := prod.docker-compose.yaml
-COMPOSE := podman-compose
+COMPOSE := podman compose
 
 GREEN  := \033[0;32m
 YELLOW := \033[1;33m
