@@ -6,7 +6,10 @@ use crate::{
     app::{
         account_charts,
         accounts::{
-            models::{AddAccountModel, AddAccountParams},
+            models::{
+                AddAccountLimitModel, AddAccountLimitParams, AddAccountLinkModel,
+                AddAccountLinkParams, AddAccountModel, AddAccountParams,
+            },
             services,
         },
         branches, customers,
@@ -192,6 +195,76 @@ pub async fn get_cus_account(
         Err(e) => {
             tracing::error!(error = ?e, "failed to customer account");
             Err(ApiError::NotFound)
+        }
+    }
+}
+
+pub async fn add_account_links(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+    payload: web::Json<AddAccountLinkParams>,
+) -> Result<HttpResponse, ApiError> {
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+    let data = payload.into_inner();
+
+    let StaffResponseModel { institution_id, .. } = staff.into_inner();
+
+    let acc_link = AddAccountLinkModel {
+        institution_id,
+        prim_account_id: gen_snow_ids::id_parser(&data.prim_account_id, "Primary Account Id")?,
+        link_account_id: gen_snow_ids::id_parser(&data.link_account_id, "Link Account Id")?,
+        link_type: data.link_type,
+        relationship: data.relationship,
+        authorized_limit: data.authorized_limit,
+    };
+
+    match services::add_acc_links(&acc_link, &state).await {
+        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
+            ApiCode::ResourceCreated,
+            "Successful",
+            {},
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to link accounts");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}
+
+pub async fn add_account_limit(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    payload: web::Json<AddAccountLimitParams>,
+) -> Result<HttpResponse, ApiError> {
+    payload
+        .validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+    let data = payload.into_inner();
+
+    let acc_limit = AddAccountLimitModel {
+        account_id: gen_snow_ids::id_parser(&data.account_id, "Account Id")?,
+        limit_type: data.limit_type,
+        limit_unit: data.limit_unit,
+        limit_value: data.limit_value,
+        current_value: data.current_value,
+        effective_from: data.effective_from.to_utc(),
+        effective_to: data.effective_to.to_utc(),
+    };
+
+    match services::add_acc_limits(&acc_limit, &state).await {
+        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
+            ApiCode::ResourceCreated,
+            "Successful",
+            {},
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to add account limit");
+            Err(ApiError::InternalServerError)
         }
     }
 }
