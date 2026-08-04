@@ -2,11 +2,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use validator::Validate;
 use serde_with::{serde_as, DisplayFromStr};
-use sea_orm::{FromQueryResult, entity::prelude::*};
+use sea_orm::entity::prelude::*;
 use chrono::{FixedOffset, DateTime};
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, DerivePartialModel)]
 #[sea_orm(entity = "entity::institutions::Entity")]
 pub struct InstitutionResponseModel {
     #[serde_as(as = "DisplayFromStr")]

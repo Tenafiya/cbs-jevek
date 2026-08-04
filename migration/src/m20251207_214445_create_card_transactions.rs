@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251207_212120_create_cards::Cards,
@@ -12,27 +12,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_transactions_trans_type AS ENUM ('ATM', 'POS', 'ONLINE', 'CONTACTLESS')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_transactions_trans_type AS ENUM ('ATM', 'POS', 'ONLINE', 'CONTACTLESS')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_transactions_trans_channel AS ENUM ('DOMESTIC', 'INTERNATIONAL')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_transactions_trans_channel AS ENUM ('DOMESTIC', 'INTERNATIONAL')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_transactions_status AS ENUM ('PENDING', 'APPROVED', 'DECLINED', 'REVERSED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_transactions_status AS ENUM ('PENDING', 'APPROVED', 'DECLINED', 'REVERSED')
+                "#,
+            )
             .await?;
 
         let card_trans = Table::create()
@@ -111,35 +113,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_card_txns_card ON card_transactions(card_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_card_txns_card ON card_transactions(card_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_card_txns_ref ON card_transactions(transaction_reference);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_card_txns_ref ON card_transactions(transaction_reference);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_card_txns_date ON card_transactions(transaction_date);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_card_txns_date ON card_transactions(transaction_date);
+                "#,
+            )
             .await?;
 
         Ok(())

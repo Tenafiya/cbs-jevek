@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 use crate::m20251204_112805_create_institutions::Institutions;
 
@@ -53,15 +52,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE loan_product_types
                     ADD CONSTRAINT unique_loan_types_insti_code
                     UNIQUE (institution_id, code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

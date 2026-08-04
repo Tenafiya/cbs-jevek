@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 use crate::m20251205_154503_create_accounts::Accounts;
 
@@ -70,15 +69,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE account_balances
                     ADD CONSTRAINT unique_acc_bal_acc_id
                     UNIQUE (account_id, balance_date);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,20 +13,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE gen_reports_format AS ENUM ('PDF', 'EXCEL', 'CSV', 'JSON')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE gen_reports_format AS ENUM ('PDF', 'EXCEL', 'CSV', 'JSON')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE gen_reports_dist_Status AS ENUM ('PENDING', 'PROCESSED', 'COMPLETED', 'FAILED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE gen_reports_dist_Status AS ENUM ('PENDING', 'PROCESSED', 'COMPLETED', 'FAILED')
+                "#,
+            )
             .await?;
 
         let generated_reports = Table::create()
@@ -116,24 +116,20 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_generated_reports_period ON generated_reports(report_period_start, report_period_end);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_generated_reports_period ON generated_reports(report_period_start, report_period_end);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_generated_reports_type ON generated_reports(report_type);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_generated_reports_type ON generated_reports(report_type);
+                "#,
+            )
             .await?;
 
         Ok(())

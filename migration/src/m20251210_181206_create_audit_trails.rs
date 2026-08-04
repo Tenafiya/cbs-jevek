@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251204_112805_create_institutions::Institutions;
 
@@ -10,29 +10,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE audit_trails_user_type AS ENUM ('STAFF', 'CUSTOMER', 'SYSTEM', 'API')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE audit_trails_user_type AS ENUM ('STAFF', 'CUSTOMER', 'SYSTEM', 'API')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE audit_trails_resource_type AS ENUM ('ACCOUNT', 'TRANSACTION', 'CUSTOMER', 'LOAN')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE audit_trails_resource_type AS ENUM ('ACCOUNT', 'TRANSACTION', 'CUSTOMER', 'LOAN')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE audit_trails_action AS ENUM ('CREATE', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE audit_trails_action AS ENUM ('CREATE', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE')
+                "#,
+            )
             .await?;
 
         let audit_trails = Table::create()
@@ -63,7 +63,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(AuditTrails::UserId).big_integer())
             .col(ColumnDef::new(AuditTrails::UserType).custom("audit_trails_user_type"))
             .col(ColumnDef::new(AuditTrails::SessionId).string())
-            .col(ColumnDef::new(AuditTrails::IpAddress).custom("INET"))
+            .col(ColumnDef::new(AuditTrails::IpAddress).string())
             .col(ColumnDef::new(AuditTrails::UserAgent).string())
             .col(ColumnDef::new(AuditTrails::ResourceType).custom("audit_trails_resource_type"))
             .col(ColumnDef::new(AuditTrails::ResourceId).big_integer())
@@ -105,57 +105,47 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_audit_trails_institution ON audit_trails(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_audit_trails_institution ON audit_trails(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_audit_trails_user ON audit_trails(user_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_audit_trails_user ON audit_trails(user_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_audit_trails_resource ON audit_trails(resource_type, resource_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_audit_trails_resource ON audit_trails(resource_type, resource_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_audit_trails_event_type ON audit_trails(event_type);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_audit_trails_event_type ON audit_trails(event_type);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_audit_trails_timestamp ON audit_trails(event_timestamp);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_audit_trails_timestamp ON audit_trails(event_timestamp);
+                "#,
+            )
             .await?;
 
         Ok(())

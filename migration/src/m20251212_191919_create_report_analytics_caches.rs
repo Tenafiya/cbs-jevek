@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 use crate::m20251204_112805_create_institutions::Institutions;
 
@@ -66,37 +65,31 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE report_analytics_cache
                     ADD CONSTRAINT unique_rac_insti_type_key_date
                     UNIQUE (institution_id, report_type, cache_key, generated_at);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_analytics_cache_expiry ON report_analytics_cache(expires_at);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_analytics_cache_expiry ON report_analytics_cache(expires_at);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_analytics_cache_key ON report_analytics_cache(cache_key);
-            "#
-                .to_string(),
-            ))
+                     CREATE INDEX idx_analytics_cache_key ON report_analytics_cache(cache_key);
+                "#,
+            )
             .await?;
 
         Ok(())

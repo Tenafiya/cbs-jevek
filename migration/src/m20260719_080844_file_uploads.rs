@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -57,46 +56,38 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE INDEX idx_file_uploads_user_id ON file_uploads(owner_id);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE INDEX idx_file_uploads_presign ON file_uploads(presigned_url);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE INDEX idx_file_uploaded_by ON file_uploads(uploaded_by);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE INDEX idx_file_uploads_status ON file_uploads(uploaded_at) WHERE uploaded_at IS NULL;
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

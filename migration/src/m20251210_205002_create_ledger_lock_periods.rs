@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,11 +12,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE ledger_lock_type AS ENUM ('MONTH_END', 'YEAR_END', 'AUDIT')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE ledger_lock_type AS ENUM ('MONTH_END', 'YEAR_END', 'AUDIT')
+                "#,
+            )
             .await?;
 
         let ledger_lock_periods = Table::create()
@@ -88,15 +88,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE ledger_lock_periods
                     ADD CONSTRAINT unique_llp_insti_dates
                     UNIQUE (institution_id, start_date, end_date);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

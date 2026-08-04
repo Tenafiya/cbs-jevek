@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,26 +14,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_category_type AS ENUM ('CASH_DEPOSIT', 'CASH_WITHDRAWAL', 'TRANSFER', 'LOAN_DISBURSEMENT', 'LOAN_REPAYMENT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_category_type AS ENUM ('CASH_DEPOSIT', 'CASH_WITHDRAWAL', 'TRANSFER', 'LOAN_DISBURSEMENT', 'LOAN_REPAYMENT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_status AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'REVERSED', 'DISPUTED', 'CANCELLED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_status AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'REVERSED', 'DISPUTED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_type AS ENUM ('DEBIT', 'CREDIT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_type AS ENUM ('DEBIT', 'CREDIT')
+                "#,
+            )
             .await?;
 
         let trans = Table::create()
@@ -56,11 +59,7 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(Transactions::TransactionReference).string())
-            .col(
-                ColumnDef::new(Transactions::ParentTransactionId)
-                    .big_integer()
-                    .not_null(),
-            )
+            .col(ColumnDef::new(Transactions::ParentTransactionId).big_integer())
             .col(ColumnDef::new(Transactions::ReversalReason).string())
             .col(ColumnDef::new(Transactions::DebitAccountId).big_integer())
             .col(ColumnDef::new(Transactions::CreditAccountId).big_integer())
@@ -87,16 +86,30 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .default(0),
             )
-            .col(ColumnDef::new(Transactions::TransactionGroupId).uuid())
-            .col(ColumnDef::new(Transactions::TransactionType).custom("transaction_type"))
+            .col(
+                ColumnDef::new(Transactions::TransactionGroupId)
+                    .uuid()
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(Transactions::TransactionType)
+                    .custom("transaction_type")
+                    .not_null(),
+            )
             .col(
                 ColumnDef::new(Transactions::TransactionCategory)
-                    .custom("transaction_category_type"),
+                    .custom("transaction_category_type")
+                    .not_null(),
             )
             .col(ColumnDef::new(Transactions::Description).string())
             .col(ColumnDef::new(Transactions::Narrative).string())
             .col(ColumnDef::new(Transactions::ExternalReference).string())
-            .col(ColumnDef::new(Transactions::Status).custom("transaction_status").default("PENDING"))
+            .col(
+                ColumnDef::new(Transactions::Status)
+                    .custom("transaction_status")
+                    .default("PENDING")
+                    .not_null(),
+            )
             .col(ColumnDef::new(Transactions::PostedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Transactions::CompletedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Transactions::FailedAt).timestamp_with_time_zone())
@@ -185,101 +198,83 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_institution ON transactions(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_institution ON transactions(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_ref ON transactions(transaction_reference);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_ref ON transactions(transaction_reference);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_debit_account ON transactions(debit_account_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_debit_account ON transactions(debit_account_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_credit_account ON transactions(credit_account_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_credit_account ON transactions(credit_account_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_customer ON transactions(debit_customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_customer ON transactions(debit_customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_status ON transactions(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_status ON transactions(status);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_date ON transactions(value_date);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_date ON transactions(value_date);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_external_ref ON transactions(external_reference);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_external_ref ON transactions(external_reference);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_transactions_posted_at ON transactions(posted_at) WHERE status = 'COMPLETED';
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_transactions_posted_at ON transactions(posted_at) WHERE status = 'COMPLETED';
+                "#,
+            )
             .await?;
 
         Ok(())

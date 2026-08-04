@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,11 +13,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE comm_payout_status AS ENUM ('PROCESSING', 'COMPLETED', 'FAILED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE comm_payout_status AS ENUM ('PROCESSING', 'COMPLETED', 'FAILED')
+                "#,
+            )
             .await?;
 
         let commission_payouts = Table::create()
@@ -105,15 +105,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE commission_payouts
                     ADD CONSTRAINT unique_comm_payout_insti_pay_cycle
                     UNIQUE (institution_id, payout_cycle);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

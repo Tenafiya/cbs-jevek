@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -14,18 +14,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_trans_type AS ENUM ('CASH_DEPOSIT', 'CASH_WITHDRAWAL', 'WALLET_TOPUP', 'WALLET_WITHDRAWAL', 'LOAN_REPAYMENT', 'BILL_PAYMENT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_trans_type AS ENUM ('CASH_DEPOSIT', 'CASH_WITHDRAWAL', 'WALLET_TOPUP', 'WALLET_WITHDRAWAL', 'LOAN_REPAYMENT', 'BILL_PAYMENT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_trans_status AS ENUM ('PENDING', 'PROCESSED', 'FAILED', 'CANCELLED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_trans_status AS ENUM ('PENDING', 'PROCESSED', 'FAILED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         let agent_trans = Table::create()
@@ -117,35 +119,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_agent_txns_agent ON agent_transactions(agent_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_agent_txns_agent ON agent_transactions(agent_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_agent_txns_date ON agent_transactions(created_at);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_agent_txns_date ON agent_transactions(created_at);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_agent_txns_status ON agent_transactions(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_agent_txns_status ON agent_transactions(status);
+                "#,
+            )
             .await?;
 
         Ok(())

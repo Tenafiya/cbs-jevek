@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,36 +13,36 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE savings_product_type AS ENUM ('TARGET', 'DAILY', 'WEEKLY', 'MONTHLY', 'ROTATIONAL', 'GROUP')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE savings_product_type AS ENUM ('TARGET', 'DAILY', 'WEEKLY', 'MONTHLY', 'ROTATIONAL', 'GROUP')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE savings_product_freq AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE savings_product_freq AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE savings_product_payout_freq AS ENUM ('MONTHLY', 'QUARTERLY', 'YEARLY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE savings_product_payout_freq AS ENUM ('MONTHLY', 'QUARTERLY', 'YEARLY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE savings_product_interest_calc AS ENUM (
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE savings_product_interest_calc AS ENUM (
                     'SIMPLE',
                     'COMPOUND_ANNUAL',
                     'COMPOUND_SEMI_ANNUAL',
@@ -61,9 +61,9 @@ impl MigrationTrait for Migration {
                     'FIXED_PAYOUT',
                     'PROFIT_SHARING',
                     'HYBRID'
-                )"
-                .to_string(),
-            ))
+                )
+                "#,
+            )
             .await?;
 
         let save_prods = Table::create()
@@ -192,15 +192,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE savings_products
                     ADD CONSTRAINT unique_savings_prod_insti_code
                     UNIQUE (institution_id, code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

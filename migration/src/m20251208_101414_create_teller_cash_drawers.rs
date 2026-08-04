@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{m20251204_150208_create_branches::Staff, m20251208_093551_create_tellers::Tellers};
 
@@ -10,10 +10,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE teller_cash_drawers_status AS ENUM ('OPEN', 'BALANCED', 'VARIANCE', 'FORCE_CLOSED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE teller_cash_drawers_status AS ENUM ('OPEN', 'BALANCED', 'VARIANCE', 'FORCE_CLOSED')
+                "#,
+            )
             .await?;
 
         let cash_drawers = Table::create()
@@ -105,15 +106,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE teller_cash_drawers
                     ADD CONSTRAINT unique_tel_cash_teller_opened
                     UNIQUE (teller_id, opened_at);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

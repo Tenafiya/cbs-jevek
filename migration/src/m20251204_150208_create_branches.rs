@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251204_112805_create_institutions::Institutions;
 
@@ -10,18 +10,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE staff_gender_enum AS ENUM ('MALE', 'FEMALE', 'OTHER')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE staff_gender_enum AS ENUM ('MALE', 'FEMALE', 'OTHER')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE staff_employment_enum AS ENUM ('ACTIVE', 'INACTIVE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE staff_employment_enum AS ENUM ('ACTIVE', 'INACTIVE')
+                "#,
+            )
             .await?;
 
         let branch = Table::create()
@@ -157,7 +159,11 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Staff::FirstName).string().not_null())
             .col(ColumnDef::new(Staff::LastName).string().not_null())
-            .col(ColumnDef::new(Staff::PhoneCountryCode).string().default("233"))
+            .col(
+                ColumnDef::new(Staff::PhoneCountryCode)
+                    .string()
+                    .default("233"),
+            )
             .col(ColumnDef::new(Staff::PhoneNumber).string().not_null())
             .col(ColumnDef::new(Staff::EmailAddress).string().not_null())
             .col(ColumnDef::new(Staff::DateOfBirth).date())
@@ -177,7 +183,11 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Staff::Permissions).json_binary())
             .col(ColumnDef::new(Staff::Salt).uuid().not_null())
             .col(ColumnDef::new(Staff::PasswordHash).string().not_null())
-            .col(ColumnDef::new(Staff::IsPasswordChanged).boolean().default(false))
+            .col(
+                ColumnDef::new(Staff::IsPasswordChanged)
+                    .boolean()
+                    .default(false),
+            )
             .col(ColumnDef::new(Staff::PasswordLastChangedAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Staff::IsMfaEnabled).boolean().default(false))
             .col(ColumnDef::new(Staff::MfaSecretEncrypted).string())
@@ -241,15 +251,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE staff
                     ADD COLUMN full_name VARCHAR(255)
                     GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED
-                "#
-                .to_owned(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
@@ -290,72 +298,60 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE branches
                     ADD CONSTRAINT unique_branches_insti_branch
                     UNIQUE (institution_id, code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE staff_roles
                     ADD CONSTRAINT unique_staff_roles_insti_code
                     UNIQUE (institution_id, role_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_staff_institution ON staff(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_staff_institution ON staff(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_staff_branch ON staff(branch_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_staff_branch ON staff(branch_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_staff_employee_number ON staff(employee_number);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_staff_employee_number ON staff(employee_number);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_staff_status ON staff(employment_status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_staff_status ON staff(employment_status);
+                "#,
+            )
             .await?;
 
         Ok(())

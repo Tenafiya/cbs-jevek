@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -13,11 +13,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE contribution_cycles_status AS ENUM ('ACTIVE', 'COMPLETED', 'CANCELLED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE contribution_cycles_status AS ENUM ('ACTIVE', 'COMPLETED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         let cycles = Table::create()

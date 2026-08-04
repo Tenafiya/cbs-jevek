@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -102,37 +101,31 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE gl_daily_balances
                     ADD CONSTRAINT unique_gl_daily_insti_acc_date
                     UNIQUE (institution_id, account_id, balance_date);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_gl_balances_date ON gl_daily_balances(balance_date);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_gl_balances_date ON gl_daily_balances(balance_date);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_gl_balances_account ON gl_daily_balances(account_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_gl_balances_account ON gl_daily_balances(account_id);
+                "#,
+            )
             .await?;
 
         Ok(())

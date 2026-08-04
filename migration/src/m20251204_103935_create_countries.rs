@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -8,32 +8,25 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE EXTENSION IF NOT EXISTS pg_trgm;
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE EXTENSION IF NOT EXISTS postgis;
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"".to_string(),
-            ))
+            .execute_unprepared(r#"CREATE EXTENSION IF NOT EXISTS "uuid-ossp";"#)
             .await?;
 
         let table_meta = Table::create()
@@ -92,32 +85,17 @@ impl MigrationTrait for Migration {
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                r#"
-                    DROP EXTENSION IF NOT EXISTS pg_trgm;
-                "#
-                .to_string(),
-            ))
+            .execute_unprepared(r#"DROP EXTENSION IF NOT EXISTS pg_trgm;"#)
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                r#"
-                    DROP EXTENSION IF NOT EXISTS postgis;
-                "#
-                .to_string(),
-            ))
+            .execute_unprepared(r#"DROP EXTENSION IF NOT EXISTS postgis;"#)
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"".to_string(),
-            ))
+            .execute_unprepared(r#"DROP EXTENSION IF EXISTS "uuid-ossp";"#)
             .await?;
 
         manager

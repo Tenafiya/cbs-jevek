@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251212_193227_create_support_tickets::SupportTickets;
 
@@ -10,20 +10,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE ticket_interaction_type AS ENUM ('CUSTOMER_MESSAGE', 'STAFF_RESPONSE', 'INTERNAL_NOTE', 'SYSTEM_ACTION')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE ticket_interaction_type AS ENUM ('CUSTOMER_MESSAGE', 'STAFF_RESPONSE', 'INTERNAL_NOTE', 'SYSTEM_ACTION')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE ticket_interaction_created_type AS ENUM ('CUSTOMER', 'STAFF', 'SYSTEM')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE ticket_interaction_created_type AS ENUM ('CUSTOMER', 'STAFF', 'SYSTEM')
+                "#,
+            )
             .await?;
 
         let ticket_interactions = Table::create()
@@ -83,13 +83,11 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_ticket_interactions_ticket ON ticket_interactions(ticket_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_ticket_interactions_ticket ON ticket_interactions(ticket_id);
+                "#,
+            )
             .await?;
 
         Ok(())

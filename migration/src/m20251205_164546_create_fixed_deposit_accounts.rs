@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251205_154503_create_accounts::Accounts;
 
@@ -10,10 +10,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE fd_rollover_type AS ENUM ('NONE', 'PRINCIPAL', 'PRINCIPAL_AND_INTEREST')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE fd_rollover_type AS ENUM ('NONE', 'PRINCIPAL', 'PRINCIPAL_AND_INTEREST')
+                "#,
+            )
             .await?;
 
         let fd = Table::create()

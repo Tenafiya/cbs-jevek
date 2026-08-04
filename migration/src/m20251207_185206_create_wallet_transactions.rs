@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -13,26 +13,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE wallet_trans_direction AS ENUM ('IN', 'OUT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE wallet_trans_direction AS ENUM ('IN', 'OUT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE wallet_trans_type AS ENUM ('TOPUP', 'WITHDRAWAL', 'P2P', 'MERCHANT_PAYMENT', 'BANK_TRANSFER')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE wallet_trans_type AS ENUM ('TOPUP', 'WITHDRAWAL', 'P2P', 'MERCHANT_PAYMENT', 'BANK_TRANSFER')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE wallet_trans_status AS ENUM ('PENDING', 'PROCESSING', 'PAID', 'FAILED', 'CANCELLED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE wallet_trans_status AS ENUM ('PENDING', 'PROCESSING', 'PAID', 'FAILED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         let wal_trans = Table::create()
@@ -132,35 +135,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_wallet_txns_wallet ON wallet_transactions(wallet_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_wallet_txns_wallet ON wallet_transactions(wallet_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_wallet_txns_ref ON wallet_transactions(transaction_reference);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_wallet_txns_ref ON wallet_transactions(transaction_reference);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_wallet_txns_date ON wallet_transactions(created_at);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_wallet_txns_date ON wallet_transactions(created_at);
+                "#,
+            )
             .await?;
 
         Ok(())

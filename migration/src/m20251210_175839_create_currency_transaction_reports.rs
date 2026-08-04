@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,11 +12,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE currency_report_type AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE currency_report_type AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY')
+                "#,
+            )
             .await?;
 
         let currency_transaction_reports = Table::create()
@@ -96,15 +96,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE currency_transaction_reports
                     ADD CONSTRAINT unique_cur_trans_reps_insti_rep_date_time
                     UNIQUE (institution_id, report_date, report_type);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

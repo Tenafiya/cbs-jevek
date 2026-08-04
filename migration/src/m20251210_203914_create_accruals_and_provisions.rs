@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,28 +13,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE accrual_reference_type AS ENUM ('LOAN', 'SAVINGS', 'INVESTMENT')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE accrual_reference_type AS ENUM ('LOAN', 'SAVINGS', 'INVESTMENT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE accrual_type AS ENUM ('INTEREST_ACCRUAL', 'FEE_ACCRUAL', 'PROVISION')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE accrual_type AS ENUM ('INTEREST_ACCRUAL', 'FEE_ACCRUAL', 'PROVISION')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE accrual_status AS ENUM ('ACCRUED', 'POSTED', 'REVERSED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE accrual_status AS ENUM ('ACCRUED', 'POSTED', 'REVERSED')
+                "#,
+            )
             .await?;
 
         let accruals_and_provisions = Table::create()
@@ -132,15 +133,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE UNIQUE INDEX unique_accrued_accrual
                     ON accruals_and_provisions (accrual_type, reference_id, accrual_date)
                     WHERE status = 'ACCRUED';
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

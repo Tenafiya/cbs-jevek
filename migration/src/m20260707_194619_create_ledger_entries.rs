@@ -1,4 +1,3 @@
-use sea_orm::Statement;
 use sea_orm_migration::prelude::*;
 
 use crate::{
@@ -89,8 +88,7 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE ledger_entries
                     ADD CONSTRAINT ledger_entry_account_check
@@ -98,64 +96,53 @@ impl MigrationTrait for Migration {
                         account_id IS NOT NULL
                         OR gl_account_id IS NOT NULL
                     );
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_ledger_entries_transaction ON ledger_entries(transaction_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_ledger_entries_transaction ON ledger_entries(transaction_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_ledger_entries_gl_account ON ledger_entries(gl_account_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_ledger_entries_gl_account ON ledger_entries(gl_account_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_ledger_entries_account ON ledger_entries(account_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_ledger_entries_account ON ledger_entries(account_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_ledger_entries_posted_at ON ledger_entries(posted_at);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_ledger_entries_posted_at ON ledger_entries(posted_at);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_ledger_entries_value_date ON ledger_entries(value_date);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_ledger_entries_value_date ON ledger_entries(value_date);
+                "#,
+            )
             .await?;
 
         Ok(())

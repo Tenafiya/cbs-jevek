@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251204_150208_create_branches::Staff;
 
@@ -10,18 +10,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE health_status AS ENUM ('HEALTHY', 'UNHEALTHY')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE health_status AS ENUM ('HEALTHY', 'UNHEALTHY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE maintenance_window_status AS ENUM ('SCHEDULED', 'PENDING', 'COMPLETED', 'POSTPONED', 'CANCELLED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE maintenance_window_status AS ENUM ('SCHEDULED', 'PENDING', 'COMPLETED', 'POSTPONED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         let system_health_metrics = Table::create()

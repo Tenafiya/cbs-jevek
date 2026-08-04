@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251212_200256_create_integration_webhooks::IntegrationWebhooks;
 
@@ -10,10 +10,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE integration_deliveries_status AS ENUM ('PENDING', 'FAILED', 'DELIVERED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE integration_deliveries_status AS ENUM ('PENDING', 'FAILED', 'DELIVERED')
+                "#,
+            )
             .await?;
 
         let webhook_deliveries = Table::create()

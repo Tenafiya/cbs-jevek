@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{m20251204_150208_create_branches::Staff, m20251206_150936_create_loans::Loans};
 
@@ -10,19 +10,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_penalty_type AS ENUM ('LATE_PAYMENT', 'DEFAULT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_penalty_type AS ENUM ('LATE_PAYMENT', 'DEFAULT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_penalty_status AS ENUM ('UNPAID', 'PAID', 'PROCESSING')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_penalty_status AS ENUM ('UNPAID', 'PAID', 'PROCESSING')
+                "#,
+            )
             .await?;
 
         let penalties = Table::create()

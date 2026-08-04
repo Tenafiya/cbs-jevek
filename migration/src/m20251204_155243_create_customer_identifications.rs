@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_103935_create_countries::Countries, m20251204_150208_create_branches::Staff,
@@ -13,11 +13,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE verification_status_type AS ENUM ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE verification_status_type AS ENUM ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED')
+                "#,
+            )
             .await?;
 
         let cus_iden = Table::create()
@@ -36,10 +36,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(CustomerIdentifications::IdType).string())
             .col(ColumnDef::new(CustomerIdentifications::IdNumber).string())
-            .col(
-                ColumnDef::new(CustomerIdentifications::IssuingCountryId)
-                    .big_integer(),
-            )
+            .col(ColumnDef::new(CustomerIdentifications::IssuingCountryId).big_integer())
             .col(ColumnDef::new(CustomerIdentifications::IssueDate).date())
             .col(ColumnDef::new(CustomerIdentifications::ExpiryDate).date())
             .col(ColumnDef::new(CustomerIdentifications::FrontImageUrl).string())
@@ -103,24 +100,20 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_customer_identities_customer ON customer_identifications(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_customer_identities_customer ON customer_identifications(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_customer_identities_status ON customer_identifications(verification_status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_customer_identities_status ON customer_identifications(verification_status);
+                "#,
+            )
             .await?;
 
         Ok(())

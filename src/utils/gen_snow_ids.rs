@@ -1,7 +1,7 @@
 use crate::utils::errors::ApiError;
 use once_cell::sync::Lazy;
 use rand::distr::Alphanumeric;
-use rand::{Rng, rng};
+use rand::{RngExt, rng};
 use serde::Serialize;
 use serde_json::Value;
 use snowflake_me::Snowflake;
@@ -39,7 +39,7 @@ pub fn base62_encode(mut num: u64) -> String {
 }
 
 pub fn gen_snowflake() -> u64 {
-    SNOWFLAKE
+    *SNOWFLAKE
         .next_id()
         .expect("failed to generate snowflake id")
 }

@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -99,15 +98,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE wallets
                     ADD CONSTRAINT unique_wals_insti_wal_num
                     UNIQUE (institution_id, wallet_number);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

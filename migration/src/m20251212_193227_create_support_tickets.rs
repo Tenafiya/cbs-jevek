@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,29 +13,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE support_tickets_category AS ENUM ('TRANSACTION_ISSUE', 'LOAN_QUERY', 'ACCOUNT_QUERY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE support_tickets_category AS ENUM ('TRANSACTION_ISSUE', 'LOAN_QUERY', 'ACCOUNT_QUERY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE support_tickets_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE support_tickets_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE support_tickets_status AS ENUM ('OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE support_tickets_status AS ENUM ('OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED')
+                "#,
+            )
             .await?;
 
         let support_tickets = Table::create()
@@ -149,46 +149,38 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_support_tickets_customer ON support_tickets(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_support_tickets_customer ON support_tickets(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_support_tickets_status ON support_tickets(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_support_tickets_status ON support_tickets(status);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_support_tickets_assigned ON support_tickets(assigned_to);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_support_tickets_assigned ON support_tickets(assigned_to);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_support_tickets_priority ON support_tickets(priority) WHERE status NOT IN ('RESOLVED', 'CLOSED');
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_support_tickets_priority ON support_tickets(priority) WHERE status NOT IN ('RESOLVED', 'CLOSED');
+                "#,
+            )
             .await?;
 
         Ok(())

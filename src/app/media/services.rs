@@ -108,7 +108,7 @@ pub async fn field_updater(
         vec![data.value.into(), data.id.into()],
     );
 
-    let result = tx.execute(stmt).await?;
+    let result = tx.execute_raw(stmt).await?;
 
     if result.rows_affected() == 0 {
         return Err(DbErr::Custom("Could not update".to_string()));

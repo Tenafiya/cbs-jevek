@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,20 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE integration_providers_service_type AS ENUM ('KYC', 'CREDIT_BUREAU', 'SMS_GATEWAY', 'PAYMENT_PROCESSOR')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE integration_providers_service_type AS ENUM ('KYC', 'CREDIT_BUREAU', 'SMS_GATEWAY', 'PAYMENT_PROCESSOR')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE integration_providers_prov_status AS ENUM ('ACTIVE', 'INACTIVE', 'MAINTENANCE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE integration_providers_prov_status AS ENUM ('ACTIVE', 'INACTIVE', 'MAINTENANCE')
+                "#,
+            )
             .await?;
 
         let integration_providers = Table::create()
@@ -120,15 +120,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE integration_providers
                     ADD CONSTRAINT unique_int_prov_insti_code
                     UNIQUE (institution_id, provider_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

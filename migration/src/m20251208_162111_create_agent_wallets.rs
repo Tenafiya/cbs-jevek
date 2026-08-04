@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251208_154224_create_agents::Agents,
@@ -12,18 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_wallet_type AS ENUM ('FLOAT', 'COMMISSION')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_wallet_type AS ENUM ('FLOAT', 'COMMISSION')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_wallet_status AS ENUM ('ACTIVE', 'INACTIVE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_wallet_status AS ENUM ('ACTIVE', 'INACTIVE')
+                "#,
+            )
             .await?;
 
         let agent_wals = Table::create()
@@ -93,15 +95,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE agent_wallets
                     ADD CONSTRAINT unique_agent_wal_agent_wal_type
                     UNIQUE (agent_id, wallet_type);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

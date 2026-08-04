@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,20 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE regu_reports_report_type AS ENUM ('CAPITAL_ADEQUACY', 'LIQUIDITY', 'ASSET_QUALITY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE regu_reports_report_type AS ENUM ('CAPITAL_ADEQUACY', 'LIQUIDITY', 'ASSET_QUALITY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE regu_reports_status AS ENUM ('DRAFT', 'FINAL', 'SUBMITTED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE regu_reports_status AS ENUM ('DRAFT', 'FINAL', 'SUBMITTED')
+                "#,
+            )
             .await?;
 
         let regulatory_reports = Table::create()

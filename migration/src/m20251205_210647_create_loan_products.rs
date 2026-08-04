@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,28 +14,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_product_interest_type AS ENUM ('FIXED', 'VARIABLE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_product_interest_type AS ENUM ('FIXED', 'VARIABLE')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_product_calc_method AS ENUM ('FLAT', 'REDUCING_BALANCE', 'DECLINING_BALANCE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_product_calc_method AS ENUM ('FLAT', 'REDUCING_BALANCE', 'DECLINING_BALANCE')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_product_freq AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'BULLET')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_product_freq AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'BULLET')
+                "#,
+            )
             .await?;
 
         let loan_products = Table::create()
@@ -220,15 +221,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE loan_products
                     ADD CONSTRAINT unique_loan_product_insti_code
                     UNIQUE (institution_id, code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

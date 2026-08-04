@@ -1,8 +1,7 @@
 use actix_web::web;
 use migration::Expr;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult,
-    PaginatorTrait, QueryFilter, QueryOrder,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, ExprTrait, InsertResult, PaginatorTrait, QueryFilter, QueryOrder,
 };
 
 use crate::{
@@ -197,8 +196,8 @@ pub async fn get_customers(
     query: &QueryModel,
     state: &web::Data<AppState>,
 ) -> Result<(Vec<CustomerResponseModel>, MetaModel), DbErr> {
-    let page = query.page.max(1);
-    let per_page = query.size.max(1);
+    let page = std::cmp::max(query.page, 1);
+    let per_page = std::cmp::max(query.size, 1);
 
     let paginator = entity::customers::Entity::find()
         .filter(

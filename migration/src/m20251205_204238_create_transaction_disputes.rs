@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251204_150208_create_branches::Staff;
 
@@ -10,29 +10,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_dispute_type AS ENUM ('UNAUTHORIZED', 'DUPLICATE', 'INCORRECT_AMOUNT', 'NOT_RECEIVED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_dispute_type AS ENUM ('UNAUTHORIZED', 'DUPLICATE', 'INCORRECT_AMOUNT', 'NOT_RECEIVED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_dispute_status AS ENUM ('OPEN', 'INVESTIGATION', 'RESOLVED', 'REJECTED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_dispute_status AS ENUM ('OPEN', 'INVESTIGATION', 'RESOLVED', 'REJECTED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')
+                "#,
+            )
             .await?;
 
         let disputes = Table::create()
@@ -109,15 +109,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     CREATE UNIQUE INDEX unique_open_dispute
                     ON transaction_disputes (transaction_id, dispute_type, status)
                     WHERE status IN ('OPEN', 'INVESTIGATION');
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,20 +14,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE refund_workflow_refund_type AS ENUM ('FAILED_TRANSACTION', 'FRAUD', 'CUSTOMER_SERVICE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE refund_workflow_refund_type AS ENUM ('FAILED_TRANSACTION', 'FRAUD', 'CUSTOMER_SERVICE')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE refund_workflow_approval_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'PROCESSED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE refund_workflow_approval_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'PROCESSED')
+                "#,
+            )
             .await?;
 
         let refund_workflows = Table::create()
@@ -152,24 +152,20 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_refunds_transaction ON refund_workflows(transaction_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_refunds_transaction ON refund_workflows(transaction_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_refunds_status ON refund_workflows(approval_status) WHERE approval_status = 'PENDING';
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_refunds_status ON refund_workflows(approval_status) WHERE approval_status = 'PENDING';
+                "#,
+            )
             .await?;
 
         Ok(())

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,20 +13,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_settlement_channels AS ENUM ('BANK_TRANSFER', 'MOBILE_MONEY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_settlement_channels AS ENUM ('BANK_TRANSFER', 'MOBILE_MONEY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_settlement_status AS ENUM ('PENDING', 'PROCESSED', 'FAILED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_settlement_status AS ENUM ('PENDING', 'PROCESSED', 'FAILED')
+                "#,
+            )
             .await?;
 
         let agent_settlements = Table::create()
@@ -154,15 +154,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE agent_settlements
                     ADD CONSTRAINT unique_agent_settle_agent_settle_cycle
                     UNIQUE (agent_id, settlement_cycle);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

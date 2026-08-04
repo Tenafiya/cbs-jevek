@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,19 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE statement_type AS ENUM ('BALANCE_SHEET', 'PROFIT_LOSS', 'CASH_FLOW')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE statement_type AS ENUM ('BALANCE_SHEET', 'PROFIT_LOSS', 'CASH_FLOW')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE statement_status AS ENUM ('DRAFT', 'FINAL', 'AUDITED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE statement_status AS ENUM ('DRAFT', 'FINAL', 'AUDITED')
+                "#,
+            )
             .await?;
 
         let financial_statements = Table::create()
@@ -113,15 +114,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE financial_statements
                     ADD CONSTRAINT unique_fs_insti_state_type_period
                     UNIQUE (institution_id, statement_type, statement_period);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251204_112805_create_institutions::Institutions;
 
@@ -10,10 +10,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE wallet_prov_status AS ENUM ('ACTIVE', 'INACTIVE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE wallet_prov_status AS ENUM ('ACTIVE', 'INACTIVE')
+                "#,
+            )
             .await?;
 
         let wal_prov = Table::create()
@@ -77,15 +78,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE wallet_providers
                     ADD CONSTRAINT unique_wal_prov_insti_code
                     UNIQUE (institution_id, provider_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

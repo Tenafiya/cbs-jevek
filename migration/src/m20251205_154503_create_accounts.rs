@@ -1,4 +1,3 @@
-use sea_orm::Statement;
 use sea_orm_migration::prelude::*;
 
 use crate::{
@@ -154,72 +153,60 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE accounts
                     ADD CONSTRAINT unique_customer_account
                     UNIQUE (customer_id, account_type_id);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE accounts
                     ADD CONSTRAINT positive_balance
                     CHECK (current_balance >= 0 OR is_overdraft_allowable = TRUE);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_accounts_institution ON accounts(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_accounts_institution ON accounts(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_accounts_customer ON accounts(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_accounts_customer ON accounts(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_accounts_number ON accounts(account_number);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_accounts_number ON accounts(account_number);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_accounts_status ON accounts(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_accounts_status ON accounts(status);
+                "#,
+            )
             .await?;
 
         Ok(())
