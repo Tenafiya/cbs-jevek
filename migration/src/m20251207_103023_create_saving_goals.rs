@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -14,11 +14,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE saving_goals_status AS ENUM ('ACTIVE', 'PAUSED', 'COMPLETED', 'ABANDONED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE saving_goals_status AS ENUM ('ACTIVE', 'PAUSED', 'COMPLETED', 'ABANDONED')
+                "#,
+            )
             .await?;
 
         let save_goals = Table::create()
@@ -116,8 +116,7 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE saving_goals
                     ADD COLUMN progress_percentage DECIMAL(5,2)
@@ -128,31 +127,26 @@ impl MigrationTrait for Migration {
                             ELSE 0
                         END
                     ) STORED;
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_savings_goals_customer ON saving_goals(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_savings_goals_customer ON saving_goals(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_savings_goals_status ON saving_goals(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_savings_goals_status ON saving_goals(status);
+                "#,
+            )
             .await?;
 
         Ok(())

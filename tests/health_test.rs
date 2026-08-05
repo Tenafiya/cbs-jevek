@@ -19,19 +19,18 @@ async fn test_app() -> impl actix_web::dev::Service<
 }
 
 async fn table_exists(state: &AppState, name: &str) -> bool {
-    let sql = format!(
-        "SELECT COUNT(*) FROM information_schema.tables \
-         WHERE table_schema = 'public' AND table_name = '{name}'"
-    );
-    let row = state
-        .pgdb
-        .query_one(sea_orm::Statement::from_string(
-            state.pgdb.get_database_backend(),
-            sql,
-        ))
-        .await
-        .unwrap()
-        .unwrap();
+    let stmt = sea_orm::Statement::from_sql_and_values(
+        state.pgdb.get_database_backend(),
+        r#"
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_name = $1
+        "#,
+            vec![name.into()],
+        );
+
+    let row = state.pgdb.query_one_raw(stmt).await.unwrap().unwrap();
 
     let count: i64 = row.try_get_by::<i64, _>("count").unwrap();
     count > 0

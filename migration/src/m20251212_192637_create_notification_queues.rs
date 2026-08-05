@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,11 +14,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE notification_queue_status AS ENUM ('PENDING', 'SENT', 'DELIVERED', 'FAILED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE notification_queue_status AS ENUM ('PENDING', 'SENT', 'DELIVERED', 'FAILED')
+                "#,
+            )
             .await?;
 
         let notification_queue = Table::create()
@@ -112,35 +112,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_notification_queue_status ON notification_queue(status) WHERE status = 'PENDING';
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_notification_queue_status ON notification_queue(status) WHERE status = 'PENDING';
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_notification_queue_scheduled ON notification_queue(scheduled_at) WHERE status = 'PENDING';
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_notification_queue_scheduled ON notification_queue(scheduled_at) WHERE status = 'PENDING';
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_notification_queue_customer ON notification_queue(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_notification_queue_customer ON notification_queue(customer_id);
+                "#,
+            )
             .await?;
 
         Ok(())

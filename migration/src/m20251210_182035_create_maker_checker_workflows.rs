@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,29 +12,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE maker_checker_reference_type AS ENUM ('TRANSACTION', 'LOAN_APPROVAL', 'PRODUCT_CHANGE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE maker_checker_reference_type AS ENUM ('TRANSACTION', 'LOAN_APPROVAL', 'PRODUCT_CHANGE')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE maker_checker_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE maker_checker_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE maker_checker_checker_action AS ENUM ('APPROVED', 'REJECTED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE maker_checker_checker_action AS ENUM ('APPROVED', 'REJECTED')
+                "#,
+            )
             .await?;
 
         let maker_checker_workflows = Table::create()
@@ -127,15 +127,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                r#"  
+            .execute_unprepared(
+                r#"
                     CREATE UNIQUE INDEX unique_mcflows_ref_type_stat
                     ON maker_checker_workflows (reference_type, reference_id, status)
                     WHERE status = 'PENDING';
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

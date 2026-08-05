@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_152312_create_customers::Customers, m20251207_103023_create_saving_goals::SavingGoals,
@@ -12,11 +12,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE group_saving_member_role AS ENUM ('MEMBER', 'LEADER', 'ADMIN')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE group_saving_member_role AS ENUM ('MEMBER', 'LEADER', 'ADMIN')
+                "#,
+            )
             .await?;
 
         let mems = Table::create()
@@ -85,15 +85,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE group_saving_members
                     ADD CONSTRAINT unique_saving_mems_cus_goal
                     UNIQUE (group_goal_id, customer_id);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

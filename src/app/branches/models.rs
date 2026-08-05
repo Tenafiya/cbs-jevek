@@ -1,4 +1,4 @@
-use sea_orm::{FromQueryResult, entity::prelude::*};
+use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::{serde_as, DisplayFromStr};
@@ -36,7 +36,7 @@ pub struct AddBranchParams {
 }
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, DerivePartialModel)]
 #[sea_orm(entity = "entity::branches::Entity")]
 pub struct BranchResponseModel {
     #[serde_as(as = "DisplayFromStr")]

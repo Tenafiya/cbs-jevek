@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_150208_create_branches::Staff, m20251205_193221_create_transactions::Transactions,
@@ -12,20 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_reversal_typs AS ENUM ('CUSTOMER_REQUEST', 'FRAUD', 'ERROR', 'COMPLIANCE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_reversal_types AS ENUM ('CUSTOMER_REQUEST', 'FRAUD', 'PROCESS_ERROR', 'COMPLIANCE')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_reversal_status AS ENUM ('PENDING', 'PROCESSED', 'CANCELLED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_reversal_status AS ENUM ('PENDING', 'PROCESSED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         let reversal = Table::create()
@@ -50,7 +50,7 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(TransactionReversals::ReversalType)
-                    .custom("transaction_reversal_typs"),
+                    .custom("transaction_reversal_types"),
             )
             .col(ColumnDef::new(TransactionReversals::Reason).string())
             .col(ColumnDef::new(TransactionReversals::Amount).big_integer())

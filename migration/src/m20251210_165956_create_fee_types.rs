@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,20 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE fee_types_category AS ENUM ('TRANSACTION', 'MAINTENANCE', 'LOAN_PROCESSING', 'CARD', 'PENALTY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE fee_types_category AS ENUM ('TRANSACTION', 'MAINTENANCE', 'LOAN_PROCESSING', 'CARD', 'PENALTY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE fee_types_calc_method AS ENUM ('PERCENTAGE', 'FLAT', 'TIERED', 'SLAB')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE fee_types_calc_method AS ENUM ('PERCENTAGE', 'FLAT', 'TIERED', 'SLAB')
+                "#,
+            )
             .await?;
 
         let fee_types = Table::create()
@@ -54,11 +54,7 @@ impl MigrationTrait for Migration {
                     .custom("fee_types_calc_method")
                     .not_null(),
             )
-            .col(
-                ColumnDef::new(FeeTypes::FeeValue)
-                    .big_integer()
-                    .not_null(),
-            )
+            .col(ColumnDef::new(FeeTypes::FeeValue).big_integer().not_null())
             .col(
                 ColumnDef::new(FeeTypes::MinimumFee)
                     .big_integer()
@@ -121,15 +117,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE fee_types
                     ADD CONSTRAINT unique_fee_type_insti_code
                     UNIQUE (institution_id, fee_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

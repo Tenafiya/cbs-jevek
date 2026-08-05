@@ -1,5 +1,4 @@
 use sea_orm_migration::prelude::*;
-use sea_orm::Statement;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251208_154224_create_agents::Agents,
@@ -112,15 +111,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE agent_performance
                     ADD CONSTRAINT unique_agent_perf_agent_rep_date
                     UNIQUE (agent_id, report_date);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

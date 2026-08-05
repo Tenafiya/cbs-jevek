@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_103935_create_countries::Countries,
@@ -13,19 +13,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE customer_type AS ENUM ('INDIVIDUAL', 'SME', 'GROUP', 'COOPERATIVE', 'CORPORATE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE customer_type AS ENUM ('INDIVIDUAL', 'SME', 'GROUP', 'COOPERATIVE', 'CORPORATE')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE customer_status AS ENUM ('ACTIVE', 'INACTIVE', 'BLOCKED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE customer_status AS ENUM ('ACTIVE', 'INACTIVE', 'BLOCKED')
+                "#,
+            )
             .await?;
 
         let customer = Table::create()
@@ -161,46 +162,38 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_customers_institution ON customers(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_customers_institution ON customers(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_customers_phone ON customers(phone_number);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_customers_phone ON customers(phone_number);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_customers_email ON customers(email);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_customers_email ON customers(email);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_customers_status ON customers(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_customers_status ON customers(status);
+                "#,
+            )
             .await?;
 
         Ok(())

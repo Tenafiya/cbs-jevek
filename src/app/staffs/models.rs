@@ -1,6 +1,6 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use entity::sea_orm_active_enums::{StaffEmploymentEnum, StaffGenderEnum};
-use sea_orm::{FromQueryResult, entity::prelude::*, prelude::Decimal};
+use sea_orm::{entity::prelude::*, prelude::Decimal};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::{DisplayFromStr, serde_as};
@@ -138,7 +138,7 @@ pub struct UpdateStaffStatusParams {
 }
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, Deserialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, Deserialize, DerivePartialModel)]
 #[sea_orm(entity = "entity::staff::Entity")]
 pub struct StaffResponseModel {
     #[serde_as(as = "DisplayFromStr")]

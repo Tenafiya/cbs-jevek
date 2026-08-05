@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -13,10 +13,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE integration_log_status AS ENUM ('SUCCESS', 'FAILURE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE integration_log_status AS ENUM ('SUCCESS', 'FAILURE')
+                "#,
+            )
             .await?;
 
         let integration_logs = Table::create()

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,20 +14,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE fee_application_status AS ENUM ('PENDING', 'CHARGED', 'WAIVED', 'REVERSED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE fee_application_status AS ENUM ('PENDING', 'CHARGED', 'WAIVED', 'REVERSED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE fee_application_ref_type AS ENUM ('TRANSACTION', 'ACCOUNT', 'LOAN')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE fee_application_ref_type AS ENUM ('TRANSACTION', 'ACCOUNT', 'LOAN')
+                "#,
+            )
             .await?;
 
         let fee_applications = Table::create()

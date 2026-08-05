@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,11 +12,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE notification_type AS ENUM ('SMS', 'EMAIL', 'PUSH', 'WHATSAPP', 'IN_APP')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE notification_type AS ENUM ('SMS', 'EMAIL', 'PUSH', 'WHATSAPP', 'IN_APP')
+                "#,
+            )
             .await?;
 
         let notification_templates = Table::create()
@@ -108,15 +108,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                    ALTER TABLE notification_templates
+                     ALTER TABLE notification_templates
                     ADD CONSTRAINT unique_noti_temp_insti_temp_code_lang
                     UNIQUE (institution_id, template_code, language_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

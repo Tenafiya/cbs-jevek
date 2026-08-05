@@ -1,5 +1,6 @@
 use actix_web::web;
 use migration::Expr;
+use sea_orm::ExprTrait;
 use sea_orm::{
     ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, InsertResult, QueryFilter,
 };

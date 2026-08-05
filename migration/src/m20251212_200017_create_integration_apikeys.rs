@@ -39,7 +39,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(IntegrationApiKeys::ApiSecretEncrypted).text())
             .col(ColumnDef::new(IntegrationApiKeys::KeyIdentifier).string())
             .col(ColumnDef::new(IntegrationApiKeys::Permissions).json_binary())
-            .col(ColumnDef::new(IntegrationApiKeys::AllowedIpAddresses).custom("INET[]"))
+            .col(ColumnDef::new(IntegrationApiKeys::AllowedIpAddresses).array(ColumnType::Text))
             .col(
                 ColumnDef::new(IntegrationApiKeys::KeyStatus)
                     .string()

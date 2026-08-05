@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,10 +12,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE data_backup_status AS ENUM ('RUNNING', 'FAILED', 'SCHEDULED', 'COMPLETED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE data_backup_status AS ENUM ('RUNNING', 'FAILED', 'SCHEDULED', 'COMPLETED')
+                "#,
+            )
             .await?;
 
         let data_backups = Table::create()

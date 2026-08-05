@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251207_212120_create_cards::Cards;
 
@@ -10,19 +10,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_limit_type AS ENUM ('ATM_WITHDRAWAL', 'POS_PURCHASE', 'ONLINE_PURCHASE', 'DAILY_TOTAL')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_limit_type AS ENUM ('ATM_WITHDRAWAL', 'POS_PURCHASE', 'ONLINE_PURCHASE', 'DAILY_TOTAL')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_limit_reset AS ENUM ('DAILY', 'MONTHLY', 'QUARTERLY', 'YEARLY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_limit_reset AS ENUM ('DAILY', 'MONTHLY', 'QUARTERLY', 'YEARLY')
+                "#,
+            )
             .await?;
 
         let limit = Table::create()
@@ -76,15 +77,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE card_limits
                     ADD CONSTRAINT unique_card_lim_card_lim_type
                     UNIQUE (card_id, limit_type);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,18 +13,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_suspicion_type AS ENUM ('MONEY_LAUNDERING', 'TERRORIST_FINANCING', 'FRAUD')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_suspicion_type AS ENUM ('MONEY_LAUNDERING', 'TERRORIST_FINANCING', 'FRAUD')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_suspicions_status AS ENUM ('DRAFT', 'SUBMITTED', 'ACKNOWLEDGED', 'UNDER_REVIEW')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_suspicions_status AS ENUM ('DRAFT', 'SUBMITTED', 'ACKNOWLEDGED', 'UNDER_REVIEW')
+                "#,
+            )
             .await?;
 
         let suspicious_transaction_reports = Table::create()
@@ -67,9 +69,7 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .not_null(),
             )
-            .col(
-                ColumnDef::new(SuspiciousTransactionReports::TransactionIds).custom("TEXT"),
-            )
+            .col(ColumnDef::new(SuspiciousTransactionReports::TransactionIds).custom("TEXT"))
             .col(
                 ColumnDef::new(SuspiciousTransactionReports::TotalAmount)
                     .big_integer()

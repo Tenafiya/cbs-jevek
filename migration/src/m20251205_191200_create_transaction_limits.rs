@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -14,10 +14,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE transaction_limits_limit_type AS ENUM ('PER_TRANSACTION', 'DAILY', 'WEEKLY', 'MONTHLY')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE transaction_limits_limit_type AS ENUM ('PER_TRANSACTION', 'DAILY', 'WEEKLY', 'MONTHLY')
+                "#,
+            )
             .await?;
 
         let trans_limit = Table::create()
@@ -42,6 +43,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(TransactionLimits::CustomerType)
                     .custom("customer_type")
+                    .not_null()
                     .default("INDIVIDUAL"),
             )
             .col(
@@ -51,7 +53,8 @@ impl MigrationTrait for Migration {
             )
             .col(
                 ColumnDef::new(TransactionLimits::LimitType)
-                    .custom("transaction_limits_limit_type"),
+                    .custom("transaction_limits_limit_type")
+                    .not_null(),
             )
             .col(ColumnDef::new(TransactionLimits::MaxAmount).big_integer())
             .col(ColumnDef::new(TransactionLimits::MaxCount).integer())

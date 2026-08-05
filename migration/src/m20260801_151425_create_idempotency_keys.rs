@@ -1,4 +1,3 @@
-use sea_orm::Statement;
 use sea_orm_migration::prelude::*;
 
 use crate::{
@@ -15,30 +14,30 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE idem_key_status AS ENUM ('PENDING', 'COMPLETED', 'PROCESSING', 'FAILED', 'EXPIRED', 'CANCELLED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE idem_key_status AS ENUM ('PENDING', 'COMPLETED', 'PROCESSING', 'FAILED', 'EXPIRED', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE idempotency_channel AS ENUM ('WEB', 'MOBILE_APP', 'API', 'OPEN_BANKING', 'ATM', 'POS', 'BRANCH', 'TELLER', 'CALL_CENTER', 'BACK_OFFICE', 'ADMIN_PORTAL', 'BATCH_JOB', 'SCHEDULED_TASK', 'MESSAGE_QUEUE', 'WEBHOOK', 'USSD', 'SMS', 'AGENT_BANKING', 'THIRD_PARTY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE idempotency_channel AS ENUM ('WEB', 'MOBILE_APP', 'API', 'OPEN_BANKING', 'ATM', 'POS', 'BRANCH', 'TELLER', 'CALL_CENTER', 'BACK_OFFICE', 'ADMIN_PORTAL', 'BATCH_JOB', 'SCHEDULED_TASK', 'MESSAGE_QUEUE', 'WEBHOOK', 'USSD', 'SMS', 'AGENT_BANKING', 'THIRD_PARTY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE idempotency_operation AS ENUM ('ACCOUNT_CREATE', 'ACCOUNT_UPDATE', 'ACCOUNT_CLOSE', 'ACCOUNT_FREEZE', 'ACCOUNT_UNFREEZE', 'DEPOSIT', 'WITHDRAWAL', 'TRANSFER', 'INTERNAL_TRANSFER', 'EXTERNAL_TRANSFER', 'PAYMENT', 'BILL_PAYMENT', 'CARD_PAYMENT', 'CARD_ISSUE', 'CARD_REPLACEMENT', 'CARD_BLOCK', 'CARD_UNBLOCK',
-                    'LOAN_APPLICATION', 'LOAN_DISBURSEMENT', 'LOAN_REPAYMENT', 'INTEREST_POSTING', 'FEE_POSTING', 'REVERSAL', 'REFUND', 'STANDING_ORDER', 'DIRECT_DEBIT', 'FOREIGN_EXCHANGE', 'CHEQUE_DEPOSIT', 'CHEQUE_CLEARING', 'CASH_DEPOSIT', 'CASH_WITHDRAWAL', 'MERCHANT_SETTLEMENT');"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE idempotency_operation AS ENUM ('ACCOUNT_CREATE', 'ACCOUNT_UPDATE', 'ACCOUNT_CLOSE', 'ACCOUNT_FREEZE', 'ACCOUNT_UNFREEZE', 'DEPOSIT', 'WITHDRAWAL', 'TRANSFER', 'INTERNAL_TRANSFER', 'EXTERNAL_TRANSFER', 'PAYMENT', 'BILL_PAYMENT', 'CARD_PAYMENT', 'CARD_ISSUE', 'CARD_REPLACEMENT', 'CARD_BLOCK', 'CARD_UNBLOCK',
+                    'LOAN_APPLICATION', 'LOAN_DISBURSEMENT', 'LOAN_REPAYMENT', 'INTEREST_POSTING', 'FEE_POSTING', 'REVERSAL', 'REFUND', 'STANDING_ORDER', 'DIRECT_DEBIT', 'FOREIGN_EXCHANGE', 'CHEQUE_DEPOSIT', 'CHEQUE_CLEARING', 'CASH_DEPOSIT', 'CASH_WITHDRAWAL', 'MERCHANT_SETTLEMENT')
+                "#,
+            )
             .await?;
 
         let idem_key = Table::create()
@@ -148,116 +147,97 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE UNIQUE INDEX uq_idempotency_keys
-                ON idempotency_keys(
-                    institution_id,
-                    operation,
-                    idempotency_key
-                );
-                "#
-                .to_string(),
-            ))
+                    CREATE UNIQUE INDEX uq_idempotency_keys
+                    ON idempotency_keys(
+                        institution_id,
+                        operation,
+                        idempotency_key
+                    )
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_transaction
-                ON idempotency_keys(transaction_id);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_transaction
+                    ON idempotency_keys(transaction_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_transaction_group
-                ON idempotency_keys(transaction_group_id);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_transaction_group
+                    ON idempotency_keys(transaction_group_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_trans_id_group
-                ON idempotency_keys(transaction_id, transaction_group_id);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_trans_id_group
+                    ON idempotency_keys(transaction_id, transaction_group_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_customer
-                ON idempotency_keys(customer_id);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_customer
+                    ON idempotency_keys(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_account
-                ON idempotency_keys(account_id);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_account
+                    ON idempotency_keys(account_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_status
-                ON idempotency_keys(status);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_status
+                    ON idempotency_keys(status);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_expires
-                ON idempotency_keys(expires_at);
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_expires
+                    ON idempotency_keys(expires_at);
+                "#,
+            )
             .await?;
 
-        // Requests currently being processed
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_idempotency_processing
-                ON idempotency_keys(status)
-                WHERE status = 'PROCESSING';
-                "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_idempotency_processing
+                    ON idempotency_keys(status)
+                    WHERE status = 'PROCESSING';
+                "#,
+            )
             .await?;
 
         Ok(())

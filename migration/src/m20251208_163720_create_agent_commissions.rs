@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,28 +13,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_commissions_trans_type AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'LOAN_REPAYMENT', 'BILL_PAYMENT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_commissions_trans_type AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'LOAN_REPAYMENT', 'BILL_PAYMENT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_commissions_status AS ENUM ('PENDING', 'PAID', 'CANCELLED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_commissions_status AS ENUM ('PENDING', 'PAID', 'CANCELLED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE agent_commission_rule_comm_type AS ENUM ('PERCENTAGE', 'FLAT')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE agent_commission_rule_comm_type AS ENUM ('PERCENTAGE', 'FLAT')
+                "#,
+            )
             .await?;
 
         let comm_rules = Table::create()
@@ -201,35 +202,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_agent_commissions_agent ON agent_commissions(agent_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_agent_commissions_agent ON agent_commissions(agent_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_agent_commissions_date ON agent_commissions(created_at);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_agent_commissions_date ON agent_commissions(created_at);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_agent_commissions_status ON agent_commissions(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_agent_commissions_status ON agent_commissions(status);
+                "#,
+            )
             .await?;
 
         Ok(())

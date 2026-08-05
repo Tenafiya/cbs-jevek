@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251205_154503_create_accounts::Accounts;
 
@@ -10,18 +10,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE acc_limit_type AS ENUM ('DAILY_DEBIT', 'DAILY_CREDIT', 'DAILY_COUNT', 'WEEKLY_DEBIT', 'WEEKLY_CREDIT', 'WEEKLY_COUNT', 'MONTHLY_DEBIT', 'MONTHLY_CREDIT', 'MONTHLY_COUNT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE acc_limit_type AS ENUM ('DAILY_DEBIT', 'DAILY_CREDIT', 'DAILY_COUNT', 'WEEKLY_DEBIT', 'WEEKLY_CREDIT', 'WEEKLY_COUNT', 'MONTHLY_DEBIT', 'MONTHLY_CREDIT', 'MONTHLY_COUNT')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE acc_limit_unit AS ENUM ('AMOUNT', 'COUNT')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE acc_limit_unit AS ENUM ('AMOUNT', 'COUNT')
+                "#,
+            )
             .await?;
 
         let acc_limits = Table::create()
@@ -100,15 +102,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE account_limits
                     ADD CONSTRAINT unique_acc_limit_acc_id_limit_type
                     UNIQUE (account_id, limit_type);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

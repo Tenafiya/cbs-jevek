@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -8,28 +8,29 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE acc_type_int_calc AS ENUM ('SIMPLE', 'COMPOUND', 'DAILY')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE acc_type_int_calc AS ENUM ('SIMPLE', 'COMPOUND', 'DAILY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE acc_type_int_payout_freq AS ENUM ('MONTHLY', 'QUATERLY', 'YEARLY')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE acc_type_int_payout_freq AS ENUM ('MONTHLY', 'QUATERLY', 'YEARLY')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE acc_type_status AS ENUM ('ACTIVE', 'DORMANT', 'INACTIVE', 'FROZEN', 'CLOSED', 'SUSPENDED')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE acc_type_status AS ENUM ('ACTIVE', 'DORMANT', 'INACTIVE', 'FROZEN', 'CLOSED', 'SUSPENDED')
+                "#,
+            )
             .await?;
 
         let acc_types = Table::create()
@@ -73,7 +74,11 @@ impl MigrationTrait for Migration {
                     .boolean()
                     .default(false),
             )
-            .col(ColumnDef::new(AccountTypes::OverdraftLimit).big_integer().default(0))
+            .col(
+                ColumnDef::new(AccountTypes::OverdraftLimit)
+                    .big_integer()
+                    .default(0),
+            )
             .col(ColumnDef::new(AccountTypes::OverdraftInterestRate).decimal_len(10, 6))
             .col(
                 ColumnDef::new(AccountTypes::DormancyPeriodDays)
@@ -112,15 +117,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE account_types
                     ADD CONSTRAINT unique_account_types_insti
                     UNIQUE (institution_id, code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

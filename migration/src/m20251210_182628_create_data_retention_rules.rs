@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,20 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE data_retention_category AS ENUM ('TRANSACTIONS', 'AUDIT_LOGS', 'CUSTOMER_DATA', 'DOCUMENTS')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE data_retention_category AS ENUM ('TRANSACTIONS', 'AUDIT_LOGS', 'CUSTOMER_DATA', 'DOCUMENTS')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE data_retention_action_after_retention AS ENUM ('ARCHIVE', 'DELETE', 'ANONYMIZE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE data_retention_action_after_retention AS ENUM ('ARCHIVE', 'DELETE', 'ANONYMIZE')
+                "#,
+            )
             .await?;
 
         let data_retention_rules = Table::create()

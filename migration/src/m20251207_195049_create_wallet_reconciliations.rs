@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -13,10 +13,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE wallet_reconciliation_status AS ENUM ('PENDING', 'MATCHED', 'UNMATCHED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE wallet_reconciliation_status AS ENUM ('PENDING', 'MATCHED', 'UNMATCHED')
+                "#,
+            )
             .await?;
 
         let recon = Table::create()
@@ -100,15 +101,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE wallet_reconciliations
                     ADD CONSTRAINT unique_wal_recon_insti_prov_date
                     UNIQUE (institution_id, wallet_provider_id, reconciliation_date);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

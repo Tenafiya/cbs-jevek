@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -12,20 +12,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE report_category AS ENUM ('PORTFOLIO', 'PERFORMANCE', 'COMPLIANCE', 'RISK')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE report_category AS ENUM ('PORTFOLIO', 'PERFORMANCE', 'COMPLIANCE', 'RISK')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE report_frequency AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'ADHOC')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE report_frequency AS ENUM ('DAILY', 'WEEKLY', 'MONTHLY', 'ADHOC')
+                "#,
+            )
             .await?;
 
         let report_schedules = Table::create()

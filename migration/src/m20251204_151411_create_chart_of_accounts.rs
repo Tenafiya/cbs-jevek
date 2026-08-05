@@ -1,4 +1,3 @@
-use sea_orm::Statement;
 use sea_orm_migration::prelude::*;
 
 use crate::m20251204_112805_create_institutions::Institutions;
@@ -64,15 +63,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE chart_of_accounts
                     ADD CONSTRAINT unique_chart_account_insti
                     UNIQUE (institution_id, account_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

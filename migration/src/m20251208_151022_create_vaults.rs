@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Branches,
@@ -12,10 +12,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE vault_status AS ENUM ('ACTIVE', 'INACTIVE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE vault_status AS ENUM ('ACTIVE', 'INACTIVE')
+                "#,
+            )
             .await?;
 
         let vault = Table::create()
@@ -42,11 +43,7 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Vaults::CashBreakdown).json_binary())
             .col(ColumnDef::new(Vaults::MaxBalance).big_integer())
-            .col(
-                ColumnDef::new(Vaults::MinBalance)
-                    .big_integer()
-                    .default(0),
-            )
+            .col(ColumnDef::new(Vaults::MinBalance).big_integer().default(0))
             .col(ColumnDef::new(Vaults::Status).custom("vault_status"))
             .col(ColumnDef::new(Vaults::LastAuditedAt).timestamp_with_time_zone())
             .col(
@@ -77,15 +74,13 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE vaults
                     ADD CONSTRAINT unique_vault_insti_code
                     UNIQUE (institution_id, vault_code);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         Ok(())

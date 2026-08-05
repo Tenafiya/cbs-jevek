@@ -322,7 +322,7 @@ pub async fn update_total_credits(
         vec![credit.into(), acc_id.into(), bal_date.into()],
     );
 
-    let result = trn.execute(stmt).await?;
+    let result = trn.execute_raw(stmt).await?;
 
     if result.rows_affected() == 0 {
         return Err(DbErr::Custom("Could not update total credits".to_string()));
@@ -351,7 +351,7 @@ pub async fn update_total_debits(
         vec![debit.into(), acc_id.into(), bal_date.into()],
     );
 
-    let result = trn.execute(stmt).await?;
+    let result = trn.execute_raw(stmt).await?;
 
     if result.rows_affected() == 0 {
         return Err(DbErr::Custom("Could not update total debits".to_string()));

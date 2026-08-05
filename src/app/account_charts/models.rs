@@ -9,7 +9,7 @@ use validator::Validate;
 use crate::utils::{models::AccountCategorySummary, validators::{validate_acc_cat_type, validate_income, validate_snowflake}};
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, DerivePartialModel)]
 #[sea_orm(entity = "entity::chart_of_accounts::Entity")]
 pub struct ChartOfAccountResponseModel {
     #[serde_as(as = "DisplayFromStr")]
@@ -47,7 +47,7 @@ pub struct ChartOfAccountResponseModel {
 }
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, DerivePartialModel)]
 #[sea_orm(entity = "entity::account_categories::Entity")]
 pub struct AccountCategoryResponseModel {
     #[serde_as(as = "DisplayFromStr")]

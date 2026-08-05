@@ -1,4 +1,4 @@
-use sea_orm::{FromQueryResult, entity::prelude::*};
+use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::{serde_as, DisplayFromStr};
@@ -7,7 +7,7 @@ use validator::Validate;
 use crate::utils::validators::validate_operation;
 
 #[serde_as]
-#[derive(Debug, Clone, Serialize, FromQueryResult, DerivePartialModel)]
+#[derive(Debug, Clone, Serialize, DerivePartialModel)]
 #[sea_orm(entity = "entity::countries::Entity")]
 pub struct CountryResponseModel {
     #[serde_as(as = "DisplayFromStr")]

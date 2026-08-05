@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::m20251206_150936_create_loans::Loans;
 
@@ -10,11 +10,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_repayment_schedule_status AS ENUM ('PENDING', 'PARTIAL', 'PAID', 'OVERDUE')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_repayment_schedule_status AS ENUM ('PENDING', 'PARTIAL', 'PAID', 'OVERDUE')
+                "#,
+            )
             .await?;
 
         let schedule = Table::create()
@@ -100,37 +100,31 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
                     ALTER TABLE loan_repayment_schedules
                     ADD CONSTRAINT unique_loan_repay_install_loan
                     UNIQUE (loan_id, installment_number);
-                "#
-                .to_string(),
-            ))
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_loan_schedules_loan ON loan_repayment_schedules(loan_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_loan_schedules_loan ON loan_repayment_schedules(loan_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_loan_schedules_due_date ON loan_repayment_schedules(due_date);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_loan_schedules_due_date ON loan_repayment_schedules(due_date);
+                "#,
+            )
             .await?;
 
         Ok(())

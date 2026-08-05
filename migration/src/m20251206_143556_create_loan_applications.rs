@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,19 +14,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_application_status AS ENUM ('DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'DISBURSED', 'REPAID', 'WRITTEN_OFF', 'RESCHEDULED', 'REFINANCED')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_application_status AS ENUM ('DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'DISBURSED', 'REPAID', 'WRITTEN_OFF', 'RESCHEDULED', 'REFINANCED')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE loan_risk_rating AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')"
-                    .to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE loan_risk_rating AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')
+                "#,
+            )
             .await?;
 
         let loan_apps = Table::create()
@@ -154,35 +155,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_loan_apps_institution ON loan_applications(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_loan_apps_institution ON loan_applications(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_loan_apps_customer ON loan_applications(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_loan_apps_customer ON loan_applications(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_loan_apps_status ON loan_applications(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_loan_apps_status ON loan_applications(status);
+                "#,
+            )
             .await?;
 
         Ok(())

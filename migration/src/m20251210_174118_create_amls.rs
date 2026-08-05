@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions, m20251204_150208_create_branches::Staff,
@@ -14,34 +14,38 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE aml_risk_level_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE aml_risk_level_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE aml_rules_rule_type AS ENUM ('VELOCITY', 'STRUCTURING', 'SANCTIONS', 'PEP')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE aml_rules_rule_type AS ENUM ('VELOCITY', 'STRUCTURING', 'SANCTIONS', 'PEP')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE aml_rules_action_on_trigger AS ENUM ('FLAG', 'FREEZE_ACCOUNT', 'ALERT', 'BLOCK_TRANSACTION')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE aml_rules_action_on_trigger AS ENUM ('FLAG', 'FREEZE_ACCOUNT', 'ALERT', 'BLOCK_TRANSACTION')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE aml_alerts_status AS ENUM ('OPEN', 'INVESTIGATING', 'RESOLVED', 'FALSE_POSITIVE')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE aml_alerts_status AS ENUM ('OPEN', 'INVESTIGATING', 'RESOLVED', 'FALSE_POSITIVE')
+                "#,
+            )
             .await?;
 
         // AML rules table
@@ -205,46 +209,38 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_aml_alerts_institution ON aml_alerts(institution_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_aml_alerts_institution ON aml_alerts(institution_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_aml_alerts_customer ON aml_alerts(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_aml_alerts_customer ON aml_alerts(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_aml_alerts_status ON aml_alerts(status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_aml_alerts_status ON aml_alerts(status);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_aml_alerts_date ON aml_alerts(created_at);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_aml_alerts_date ON aml_alerts(created_at);
+                "#,
+            )
             .await?;
 
         Ok(())
@@ -261,10 +257,11 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "DROP TYPE IF EXISTS risk_level_enum".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    DROP TYPE IF EXISTS risk_level_enum
+                "#,
+            )
             .await?;
 
         Ok(())

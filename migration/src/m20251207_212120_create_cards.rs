@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*, sea_orm::Statement};
+use sea_orm_migration::prelude::*;
 
 use crate::{
     m20251204_112805_create_institutions::Institutions,
@@ -13,34 +13,38 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_type AS ENUM ('DEBIT', 'CREDIT', 'PREPAID')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_type AS ENUM ('DEBIT', 'CREDIT', 'PREPAID')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_form AS ENUM ('PHYSICAL', 'VIRTUAL')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_form AS ENUM ('PHYSICAL', 'VIRTUAL')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_status AS ENUM ('INACTIVE', 'ACTIVE', 'BLOCKED', 'EXPIRED', 'CANCELLED', 'FROZEN')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_status AS ENUM ('INACTIVE', 'ACTIVE', 'BLOCKED', 'EXPIRED', 'CANCELLED', 'FROZEN')
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
-                "CREATE TYPE card_brand AS ENUM ('VISA', 'MASTERCARD')".to_string(),
-            ))
+            .execute_unprepared(
+                r#"
+                    CREATE TYPE card_brand AS ENUM ('VISA', 'MASTERCARD')
+                "#,
+            )
             .await?;
 
         let cards = Table::create()
@@ -59,7 +63,12 @@ impl MigrationTrait for Migration {
             )
             .col(ColumnDef::new(Cards::CustomerId).big_integer().not_null())
             .col(ColumnDef::new(Cards::AccountId).big_integer().not_null())
-            .col(ColumnDef::new(Cards::CardNumberHashed).string().unique_key().not_null())
+            .col(
+                ColumnDef::new(Cards::CardNumberHashed)
+                    .string()
+                    .unique_key()
+                    .not_null(),
+            )
             .col(ColumnDef::new(Cards::CardNumberMasked).string().not_null())
             .col(
                 ColumnDef::new(Cards::CardFormFactor)
@@ -127,35 +136,29 @@ impl MigrationTrait for Migration {
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_cards_customer ON cards(customer_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_cards_customer ON cards(customer_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_cards_account ON cards(account_id);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_cards_account ON cards(account_id);
+                "#,
+            )
             .await?;
 
         manager
             .get_connection()
-            .execute(Statement::from_string(
-                manager.get_database_backend(),
+            .execute_unprepared(
                 r#"
-                CREATE INDEX idx_cards_status ON cards(card_status);
-            "#
-                .to_string(),
-            ))
+                    CREATE INDEX idx_cards_status ON cards(card_status);
+                "#,
+            )
             .await?;
 
         Ok(())
