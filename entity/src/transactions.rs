@@ -52,6 +52,7 @@ pub struct Model {
     pub approved_by: Option<i64>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
+    pub teller_cash_drawer_id: Option<i64>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -78,6 +79,8 @@ pub enum Relation {
     AgentTransactions,
     #[sea_orm(has_many = "super::aml_alerts::Entity")]
     AmlAlerts,
+    #[sea_orm(has_many = "super::aml_rule_executions::Entity")]
+    AmlRuleExecutions,
     #[sea_orm(has_many = "super::chargebacks::Entity")]
     Chargebacks,
     #[sea_orm(has_many = "super::contributions::Entity")]
@@ -137,6 +140,14 @@ pub enum Relation {
     #[sea_orm(has_many = "super::tax_withholding::Entity")]
     TaxWithholding,
     #[sea_orm(
+        belongs_to = "super::teller_cash_drawers::Entity",
+        from = "Column::TellerCashDrawerId",
+        to = "super::teller_cash_drawers::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    TellerCashDrawers,
+    #[sea_orm(
         belongs_to = "super::transaction_channels::Entity",
         from = "Column::TransactionChannelId",
         to = "super::transaction_channels::Column::Id",
@@ -171,6 +182,12 @@ impl Related<super::agent_transactions::Entity> for Entity {
 impl Related<super::aml_alerts::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AmlAlerts.def()
+    }
+}
+
+impl Related<super::aml_rule_executions::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlRuleExecutions.def()
     }
 }
 
@@ -231,6 +248,12 @@ impl Related<super::staff_commissions::Entity> for Entity {
 impl Related<super::tax_withholding::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TaxWithholding.def()
+    }
+}
+
+impl Related<super::teller_cash_drawers::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TellerCashDrawers.def()
     }
 }
 

@@ -20,7 +20,8 @@ pub struct Model {
     pub last_login_at: Option<DateTimeWithTimeZone>,
     pub current_session_id: Option<String>,
     pub current_terminal_id: Option<String>,
-    pub staff_id: Option<i64>,
+    pub staff_id: i64,
+    pub supervisor_id: Option<i64>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
 }
@@ -50,8 +51,16 @@ pub enum Relation {
         on_update = "NoAction",
         on_delete = "Cascade"
     )]
-    Staff,
-    #[sea_orm(has_many = "super::teller_cash_drawers::Entity")]
+    Staff2,
+    #[sea_orm(
+        belongs_to = "super::staff::Entity",
+        from = "Column::SupervisorId",
+        to = "super::staff::Column::Id",
+        on_update = "NoAction",
+        on_delete = "Cascade"
+    )]
+    Staff1,
+    #[sea_orm(has_one = "super::teller_cash_drawers::Entity")]
     TellerCashDrawers,
 }
 
@@ -64,12 +73,6 @@ impl Related<super::branches::Entity> for Entity {
 impl Related<super::institutions::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Institutions.def()
-    }
-}
-
-impl Related<super::staff::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Staff.def()
     }
 }
 

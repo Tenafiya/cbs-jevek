@@ -293,6 +293,7 @@ pub enum Transactions {
     Id,
     InstitutionId,
     TransactionChannelId,
+    TellerCashDrawerId,
     TransactionReference,
     ParentTransactionId,
     ReversalReason,

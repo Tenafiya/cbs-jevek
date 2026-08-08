@@ -3,14 +3,16 @@ use actix_web::web::{self, ServiceConfig};
 use crate::AppState;
 
 pub mod account_charts;
+pub mod accounts;
+pub mod amls;
 pub mod branches;
 pub mod countries;
 pub mod customers;
 pub mod health;
 pub mod institutions;
-pub mod staffs;
-pub mod accounts;
 pub mod media;
+pub mod staffs;
+pub mod tellers;
 pub mod transactions;
 
 pub fn app_routes(state: web::Data<AppState>) -> impl FnOnce(&mut ServiceConfig) + Clone {
