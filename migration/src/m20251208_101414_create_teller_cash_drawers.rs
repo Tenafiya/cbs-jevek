@@ -1,6 +1,9 @@
 use sea_orm_migration::prelude::*;
 
-use crate::{m20251204_150208_create_branches::Staff, m20251205_193221_create_transactions::Transactions, m20251208_093551_create_tellers::Tellers};
+use crate::{
+    m20251204_150208_create_branches::Staff, m20251205_193221_create_transactions::Transactions,
+    m20251208_093551_create_tellers::Tellers,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -111,9 +114,7 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Transactions::Table)
-                    .add_column(
-                        ColumnDef::new(Transactions::TellerCashDrawerId).big_integer(),
-                    )
+                    .add_column(ColumnDef::new(Transactions::TellerCashDrawerId).big_integer())
                     .add_foreign_key(
                         TableForeignKey::new()
                             .from_tbl(Transactions::Table)

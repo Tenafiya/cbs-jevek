@@ -37,18 +37,18 @@ pub async fn setup(
 
     let institution_name = &data.institution_name;
 
-    let code = gen_string(institution_name.len()).await;
+    let code = gen_string(institution_name.len());
 
     let institution = match init_institution(&data.institution_name, &code, &state).await {
         Ok(inst) => inst,
         Err(err) => {
             tracing::error!(error = ?err, "Failed to find institution");
-            return Err(ApiError::Unprocessable(err.to_string()))
-        },
+            return Err(ApiError::Unprocessable(err.to_string()));
+        }
     };
 
     let salt = uuid::Uuid::new_v4();
-    let password = gen_string(14).await;
+    let password = gen_string(14);
 
     let staff = SetupStaff {
         institution_id: institution.last_insert_id,
@@ -86,7 +86,7 @@ pub async fn add_staff(
     let data = payload.into_inner();
 
     let salt = uuid::Uuid::new_v4();
-    let password = gen_string(14).await;
+    let password = gen_string(14);
 
     let staff = AddStaffModel {
         institution_id: id_parser(&data.institution_id, "Institution Id")?,

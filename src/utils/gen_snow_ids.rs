@@ -50,7 +50,7 @@ pub fn gen_snowflake_slug() -> Result<(i64, String), Box<dyn std::error::Error>>
     Ok((id as i64, slug))
 }
 
-pub async fn get_code(num: i16) -> String {
+pub fn get_code(num: i16) -> String {
     let mut rng = rng();
 
     let code: String = (0..num)
@@ -60,7 +60,7 @@ pub async fn get_code(num: i16) -> String {
     code
 }
 
-pub async fn gen_string(size: usize) -> String {
+pub fn gen_string(size: usize) -> String {
     rng()
         .sample_iter(&Alphanumeric)
         .take(size)

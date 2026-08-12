@@ -24,9 +24,9 @@ pub async fn save_acc_chart(
 
     let chart = entity::chart_of_accounts::ActiveModel {
         id: Set(snowflake),
-        account_code: Set(Some(gen_snow_ids::gen_string(13).await)),
+        account_code: Set(Some(data.acc_code)),
         account_name: Set(Some(data.acc_name)),
-        account_type: Set(Some(data.acc_code)),
+        account_type: Set(Some(data.acc_type)),
         parent_account_id: Set(data.parent_acc_id),
         is_system_account: Set(Some(data.is_system_acc)),
         institution_id: Set(data.institution_id),
@@ -133,7 +133,7 @@ pub async fn get_account_types(
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
         r#"
-        SELECT 
+        SELECT
             at.id,
             at.institution_id,
             at.name,
@@ -184,7 +184,7 @@ pub async fn get_account_type(
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
         r#"
-        SELECT 
+        SELECT
             at.id,
             at.institution_id,
             at.name,

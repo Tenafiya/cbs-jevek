@@ -16,6 +16,7 @@ use crate::{
         staffs::models::StaffResponseModel,
     },
     utils::{
+        conversions,
         errors::{ApiCode, ApiError, ApiResponse},
         gen_snow_ids,
         models::{CursorModel, CursorQueryParams, ListResponseModel, PathParamsModel},
@@ -213,13 +214,18 @@ pub async fn add_account_links(
 
     let StaffResponseModel { institution_id, .. } = staff.into_inner();
 
+    let auth_limit = data
+        .authorized_limit
+        .as_ref()
+        .map(|limit| conversions::minor_conversion(*limit, "GHS"));
+
     let acc_link = AddAccountLinkModel {
         institution_id,
         prim_account_id: gen_snow_ids::id_parser(&data.prim_account_id, "Primary Account Id")?,
         link_account_id: gen_snow_ids::id_parser(&data.link_account_id, "Link Account Id")?,
         link_type: data.link_type,
         relationship: data.relationship,
-        authorized_limit: data.authorized_limit,
+        authorized_limit: auth_limit,
     };
 
     match services::add_acc_links(&acc_link, &state).await {

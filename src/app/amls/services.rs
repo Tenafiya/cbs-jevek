@@ -1,5 +1,5 @@
 use actix_web::web;
-use sea_orm::{ActiveValue::Set, DbErr, EntityTrait, InsertResult};
+use sea_orm::{ActiveValue::Set, DatabaseTransaction, DbErr, EntityTrait, InsertResult};
 
 use crate::{
     AppState,
@@ -40,7 +40,7 @@ pub async fn save_aml(
 
 pub async fn save_aml_alerts(
     model: &AmlAlertsModel,
-    state: &web::Data<AppState>,
+    trn: &DatabaseTransaction,
 ) -> Result<InsertResult<entity::aml_alerts::ActiveModel>, DbErr> {
     use entity::aml_alerts::{ActiveModel, Entity};
 
@@ -60,12 +60,12 @@ pub async fn save_aml_alerts(
         ..Default::default()
     };
 
-    Entity::insert(alert).exec(state.pgdb.get_ref()).await
+    Entity::insert(alert).exec(trn).await
 }
 
 pub async fn save_aml_cases(
     model: &AmlCasesModel,
-    state: &web::Data<AppState>,
+    trn: &DatabaseTransaction,
 ) -> Result<InsertResult<entity::aml_cases::ActiveModel>, DbErr> {
     use entity::aml_cases::{ActiveModel, Entity};
 
@@ -85,7 +85,7 @@ pub async fn save_aml_cases(
         ..Default::default()
     };
 
-    Entity::insert(case).exec(state.pgdb.get_ref()).await
+    Entity::insert(case).exec(trn).await
 }
 
 pub async fn save_aml_case_notes(
@@ -127,7 +127,7 @@ pub async fn save_aml_action(
         case_id: Set(data.case_id),
         alert_id: Set(data.alert_id),
         action_type: Set(Some(data.action_type)),
-        performedby: Set(Some(data.performedby)),
+        performedby: Set(Some(data.performed_by)),
         metadata: Set(data.metadata),
         ..Default::default()
     };

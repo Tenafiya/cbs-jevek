@@ -3,7 +3,12 @@ use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlCasesPriority, AmlEntityType, AmlRiskLevelEnum, AmlRuleActions,
     AmlRulesActionOnTrigger, AmlRulesRuleType, AmlWatchlistsListType,
 };
+use migration::prelude::rust_decimal;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use validator::Validate;
+
+use crate::utils::{models::DateStruct, validators::validate_snowflake};
 
 #[derive(Debug, Clone)]
 pub struct AmlRulesModel {
@@ -58,7 +63,7 @@ pub struct AmlActionsModel {
     pub case_id: i64,
     pub alert_id: i64,
     pub action_type: AmlRuleActions,
-    pub performedby: i64,
+    pub performed_by: i64,
     pub metadata: Option<Value>,
 }
 
@@ -88,4 +93,91 @@ pub struct AmlBlackListModel {
     pub entity_id: Option<i64>,
     pub reason: Option<String>,
     pub severity: AmlRiskLevelEnum,
+}
+
+//=================================================================
+// Params
+//=================================================================
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ConditionValue {
+    String(String),
+    Integer(i64),
+    Decimal(rust_decimal::Decimal),
+    Boolean(bool),
+    Strings(Vec<String>),
+    Integers(Vec<i64>),
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct ConditionParams {
+    pub field: String,
+    pub operator: String,
+    pub value: ConditionValue,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct ConditionGroup {
+    pub operator: String,
+    pub conditions: Vec<ConditionParams>,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct CreateAmlRulesParams {
+    #[validate(length(min = 1, max = 255))]
+    #[serde(rename = "ruleName")]
+    pub rule_name: String,
+
+    #[serde(rename = "ruleType")]
+    pub rule_type: AmlRulesRuleType,
+
+    #[serde(rename = "conditionLogic")]
+    pub condition_logic: ConditionGroup,
+
+    #[serde(rename = "triggerAction")]
+    pub trigger_action: AmlRulesActionOnTrigger,
+
+    #[validate(length(max = 255))]
+    pub description: Option<String>,
+
+    #[validate(range(min = 1, max = 10))]
+    pub priority: Option<i32>,
+
+    #[validate(range(min = 1))]
+    pub version: Option<i32>,
+
+    #[validate(nested)]
+    #[serde(rename = "effectiveDates")]
+    pub effective_dates: Option<DateStruct>,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct CreateAmlCaseNodes {
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "caseId")]
+    pub case_id: String,
+
+    #[validate(length(min = 1, max = 255))]
+    pub notes: String,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct CreateAmlActionParams {
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "caseId")]
+    pub case_id: String,
+
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "alertId")]
+    pub alert_id: String,
+
+    #[serde(rename = "actionType")]
+    pub action_type: AmlRuleActions,
+
+    pub metadata: Option<Value>,
 }

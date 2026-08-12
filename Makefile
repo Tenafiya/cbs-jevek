@@ -210,10 +210,12 @@ version-bump:
 git-release: version-bump
 	@printf "Commit message: "
 	@read MSG; \
+	printf "Push branch: "; \
+	read BRANCH; \
 	git status && \
 	git add . && \
 	git commit -m "$$MSG" && \
-	git push -u origin main
+	git push -u origin "$$BRANCH"
 
 git-debug:
 	@printf "Commit message: "

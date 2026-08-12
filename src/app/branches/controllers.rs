@@ -1,3 +1,4 @@
+use crate::utils::conversions;
 use actix_web::{HttpRequest, HttpResponse, web};
 use validator::Validate;
 
@@ -28,16 +29,18 @@ pub async fn add_branch(
 
     let institution_id = id_parser(&data.institution_id, "Institution Id")?;
 
+    let cash_limit = conversions::minor_conversion(data.cash_limit, "GHS");
+
     let branch = AddBranchModel {
         name: data.name,
-        code: utils::gen_snow_ids::get_code(6).await,
+        code: utils::gen_snow_ids::get_code(6),
         institution: institution_id,
         address: data.address,
         phone: data.phone,
         email: data.email,
         location: data.location,
         is_main: data.is_main_branch,
-        cash_limit: data.cash_limit,
+        cash_limit,
     };
 
     match services::save_branch(&branch, &state).await {
@@ -49,7 +52,7 @@ pub async fn add_branch(
         Err(err) => {
             tracing::error!(error = ?err, "Failed to save branch");
             Err(ApiError::InternalServerError)
-        },
+        }
     }
 }
 
@@ -75,7 +78,7 @@ pub async fn get_branch_details(
         Err(e) => {
             tracing::error!(error = ?e, "Failed to fetch branch details");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }
 
@@ -89,13 +92,13 @@ pub async fn get_branches(
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
-    let data = params.into_inner();
-
-    let id = id_parser(&data.id, "Id")?;
-
     query
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+    let data = params.into_inner();
+
+    let id = id_parser(&data.id, "Id")?;
 
     let query = QueryModel {
         size: query.size,
@@ -114,6 +117,6 @@ pub async fn get_branches(
         Err(e) => {
             tracing::error!(error = ?e, "Failed to get branch list");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }

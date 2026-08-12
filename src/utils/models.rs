@@ -1,8 +1,11 @@
+use chrono::{DateTime, FixedOffset};
 use entity::sea_orm_active_enums::CustomerType;
 use sea_orm::prelude::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use validator::Validate;
+
+use crate::utils::validators::validate_date_range;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountCategorySummary {
@@ -122,4 +125,11 @@ pub fn default_decimal() -> Decimal {
 
 fn default_limit() -> u64 {
     20
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[validate(schema(function = "validate_date_range"))]
+pub struct DateStruct {
+    pub effective_from: DateTime<FixedOffset>,
+    pub effective_to: DateTime<FixedOffset>,
 }

@@ -33,7 +33,7 @@ pub async fn add_institution(
 
     let institution = AddInstitutionModel {
         name: data.name,
-        code: utils::gen_snow_ids::get_code(6).await,
+        code: utils::gen_snow_ids::get_code(6),
         country: country_id,
         license_num: data.license_num,
         regulation_num: data.regulation_num,
@@ -55,7 +55,7 @@ pub async fn add_institution(
         Err(err) => {
             tracing::error!(error = ?err, "Failed to save institution");
             Err(ApiError::InternalServerError)
-        },
+        }
     }
 }
 
@@ -81,7 +81,7 @@ pub async fn get_institution(
         Err(e) => {
             tracing::error!(error = ?e, "Failed to get institution");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }
 
@@ -111,7 +111,7 @@ pub async fn get_institutions(
         Err(e) => {
             tracing::error!(error = ?e, "Failed to get institutions");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }
 
@@ -144,6 +144,6 @@ pub async fn update_institution(
         Err(e) => {
             tracing::error!(error = ?e, "Failed to update institution");
             Err(ApiError::InternalServerError)
-        },
+        }
     }
 }

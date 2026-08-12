@@ -42,7 +42,7 @@ pub async fn add_acc_chart(
 
     let acc_chart = AddAccountChartModel {
         institution_id,
-        acc_code: gen_snow_ids::gen_string(14).await,
+        acc_code: gen_snow_ids::gen_string(14),
         acc_name: data.acc_name,
         acc_type: data.acc_type,
         currency_code: data.currency_code,
@@ -59,7 +59,7 @@ pub async fn add_acc_chart(
         Err(e) => {
             tracing::error!(error = ?e, "failed to add account charts");
             Err(ApiError::InternalServerError)
-        },
+        }
     }
 }
 
@@ -93,7 +93,7 @@ pub async fn add_acc_cat(
         Err(e) => {
             tracing::error!(error = ?e, "failed to add account category");
             Err(ApiError::InternalServerError)
-        },
+        }
     }
 }
 
@@ -110,7 +110,7 @@ pub async fn fetch_charts(
         Err(e) => {
             tracing::error!(error = ?e, "failed to fetch account charts");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }
 
@@ -130,7 +130,7 @@ pub async fn fetch_categories(
         Err(e) => {
             tracing::error!(error = ?e, "failed to fetch account categories");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }
 
@@ -160,7 +160,7 @@ pub async fn add_acc_types(
         institution_id,
         category_id: gen_snow_ids::id_parser(&data.category_id, "Category ID")?,
         name: Some(data.name),
-        code: Some(gen_snow_ids::gen_string(13).await),
+        code: Some(gen_snow_ids::gen_string(13)),
         description: Some(data.description),
         currency: gen_snow_ids::get_serde_value(&data.currency)?,
         min_balance: conversions::minor_conversion(data.min_balance, "GHs"),
@@ -186,7 +186,7 @@ pub async fn add_acc_types(
         Err(e) => {
             tracing::error!(error = ?e, "failed to add account types");
             Err(ApiError::InternalServerError)
-        },
+        }
     }
 }
 
@@ -206,6 +206,6 @@ pub async fn fetch_account_types(
         Err(e) => {
             tracing::error!(error = ?e, "failed to fetch account types");
             Err(ApiError::NotFound)
-        },
+        }
     }
 }
