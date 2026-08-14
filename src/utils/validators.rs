@@ -150,3 +150,12 @@ pub fn validate_content_type(content_type: &str) -> Result<(), ValidationError> 
 
     Ok(())
 }
+
+pub fn validate_cash_type(c_type: &str) -> Result<(), ValidationError> {
+    match c_type {
+        "NOTES" | "COINS" => Ok(()),
+        _ => {
+            Err(ValidationError::new("ACCOUNT_CASH_TYPE").with_message("Invalid cash type".into()))
+        }
+    }
+}

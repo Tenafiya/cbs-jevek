@@ -10,6 +10,9 @@ use validator::Validate;
 
 use crate::utils::{models::DateStruct, validators::validate_snowflake};
 
+//=================================================================
+// Models
+//=================================================================
 #[derive(Debug, Clone)]
 pub struct AmlRulesModel {
     pub institution_id: i64,

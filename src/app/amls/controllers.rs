@@ -128,3 +128,57 @@ pub async fn create_aml_action(
         }
     }
 }
+
+pub async fn fetch_aml_rules(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+) -> Result<HttpResponse, ApiError> {
+    match services::get_aml_rules(staff.institution_id, &state).await {
+        Ok(res) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            res,
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch Aml Rules");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}
+
+pub async fn fetch_aml_cases(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+) -> Result<HttpResponse, ApiError> {
+    match services::get_aml_cases(staff.institution_id, &state).await {
+        Ok(res) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            res,
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch Aml Cases");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}
+
+pub async fn fetch_aml_alerts(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+) -> Result<HttpResponse, ApiError> {
+    match services::get_aml_alerts(staff.institution_id, &state).await {
+        Ok(res) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            res,
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch Aml Alerts");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}

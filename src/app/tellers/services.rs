@@ -1,10 +1,19 @@
 use actix_web::web;
-use sea_orm::{ActiveValue::Set, DatabaseTransaction, DbErr, EntityTrait, InsertResult};
+use sea_orm::{
+    ActiveValue::Set, ConnectionTrait, DatabaseBackend, DatabaseTransaction, DbErr, EntityTrait,
+    FromQueryResult, InsertResult, Statement,
+};
 
 use crate::{
     AppState,
-    app::tellers::models::{AddDrawerModel, AddTellerModel, AddTellerReconModel},
-    utils::gen_snow_ids,
+    app::tellers::{
+        mapper::{TellerFlat, TellerRow},
+        models::{AddDrawerModel, AddTellerModel, AddTellerReconModel},
+    },
+    utils::{
+        gen_snow_ids,
+        models::{MetaModel, QueryModel},
+    },
 };
 
 pub async fn add_teller(
@@ -72,4 +81,181 @@ pub async fn open_drawer(
     };
 
     Entity::insert(drawer).exec(state.pgdb.get_ref()).await
+}
+
+pub async fn get_teller(
+    teller_id: i64,
+    institution_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<TellerRow, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            t.id,
+            t.institution_id,
+            t.branch_id,
+            t.teller_name,
+            t.teller_number,
+            t.drawer_limit,
+            t.current_drawer_balance,
+            t.status,
+            t.is_logged_in,
+            t.last_login_at,
+            t.current_session_id,
+            t.current_terminal_id,
+
+            -- Staff
+            s.id AS staff_id,
+            s.employee_number AS staff_employee_number,
+            s.full_name AS staff_full_name,
+            s.first_name AS staff_first_name,
+            s.last_name AS staff_last_name,
+            s.phone_number AS staff_phone_number,
+            s.email_address AS staff_email_address,
+            s.job_title AS staff_job_title,
+            s.department AS staff_department,
+            s.employment_status AS staff_employment_status,
+
+            -- Supervisor
+            sp.id AS supervisor_id,
+            sp.employee_number AS supervisor_employee_number,
+            sp.full_name AS supervisor_full_name,
+            sp.first_name AS supervisor_first_name,
+            sp.last_name AS supervisor_last_name,
+            sp.phone_number AS supervisor_phone_number,
+            sp.email_address AS supervisor_email_address,
+            sp.job_title AS supervisor_job_title,
+            sp.department AS supervisor_department,
+            sp.employment_status AS supervisor_employment_status
+
+        FROM tellers t
+
+        INNER JOIN staff s
+            ON s.id = t.staff_id
+            AND s.institution_id = t.institution_id
+
+        LEFT JOIN staff sp
+            ON sp.id = t.supervisor_id
+            AND sp.institution_id = t.institution_id
+
+        WHERE t.id = $1
+            AND t.institution_id = $2;
+        "#,
+        vec![teller_id.into(), institution_id.into()],
+    );
+
+    TellerFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Teller not found".to_string()))
+        .map(Into::into)
+}
+
+pub async fn get_teller_list(
+    institution_id: i64,
+    model: QueryModel,
+    state: &web::Data<AppState>,
+) -> Result<(Vec<TellerRow>, MetaModel), DbErr> {
+    let data = model.clone();
+
+    let offset = (data.page.saturating_sub(1)) * data.size;
+
+    let count_stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT COUNT(*) as total
+        FROM tellers t
+        WHERE t.institution_id = $1;
+        "#,
+        vec![institution_id.into()],
+    );
+
+    let count = state
+        .pgdb
+        .get_ref()
+        .query_one_raw(count_stmt)
+        .await?
+        .ok_or_else(|| DbErr::Custom("Failed to get teller count".to_string()))?;
+
+    let total_items: i64 = count.try_get("", "total")?;
+
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            t.id,
+            t.institution_id,
+            t.branch_id,
+            t.teller_name,
+            t.teller_number,
+            t.drawer_limit,
+            t.current_drawer_balance,
+            t.status,
+            t.is_logged_in,
+            t.last_login_at,
+            t.current_session_id,
+            t.current_terminal_id,
+
+            -- Staff
+            s.id AS staff_id,
+            s.employee_number AS staff_employee_number,
+            s.full_name AS staff_full_name,
+            s.first_name AS staff_first_name,
+            s.last_name AS staff_last_name,
+            s.phone_number AS staff_phone_number,
+            s.email_address AS staff_email_address,
+            s.job_title AS staff_job_title,
+            s.department AS staff_department,
+            s.employment_status AS staff_employment_status,
+
+            -- Supervisor
+            sp.id AS supervisor_id,
+            sp.employee_number AS supervisor_employee_number,
+            sp.full_name AS supervisor_full_name,
+            sp.first_name AS supervisor_first_name,
+            sp.last_name AS supervisor_last_name,
+            sp.phone_number AS supervisor_phone_number,
+            sp.email_address AS supervisor_email_address,
+            sp.job_title AS supervisor_job_title,
+            sp.department AS supervisor_department,
+            sp.employment_status AS supervisor_employment_status
+
+        FROM tellers t
+
+        INNER JOIN staff s
+            ON s.id = t.staff_id
+            AND s.institution_id = t.institution_id
+
+        LEFT JOIN staff sp
+            ON sp.id = t.supervisor_id
+            AND sp.institution_id = t.institution_id
+
+        WHERE t.institution_id = $1
+        ORDER BY t.created_at DESC
+        LIMIT $2 OFFSET $3
+        "#,
+        vec![institution_id.into(), data.size.into(), offset.into()],
+    );
+
+    let rows = TellerFlat::find_by_statement(stmt)
+        .all(state.pgdb.get_ref())
+        .await?;
+
+    let items: Vec<TellerRow> = rows.into_iter().map(Into::into).collect();
+
+    let total_pages = if total_items == 0 {
+        0
+    } else {
+        ((total_items - 1) / data.size as i64) + 1
+    };
+
+    let meta = MetaModel {
+        total_items: total_items as u64,
+        total_pages: total_pages as u64,
+        page: data.page,
+        per_page: data.size,
+    };
+
+    Ok((items, meta))
 }

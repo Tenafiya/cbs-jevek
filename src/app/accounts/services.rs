@@ -113,7 +113,6 @@ pub async fn get_accounts(
             pa.hold_balance AS parent_account_hold_balance,
 
             at.id AS account_type_id,
-            at.institution_id AS account_type_institution_id,
             at.name AS account_type_name,
             at.code AS account_type_code,
             at.description AS account_type_description,
@@ -205,7 +204,6 @@ pub async fn fetch_customer_acc(
             pa.hold_balance AS parent_account_hold_balance,
 
             at.id AS account_type_id,
-            at.institution_id AS account_type_institution_id,
             at.name AS account_type_name,
             at.code AS account_type_code,
             at.description AS account_type_description,

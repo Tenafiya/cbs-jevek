@@ -5,11 +5,14 @@ use entity::sea_orm_active_enums::{
     TransactionReversalTypes, TransactionStatus, TransactionType,
 };
 use sea_orm::prelude::Decimal;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 use validator::Validate;
 
-use crate::utils::{models::DateStruct, validators::validate_snowflake};
+use crate::utils::{
+    models::{CurrencyParams, DateStruct},
+    validators::validate_snowflake,
+};
 
 // ===========================================
 // Models
@@ -129,22 +132,6 @@ pub struct AddTransactionDisputeModel {
 //=================================================================
 // Params
 //=================================================================
-#[derive(Debug, Deserialize, Serialize, Validate)]
-#[serde(deny_unknown_fields)]
-pub struct CurrencyParams {
-    #[validate(length(min = 1, max = 100))]
-    pub name: String,
-
-    #[validate(length(min = 1, max = 10))]
-    pub symbol: String,
-
-    #[validate(length(equal = 3))]
-    pub code: String,
-
-    #[validate(range(min = 0, max = 18))]
-    pub precision: i32,
-}
-
 #[derive(Debug, Deserialize, Validate)]
 #[serde(deny_unknown_fields)]
 pub struct AddTransChannelParams {

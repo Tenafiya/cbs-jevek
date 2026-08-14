@@ -65,7 +65,6 @@ pub struct AccountFlat {
     pub parent_account_hold_balance: Option<i64>,
 
     pub account_type_id: i64,
-    pub account_type_institution_id: i64,
     pub account_type_name: Option<String>,
     pub account_type_code: Option<String>,
     pub account_type_description: Option<String>,
@@ -119,7 +118,6 @@ impl From<AccountFlat> for AccountRow {
 
             account_type: AccountTypeSummary {
                 id: flat.account_type_id.to_string(),
-                institution_id: flat.account_type_institution_id.to_string(),
                 name: flat.account_type_name,
                 code: flat.account_type_code,
                 description: flat.account_type_description,
