@@ -1,4 +1,5 @@
 use entity::sea_orm_active_enums::TellerReconType;
+use sea_orm::prelude::Decimal;
 use serde::Deserialize;
 use serde_json::Value;
 use validator::Validate;
@@ -59,7 +60,7 @@ pub struct AddDrawerParams {
     pub teller_id: String,
 
     #[serde(rename = "openingCashAmount")]
-    pub opening_cash_amount: i64,
+    pub opening_cash_amount: Decimal,
 
     #[validate(nested)]
     #[serde(rename = "openingCash")]

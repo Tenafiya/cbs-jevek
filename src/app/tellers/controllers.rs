@@ -16,6 +16,7 @@ use crate::{
         },
     },
     utils::{
+        conversions,
         errors::{ApiCode, ApiError, ApiResponse},
         gen_snow_ids,
         models::{ListResponseModel, PathParamsModel, QueryModel, QueryParamsModel},
@@ -136,9 +137,11 @@ pub async fn start_drawer_session(
         ApiError::InternalServerError
     })?;
 
+    let cash_amount = conversions::minor_conversion(data.opening_cash_amount, "GHS");
+
     let drawer = AddDrawerModel {
         teller_id: gen_snow_ids::id_parser(&teller.id, "Teller ID")?,
-        opening_cash_amount: data.opening_cash_amount,
+        opening_cash_amount: cash_amount,
         opening_cash: cash,
     };
 

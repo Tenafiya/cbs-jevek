@@ -13,7 +13,9 @@ use crate::utils::validators::{validate_cash_type, validate_date_range, validate
 #[derive(Debug, Deserialize, Validate)]
 #[validate(schema(function = "validate_date_range"))]
 pub struct DateStruct {
+    #[serde(rename = "effectiveFrom")]
     pub effective_from: DateTime<FixedOffset>,
+    #[serde(rename = "effectiveTo")]
     pub effective_to: DateTime<FixedOffset>,
 }
 
