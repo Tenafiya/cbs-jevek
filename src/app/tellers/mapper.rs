@@ -1,4 +1,4 @@
-use crate::utils::models::{StaffSummary, TellerSummary};
+use crate::utils::models::{StaffSelectFields, StaffSummary, TellerSummary};
 use chrono::{DateTime, FixedOffset};
 use entity::sea_orm_active_enums::{
     StaffEmploymentEnum, TellerCashDrawersStatus, TellerReconType, TellerStatus,
@@ -229,9 +229,10 @@ pub struct TellerReconRow {
     pub cash_drawer_id: String,
     pub reconciliation_type: Option<TellerReconType>,
     pub notes: Option<String>,
-    pub supervisor_id: Option<i64>,
     pub created_at: Option<DateTime<FixedOffset>>,
     pub updated_at: Option<DateTime<FixedOffset>>,
+
+    pub supervisor: Option<StaffSelectFields>,
 }
 
 #[derive(Debug, FromQueryResult, Clone)]
@@ -240,9 +241,11 @@ pub struct TellerReconFlat {
     pub cash_drawer_id: i64,
     pub reconciliation_type: Option<TellerReconType>,
     pub notes: Option<String>,
-    pub supervisor_id: Option<i64>,
     pub created_at: Option<DateTime<FixedOffset>>,
     pub updated_at: Option<DateTime<FixedOffset>>,
+
+    pub supervisor_id: Option<i64>,
+    pub full_name: Option<String>,
 }
 
 impl From<TellerReconFlat> for TellerReconRow {
@@ -252,9 +255,13 @@ impl From<TellerReconFlat> for TellerReconRow {
             cash_drawer_id: value.cash_drawer_id.to_string(),
             reconciliation_type: value.reconciliation_type,
             notes: value.notes,
-            supervisor_id: value.supervisor_id,
             created_at: value.created_at,
             updated_at: value.updated_at,
+
+            supervisor: value.supervisor_id.map(|id| StaffSelectFields {
+                id: id.to_string(),
+                full_name: value.full_name,
+            }),
         }
     }
 }

@@ -1,4 +1,4 @@
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, Utc};
 use entity::sea_orm_active_enums::{
     AmlCaseStatus, AmlCasesPriority, AmlRulesActionOnTrigger, AmlRulesRuleType, CustomerType,
     StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
@@ -221,6 +221,12 @@ pub struct CursorMetaModel {
     pub next_cursor: Option<String>,
     pub has_next: bool,
     pub limit: u64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DateQuery {
+    pub from: DateTime<Utc>,
+    pub to: DateTime<Utc>,
 }
 
 fn default_page() -> u64 {

@@ -7,12 +7,15 @@ use sea_orm::{
 use crate::{
     AppState,
     app::tellers::{
-        mapper::{TellerFlat, TellerRow},
+        mapper::{
+            TellerCashDrawerFlat, TellerCashDrawerRow, TellerFlat, TellerReconFlat, TellerReconRow,
+            TellerRow,
+        },
         models::{AddDrawerModel, AddTellerModel, AddTellerReconModel},
     },
     utils::{
         gen_snow_ids,
-        models::{MetaModel, QueryModel},
+        models::{DateQuery, MetaModel, QueryModel},
     },
 };
 
@@ -33,6 +36,7 @@ pub async fn add_teller(
         teller_name: Set(data.teller_name),
         teller_number: Set(data.teller_number),
         staff_id: Set(data.staff_id),
+        branch_id: Set(data.branch_id),
         ..Default::default()
     };
 
@@ -258,4 +262,244 @@ pub async fn get_teller_list(
     };
 
     Ok((items, meta))
+}
+
+pub async fn get_teller_drawers(
+    teller_id: i64,
+    institution_id: i64,
+    dates: &DateQuery,
+    state: &web::Data<AppState>,
+) -> Result<Vec<TellerCashDrawerRow>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            -- Drawer
+            tcd.id,
+            tcd.opening_cash_amount,
+            tcd.opening_cash,
+            tcd.total_cash_in,
+            tcd.total_cash_out,
+            tcd.cheque_count,
+            tcd.total_cheque_amount,
+            tcd.transfer_in_count,
+            tcd.total_transfer_in_amount,
+            tcd.transfer_out_count,
+            tcd.total_transfer_out_amount,
+            tcd.closing_balance,
+            tcd.closing_cash,
+            tcd.expected_amount,
+            tcd.variance_amount,
+            tcd.variance_reason,
+            tcd.status,
+            tcd.opened_at,
+            tcd.closed_at,
+
+            -- Teller
+            t.id AS teller_id,
+            t.teller_name,
+            t.teller_number,
+            t.branch_id,
+
+            -- Supervisor
+            s.id AS supervisor_id,
+            s.employee_number AS supervisor_employee_number,
+            s.full_name AS supervisor_full_name,
+            s.first_name AS supervisor_first_name,
+            s.last_name AS supervisor_last_name,
+            s.phone_number AS supervisor_phone_number,
+            s.email_address AS supervisor_email_address,
+            s.job_title AS supervisor_job_title,
+            s.department AS supervisor_department,
+            s.employment_status AS supervisor_employment_status
+
+        FROM teller_cash_drawers tcd
+
+        INNER JOIN tellers t
+            ON t.id = tcd.teller_id
+            AND t.institution_id = tcd.institution_id
+
+        LEFT JOIN staff s
+            ON s.id = t.supervisor_id
+            AND s.institution_id = t.institution_id
+
+        WHERE tcd.institution_id = $1
+        AND tcd.teller_id = $2
+        AND tcd.opened_at < $3
+            AND (
+                tcd.closed_at IS NULL
+                OR tcd.closed_at >= $4
+            )
+        "#,
+        vec![
+            institution_id.into(),
+            teller_id.into(),
+            dates.to.into(),
+            dates.from.into(),
+        ],
+    );
+
+    TellerCashDrawerFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await
+        .map(|rows| rows.into_iter().map(Into::into).collect())
+}
+
+pub async fn get_institution_drawers(
+    institution_id: i64,
+    dates: &DateQuery,
+    state: &web::Data<AppState>,
+) -> Result<Vec<TellerCashDrawerRow>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            -- Drawer
+            tcd.id,
+            tcd.opening_cash_amount,
+            tcd.opening_cash,
+            tcd.total_cash_in,
+            tcd.total_cash_out,
+            tcd.cheque_count,
+            tcd.total_cheque_amount,
+            tcd.transfer_in_count,
+            tcd.total_transfer_in_amount,
+            tcd.transfer_out_count,
+            tcd.total_transfer_out_amount,
+            tcd.closing_balance,
+            tcd.closing_cash,
+            tcd.expected_amount,
+            tcd.variance_amount,
+            tcd.variance_reason,
+            tcd.status,
+            tcd.opened_at,
+            tcd.closed_at,
+
+            -- Teller
+            t.id AS teller_id,
+            t.teller_name,
+            t.teller_number,
+            t.branch_id,
+
+            -- Supervisor
+            s.id AS supervisor_id,
+            s.employee_number AS supervisor_employee_number,
+            s.full_name AS supervisor_full_name,
+            s.first_name AS supervisor_first_name,
+            s.last_name AS supervisor_last_name,
+            s.phone_number AS supervisor_phone_number,
+            s.email_address AS supervisor_email_address,
+            s.job_title AS supervisor_job_title,
+            s.department AS supervisor_department,
+            s.employment_status AS supervisor_employment_status
+
+        FROM teller_cash_drawers tcd
+
+        INNER JOIN tellers t
+            ON t.id = tcd.teller_id
+            AND t.institution_id = tcd.institution_id
+
+        LEFT JOIN staff s
+            ON s.id = t.supervisor_id
+            AND s.institution_id = t.institution_id
+
+        WHERE tcd.institution_id = $1
+        AND tcd.opened_at < $2
+            AND (
+                tcd.closed_at IS NULL
+                OR tcd.closed_at >= $3
+            )
+        "#,
+        vec![institution_id.into(), dates.to.into(), dates.from.into()],
+    );
+
+    TellerCashDrawerFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await
+        .map(|rows| rows.into_iter().map(Into::into).collect())
+}
+
+pub async fn get_teller_recons(
+    teller_id: i64,
+    institution_id: i64,
+    dates: &DateQuery,
+    state: &web::Data<AppState>,
+) -> Result<Vec<TellerReconRow>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            tr.id,
+            tr.cash_drawer_id,
+            tr.reconciliation_type,
+            tr.notes,
+            tr.created_at,
+            tr.updated_at,
+
+            s.id AS supervisor_id,
+            s.full_name
+
+        FROM teller_reconciliations tr
+
+        LEFT JOIN staff s
+            ON s.id = tr.supervisor_id
+            AND s.institution_id = tr.institution_id
+
+        WHERE
+            tr.institution_id = $1
+            AND tr.created_at >= $2
+            AND tr.created_at < $3
+            AND tr.teller_id = $4
+        "#,
+        vec![
+            institution_id.into(),
+            dates.from.into(),
+            dates.to.into(),
+            teller_id.into(),
+        ],
+    );
+
+    TellerReconFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await
+        .map(|rows| rows.into_iter().map(Into::into).collect())
+}
+
+pub async fn get_institution_recons(
+    institution_id: i64,
+    dates: &DateQuery,
+    state: &web::Data<AppState>,
+) -> Result<Vec<TellerReconRow>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            tr.id,
+            tr.cash_drawer_id,
+            tr.reconciliation_type,
+            tr.notes,
+            tr.created_at,
+            tr.updated_at,
+
+            s.id AS supervisor_id,
+            s.full_name
+
+        FROM teller_reconciliations tr
+
+        LEFT JOIN staff s
+            ON s.id = tr.supervisor_id
+            AND s.institution_id = tr.institution_id
+
+        WHERE
+            tr.institution_id = $1
+            AND tr.created_at >= $2
+            AND tr.created_at < $3
+        "#,
+        vec![institution_id.into(), dates.from.into(), dates.to.into()],
+    );
+
+    TellerReconFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await
+        .map(|rows| rows.into_iter().map(Into::into).collect())
 }
