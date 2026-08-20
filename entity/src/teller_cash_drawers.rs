@@ -9,16 +9,19 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: i64,
-    #[sea_orm(unique_key = "unique_tel_cash_teller_opened")]
+    #[sea_orm(unique)]
     pub teller_id: i64,
-    pub opening_balance: Option<i64>,
+    pub opening_cash_amount: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub opening_cash: Option<Json>,
     pub total_cash_in: Option<i64>,
     pub total_cash_out: Option<i64>,
-    pub total_cheques: Option<i64>,
-    pub total_transfers_in: Option<i64>,
-    pub total_transfers_out: Option<i64>,
+    pub cheque_count: Option<i32>,
+    pub total_cheque_amount: Option<i64>,
+    pub transfer_in_count: Option<i32>,
+    pub total_transfer_in_amount: Option<i64>,
+    pub transfer_out_count: Option<i32>,
+    pub total_transfer_out_amount: Option<i64>,
     pub closing_balance: Option<i64>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub closing_cash: Option<Json>,
@@ -26,7 +29,6 @@ pub struct Model {
     pub variance_amount: Option<i64>,
     pub variance_reason: Option<String>,
     pub status: Option<TellerCashDrawersStatus>,
-    #[sea_orm(unique_key = "unique_tel_cash_teller_opened")]
     pub opened_at: Option<DateTimeWithTimeZone>,
     pub closed_at: Option<DateTimeWithTimeZone>,
     pub closed_by_supervisor: Option<i64>,
@@ -54,6 +56,8 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Tellers,
+    #[sea_orm(has_many = "super::transactions::Entity")]
+    Transactions,
 }
 
 impl Related<super::staff::Entity> for Entity {
@@ -71,6 +75,12 @@ impl Related<super::teller_reconciliations::Entity> for Entity {
 impl Related<super::tellers::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Tellers.def()
+    }
+}
+
+impl Related<super::transactions::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Transactions.def()
     }
 }
 

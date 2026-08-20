@@ -51,7 +51,7 @@ pub struct Model {
     pub deleted_at: Option<DateTimeWithTimeZone>,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
-    pub full_name: Option<String>
+    pub full_name: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -68,8 +68,10 @@ pub enum Relation {
     AgentSettlements,
     #[sea_orm(has_many = "super::agents::Entity")]
     Agents,
-    #[sea_orm(has_many = "super::aml_rules::Entity")]
-    AmlRules,
+    #[sea_orm(has_many = "super::aml_actions::Entity")]
+    AmlActions,
+    #[sea_orm(has_many = "super::aml_case_notes::Entity")]
+    AmlCaseNotes,
     #[sea_orm(
         belongs_to = "super::branches::Entity",
         from = "Column::BranchId",
@@ -166,8 +168,6 @@ pub enum Relation {
     TellerCashDrawers,
     #[sea_orm(has_many = "super::teller_reconciliations::Entity")]
     TellerReconciliations,
-    #[sea_orm(has_many = "super::tellers::Entity")]
-    Tellers,
     #[sea_orm(has_many = "super::wallet_reconciliations::Entity")]
     WalletReconciliations,
 }
@@ -208,9 +208,15 @@ impl Related<super::agents::Entity> for Entity {
     }
 }
 
-impl Related<super::aml_rules::Entity> for Entity {
+impl Related<super::aml_actions::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::AmlRules.def()
+        Relation::AmlActions.def()
+    }
+}
+
+impl Related<super::aml_case_notes::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlCaseNotes.def()
     }
 }
 
@@ -439,12 +445,6 @@ impl Related<super::teller_cash_drawers::Entity> for Entity {
 impl Related<super::teller_reconciliations::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::TellerReconciliations.def()
-    }
-}
-
-impl Related<super::tellers::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Tellers.def()
     }
 }
 

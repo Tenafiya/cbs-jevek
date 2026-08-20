@@ -4,7 +4,15 @@ use entity::sea_orm_active_enums::{
     TransactionLimitsLimitType, TransactionPriority, TransactionReversalStatus,
     TransactionReversalTypes, TransactionStatus, TransactionType,
 };
+use sea_orm::prelude::Decimal;
+use serde::Deserialize;
 use serde_json::Value;
+use validator::Validate;
+
+use crate::utils::{
+    models::{CurrencyParams, DateStruct},
+    validators::validate_snowflake,
+};
 
 // ===========================================
 // Models
@@ -119,4 +127,54 @@ pub struct AddTransactionDisputeModel {
     pub priority: TransactionPriority,
     pub resolution: String,
     pub refund_amount: i64,
+}
+
+//=================================================================
+// Params
+//=================================================================
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct AddTransChannelParams {
+    #[validate(length(min = 1, max = 255))]
+    #[serde(rename = "channelName")]
+    pub channel_name: String,
+
+    #[validate(length(min = 1, max = 255))]
+    pub description: Option<String>,
+
+    #[serde(rename = "requiresApproval")]
+    pub requires_approval: bool,
+
+    pub metadata: Option<Value>,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct AddTransLimitParams {
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "transactionChannelId")]
+    pub trans_channel_id: String,
+
+    #[serde(rename = "customerType")]
+    pub customer_type: CustomerType,
+
+    #[validate(nested)]
+    pub currency: Option<CurrencyParams>,
+
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "accountCategoryId")]
+    pub acc_category_id: String,
+
+    #[serde(rename = "limitType")]
+    pub limit_type: TransactionLimitsLimitType,
+
+    #[serde(rename = "maxAmount")]
+    pub max_amount: Option<Decimal>,
+
+    #[serde(rename = "maxCount")]
+    pub max_count: Option<i32>,
+
+    #[validate(nested)]
+    #[serde(rename = "effectiveDates")]
+    pub effective_dates: Option<DateStruct>,
 }

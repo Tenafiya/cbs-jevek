@@ -1,3 +1,4 @@
+use crate::utils::models::DateStruct;
 use chrono::{Datelike, NaiveDate, Utc};
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -91,8 +92,11 @@ pub fn validate_snowflake(id: &str) -> Result<(), ValidationError> {
 
 pub fn validate_acc_cat_type(cat: &str) -> Result<(), ValidationError> {
     match cat {
-        "SAVINGS" | "CURRENT" | "FIXED_DEPOSIT" | "LOAN" | "WALLET" | "AGENT_FLOAT" | "SUSU" => Ok(()),
-        _ => Err(ValidationError::new("ACCOUNT_CATEGORY_TYPE").with_message("Invalid account category type".into()))
+        "SAVINGS" | "CURRENT" | "FIXED_DEPOSIT" | "LOAN" | "WALLET" | "AGENT_FLOAT" | "SUSU" => {
+            Ok(())
+        }
+        _ => Err(ValidationError::new("ACCOUNT_CATEGORY_TYPE")
+            .with_message("Invalid account category type".into())),
     }
 }
 
@@ -111,6 +115,14 @@ pub fn validate_file_entity(entity: &str) -> Result<(), ValidationError> {
         "CUS" => Ok(()),
         _ => Err(ValidationError::new("File entity").with_message("Invalid file entity".into())),
     }
+}
+
+pub fn validate_date_range(data: &DateStruct) -> Result<(), ValidationError> {
+    if data.effective_from >= data.effective_to {
+        return Err(ValidationError::new("invalid_range")
+            .with_message("End date must be after start date".into()));
+    }
+    Ok(())
 }
 
 pub fn validate_content_type(content_type: &str) -> Result<(), ValidationError> {
@@ -137,4 +149,13 @@ pub fn validate_content_type(content_type: &str) -> Result<(), ValidationError> 
     };
 
     Ok(())
+}
+
+pub fn validate_cash_type(c_type: &str) -> Result<(), ValidationError> {
+    match c_type {
+        "NOTES" | "COINS" => Ok(()),
+        _ => {
+            Err(ValidationError::new("ACCOUNT_CASH_TYPE").with_message("Invalid cash type".into()))
+        }
+    }
 }

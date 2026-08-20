@@ -1,5 +1,6 @@
 use chrono::{DateTime, FixedOffset, NaiveDate, Utc};
 use entity::sea_orm_active_enums::{AccLimitType, AccLimitUnit, AccLinkType};
+use sea_orm::prelude::Decimal;
 use serde::Deserialize;
 use validator::Validate;
 
@@ -43,7 +44,7 @@ pub struct AddAccountLimitModel {
     pub limit_value: i64,
     pub current_value: i64,
     pub effective_from: DateTime<Utc>,
-    pub effective_to: DateTime<Utc>
+    pub effective_to: DateTime<Utc>,
 }
 
 // ==============================================
@@ -78,7 +79,7 @@ pub struct AddAccountLinkParams {
     pub relationship: Option<String>,
 
     #[serde(rename = "authorizedLimit")]
-    pub authorized_limit: Option<i64>
+    pub authorized_limit: Option<Decimal>,
 }
 
 #[derive(Debug, Deserialize, Validate)]
@@ -104,5 +105,5 @@ pub struct AddAccountLimitParams {
     pub effective_from: DateTime<FixedOffset>,
 
     #[serde(rename = "effectiveTo")]
-    pub effective_to: DateTime<FixedOffset>
+    pub effective_to: DateTime<FixedOffset>,
 }

@@ -56,7 +56,8 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Tellers::LastLoginAt).timestamp_with_time_zone())
             .col(ColumnDef::new(Tellers::CurrentSessionId).string())
             .col(ColumnDef::new(Tellers::CurrentTerminalId).string())
-            .col(ColumnDef::new(Tellers::StaffId).big_integer())
+            .col(ColumnDef::new(Tellers::StaffId).big_integer().not_null())
+            .col(ColumnDef::new(Tellers::SupervisorId).big_integer())
             .col(
                 ColumnDef::new(Tellers::CreatedAt)
                     .timestamp_with_time_zone()
@@ -85,6 +86,12 @@ impl MigrationTrait for Migration {
                     .to(Staff::Table, Staff::Id)
                     .on_delete(ForeignKeyAction::Cascade),
             )
+            .foreign_key(
+                ForeignKey::create()
+                    .from(Tellers::Table, Tellers::SupervisorId)
+                    .to(Staff::Table, Staff::Id)
+                    .on_delete(ForeignKeyAction::Cascade),
+            )
             .to_owned();
 
         manager.create_table(teller).await?;
@@ -106,6 +113,7 @@ pub enum Tellers {
     InstitutionId,
     BranchId,
     StaffId,
+    SupervisorId,
     TellerNumber,
     TellerName,
     DrawerLimit,

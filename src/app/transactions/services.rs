@@ -1,9 +1,15 @@
 use actix_web::web;
-use sea_orm::{ActiveValue::Set, DbErr, EntityTrait, InsertResult};
+use sea_orm::{
+    ActiveValue::Set, DatabaseBackend, DatabaseTransaction, DbErr, EntityTrait, FromQueryResult,
+    InsertResult, Statement,
+};
 
 use crate::{
     AppState,
-    app::transactions::models::{AddTransactionChannelModel, AddTransactionLimitModel},
+    app::transactions::{
+        mapper::{TransactionCheckerFlat, TransactionCheckerRow},
+        models::{AddTransactionChannelModel, AddTransactionLimitModel},
+    },
     utils::gen_snow_ids,
 };
 
@@ -59,4 +65,52 @@ pub async fn add_trans_channel(
     };
 
     Entity::insert(channel).exec(state.pgdb.get_ref()).await
+}
+
+pub async fn fetch_checker_limit(
+    institution_id: i64,
+    channel_id: i64,
+    trn: &DatabaseTransaction,
+) -> Result<TransactionCheckerRow, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            tc.id,
+            tc.institution_id,
+            tc.channel_name,
+            tc.channel_code,
+            tc.description,
+            tc.requires_maker_checker,
+            tc.metadata AS channel_metadata,
+
+            tl.id AS limit_id,
+            tl.transaction_channel_id AS limit_transaction_channel_id,
+            tl.customer_type::TEXT AS limit_customer_type,
+            tl.account_category_id AS limit_account_category_id,
+            tl.limit_type::TEXT AS limit_limit_type,
+            tl.max_amount AS limit_max_amount,
+            tl.max_count AS limit_max_count,
+            tl.currency AS limit_currency,
+            tl.effective_from AS limit_effective_from,
+            tl.effective_to AS limit_effective_to,
+
+        FROM transaction_channels tc
+        LEFT JOIN transaction_limits tl
+            ON tl.transaction_channel_id = tc.id
+        AND tl.institution_id = tc.institution_id
+        AND tl.is_active = TRUE
+        WHERE
+            tc.institution_id = $1
+            AND tc.id = $2
+            AND tc.is_active = TRUE;
+        "#,
+        vec![institution_id.into(), channel_id.into()],
+    );
+
+    TransactionCheckerFlat::find_by_statement(stmt)
+        .one(trn)
+        .await?
+        .ok_or_else(|| DbErr::Custom("Transaction Checker Not Found".to_string()))
+        .map(Into::into)
 }

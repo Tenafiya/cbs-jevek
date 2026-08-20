@@ -58,10 +58,22 @@ pub enum Relation {
     AgentWallets,
     #[sea_orm(has_many = "super::agents::Entity")]
     Agents,
+    #[sea_orm(has_many = "super::aml_actions::Entity")]
+    AmlActions,
     #[sea_orm(has_many = "super::aml_alerts::Entity")]
     AmlAlerts,
+    #[sea_orm(has_many = "super::aml_blacklists::Entity")]
+    AmlBlacklists,
+    #[sea_orm(has_many = "super::aml_cases::Entity")]
+    AmlCases,
+    #[sea_orm(has_many = "super::aml_rule_executions::Entity")]
+    AmlRuleExecutions,
     #[sea_orm(has_many = "super::aml_rules::Entity")]
     AmlRules,
+    #[sea_orm(has_many = "super::aml_watchlists::Entity")]
+    AmlWatchlists,
+    #[sea_orm(has_many = "super::aml_whitelists::Entity")]
+    AmlWhitelists,
     #[sea_orm(has_many = "super::audit_trails::Entity")]
     AuditTrails,
     #[sea_orm(has_many = "super::branches::Entity")]
@@ -290,15 +302,51 @@ impl Related<super::agents::Entity> for Entity {
     }
 }
 
+impl Related<super::aml_actions::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlActions.def()
+    }
+}
+
 impl Related<super::aml_alerts::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AmlAlerts.def()
     }
 }
 
+impl Related<super::aml_blacklists::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlBlacklists.def()
+    }
+}
+
+impl Related<super::aml_cases::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlCases.def()
+    }
+}
+
+impl Related<super::aml_rule_executions::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlRuleExecutions.def()
+    }
+}
+
 impl Related<super::aml_rules::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AmlRules.def()
+    }
+}
+
+impl Related<super::aml_watchlists::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlWatchlists.def()
+    }
+}
+
+impl Related<super::aml_whitelists::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlWhitelists.def()
     }
 }
 

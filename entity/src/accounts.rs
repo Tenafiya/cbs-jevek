@@ -68,6 +68,8 @@ pub enum Relation {
     SelfRef,
     #[sea_orm(has_many = "super::aml_alerts::Entity")]
     AmlAlerts,
+    #[sea_orm(has_many = "super::aml_rule_executions::Entity")]
+    AmlRuleExecutions,
     #[sea_orm(has_many = "super::cards::Entity")]
     Cards,
     #[sea_orm(has_many = "super::contributions::Entity")]
@@ -153,6 +155,12 @@ impl Related<super::account_types::Entity> for Entity {
 impl Related<super::aml_alerts::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AmlAlerts.def()
+    }
+}
+
+impl Related<super::aml_rule_executions::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AmlRuleExecutions.def()
     }
 }
 

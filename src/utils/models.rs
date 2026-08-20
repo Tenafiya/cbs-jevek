@@ -1,8 +1,30 @@
-use entity::sea_orm_active_enums::CustomerType;
+use chrono::{DateTime, FixedOffset, Utc};
+use entity::sea_orm_active_enums::{
+    AmlCaseStatus, AmlCasesPriority, AmlRulesActionOnTrigger, AmlRulesRuleType, CustomerType,
+    StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
+};
 use sea_orm::prelude::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use validator::Validate;
+
+use crate::utils::validators::{validate_cash_type, validate_date_range, validate_income};
+
+#[derive(Debug, Deserialize, Validate)]
+#[validate(schema(function = "validate_date_range"))]
+pub struct DateStruct {
+    #[serde(rename = "effectiveFrom")]
+    pub effective_from: DateTime<FixedOffset>,
+    #[serde(rename = "effectiveTo")]
+    pub effective_to: DateTime<FixedOffset>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StaffSelectFields {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub full_name: Option<String>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountCategorySummary {
@@ -18,7 +40,6 @@ pub struct AccountCategorySummary {
 pub struct AccountTypeSummary {
     #[serde(rename = "_id")]
     pub id: String,
-    pub institution_id: String,
     pub name: Option<String>,
     pub code: Option<String>,
     pub description: Option<String>,
@@ -52,23 +73,70 @@ pub struct AccountSummary {
     pub hold_balance: Option<i64>,
 }
 
-#[derive(Debug, Clone)]
-pub struct QueryModel {
-    pub size: u64,
-    pub page: u64,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StaffSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub employee_number: String,
+    pub full_name: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
+    pub phone_number: String,
+    pub email_address: String,
+    pub job_title: Option<String>,
+    pub department: Option<String>,
+    pub employment_status: Option<StaffEmploymentEnum>,
 }
 
-#[derive(Debug, Clone)]
-pub struct CursorModel {
-    pub cursor: Option<i64>,
-    pub limit: u64,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TellerSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub teller_name: String,
+    pub teller_number: String,
+    pub branch_id: String,
 }
 
-#[derive(Debug, Serialize)]
-pub struct CursorMetaModel {
-    pub next_cursor: Option<String>,
-    pub has_next: bool,
-    pub limit: u64,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TransactionSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub transaction_reference: Option<String>,
+    pub transaction_group_id: uuid::Uuid,
+    pub transaction_type: TransactionType,
+    pub transaction_category: TransactionCategoryType,
+    pub amount: i64,
+    pub currency: Option<Value>,
+    pub status: TransactionStatus,
+    pub posted_at: Option<DateTime<FixedOffset>>,
+    pub completed_at: Option<DateTime<FixedOffset>>,
+    pub failed_at: Option<DateTime<FixedOffset>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AmlRuleSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub rule_name: String,
+    pub rule_description: Option<String>,
+    pub rule_type: AmlRulesRuleType,
+    pub condition_logic: Value,
+    pub action_on_trigger: AmlRulesActionOnTrigger,
+    pub is_enabled: Option<bool>,
+
+    pub creator: Option<StaffSelectFields>,
+    pub updater: Option<StaffSelectFields>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AmlCaseSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub case_number: String,
+    pub title: String,
+    pub description: Option<String>,
+    pub priority: AmlCasesPriority,
+    pub status: AmlCaseStatus,
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -94,6 +162,36 @@ pub struct CursorQueryParams {
     pub limit: u64,
 }
 
+#[derive(Debug, Deserialize, Serialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct CurrencyParams {
+    #[validate(length(min = 1, max = 100))]
+    pub name: String,
+
+    #[validate(length(min = 1, max = 10))]
+    pub symbol: String,
+
+    #[validate(length(equal = 3))]
+    pub code: String,
+
+    #[validate(range(min = 0, max = 18))]
+    pub precision: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct CashParams {
+    #[validate(custom(function = "validate_income"))]
+    pub denomination: Decimal,
+
+    #[validate(range(min = 0, max = 100000))]
+    pub quantity: i32,
+
+    #[validate(custom(function = "validate_cash_type"))]
+    #[serde(rename = "cashType")]
+    pub cash_type: String,
+}
+
 #[derive(Debug, Serialize)]
 pub struct MetaModel {
     pub total_items: u64,
@@ -106,6 +204,31 @@ pub struct MetaModel {
 pub struct ListResponseModel<T, F> {
     pub items: T,
     pub meta: F,
+}
+
+#[derive(Debug, Clone)]
+pub struct QueryModel {
+    pub size: u64,
+    pub page: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct CursorModel {
+    pub cursor: Option<i64>,
+    pub limit: u64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CursorMetaModel {
+    pub next_cursor: Option<String>,
+    pub has_next: bool,
+    pub limit: u64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DateQuery {
+    pub from: DateTime<Utc>,
+    pub to: DateTime<Utc>,
 }
 
 fn default_page() -> u64 {

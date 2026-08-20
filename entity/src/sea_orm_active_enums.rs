@@ -268,16 +268,142 @@ pub enum AgentWalletType {
     Commission,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "Enum",
+    db_type = "Enum",
+    enum_name = "aml_alerts_alert_type"
+)]
+pub enum AmlAlertsAlertType {
+    #[sea_orm(string_value = "LARGE_TRANSACTION")]
+    LargeTransaction,
+    #[sea_orm(string_value = "STRUCTURING")]
+    Structuring,
+    #[sea_orm(string_value = "RAPID_MOVEMENT_OF_FUNDS")]
+    RapidMovementOfFunds,
+    #[sea_orm(string_value = "UNUSUAL_TRANSACTION")]
+    UnusualTransaction,
+    #[sea_orm(string_value = "UNUSUAL_TRANSACTION_PATTERN")]
+    UnusualTransactionPattern,
+    #[sea_orm(string_value = "HIGH_RISK_COUNTRY")]
+    HighRiskCountry,
+    #[sea_orm(string_value = "SANCTIONS_MATCH")]
+    SanctionsMatch,
+    #[sea_orm(string_value = "PEP_MATCH")]
+    PepMatch,
+    #[sea_orm(string_value = "ADVERSE_MEDIA")]
+    AdverseMedia,
+    #[sea_orm(string_value = "SUSPICIOUS_BENEFICIARY")]
+    SuspiciousBeneficiary,
+    #[sea_orm(string_value = "SUSPICIOUS_ACCOUNT")]
+    SuspiciousAccount,
+    #[sea_orm(string_value = "DORMANT_ACCOUNT_ACTIVITY")]
+    DormantAccountActivity,
+    #[sea_orm(string_value = "UNUSUAL_CASH_ACTIVITY")]
+    UnusualCashActivity,
+    #[sea_orm(string_value = "UNUSUAL_DEPOSIT")]
+    UnusualDeposit,
+    #[sea_orm(string_value = "UNUSUAL_WITHDRAWAL")]
+    UnusualWithdrawal,
+    #[sea_orm(string_value = "UNUSUAL_TRANSFER")]
+    UnusualTransfer,
+    #[sea_orm(string_value = "ACCOUNT_TAKEOVER")]
+    AccountTakeover,
+    #[sea_orm(string_value = "IDENTITY_MISMATCH")]
+    IdentityMismatch,
+    #[sea_orm(string_value = "MULTIPLE_ACCOUNTS")]
+    MultipleAccounts,
+    #[sea_orm(string_value = "MULE_ACCOUNT")]
+    MuleAccount,
+    #[sea_orm(string_value = "FUNDS_CYCLING")]
+    FundsCycling,
+    #[sea_orm(string_value = "ROUND_TRIPPING")]
+    RoundTripping,
+    #[sea_orm(string_value = "FRAUD_SUSPECTED")]
+    FraudSuspected,
+    #[sea_orm(string_value = "OTHER")]
+    Other,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_alerts_status")]
 pub enum AmlAlertsStatus {
-    #[sea_orm(string_value = "OPEN")]
-    Open,
+    #[sea_orm(string_value = "NEW")]
+    New,
+    #[sea_orm(string_value = "PENDING_REVIEW")]
+    PendingReview,
     #[sea_orm(string_value = "INVESTIGATING")]
     Investigating,
     #[sea_orm(string_value = "RESOLVED")]
     Resolved,
     #[sea_orm(string_value = "FALSE_POSITIVE")]
     FalsePositive,
+    #[sea_orm(string_value = "ESCALATED")]
+    Escalated,
+    #[sea_orm(string_value = "CONFIRMED_SUSPICIOUS")]
+    ConfirmedSuspicious,
+    #[sea_orm(string_value = "DISMISSED")]
+    Dismissed,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_case_status")]
+pub enum AmlCaseStatus {
+    #[sea_orm(string_value = "OPEN")]
+    Open,
+    #[sea_orm(string_value = "ASSIGNED")]
+    Assigned,
+    #[sea_orm(string_value = "INVESTIGATING")]
+    Investigating,
+    #[sea_orm(string_value = "WAITING_FOR_CUSTOMER")]
+    WaitingForCustomer,
+    #[sea_orm(string_value = "ESCALATED")]
+    Escalated,
+    #[sea_orm(string_value = "CLOSED")]
+    Closed,
+    #[sea_orm(string_value = "ARCHIVED")]
+    Archived,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_cases_priority")]
+pub enum AmlCasesPriority {
+    #[sea_orm(string_value = "LOW")]
+    Low,
+    #[sea_orm(string_value = "NORMAL")]
+    Normal,
+    #[sea_orm(string_value = "HIGH")]
+    High,
+    #[sea_orm(string_value = "URGENT")]
+    Urgent,
+    #[sea_orm(string_value = "CRITICAL")]
+    Critical,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_entity_type")]
+pub enum AmlEntityType {
+    #[sea_orm(string_value = "CUSTOMER")]
+    Customer,
+    #[sea_orm(string_value = "ACCOUNT")]
+    Account,
+    #[sea_orm(string_value = "BENEFICIARY")]
+    Beneficiary,
+    #[sea_orm(string_value = "BUSINESS")]
+    Business,
+    #[sea_orm(string_value = "ORGANIZATION")]
+    Organization,
+    #[sea_orm(string_value = "INDIVIDUAL")]
+    Individual,
+    #[sea_orm(string_value = "DEVICE")]
+    Device,
+    #[sea_orm(string_value = "IP_ADDRESS")]
+    IpAddress,
+    #[sea_orm(string_value = "PHONE_NUMBER")]
+    PhoneNumber,
+    #[sea_orm(string_value = "EMAIL_ADDRESS")]
+    EmailAddress,
+    #[sea_orm(string_value = "COUNTRY")]
+    Country,
+    #[sea_orm(string_value = "TRANSACTION")]
+    Transaction,
+    #[sea_orm(string_value = "OTHER")]
+    Other,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_risk_level_enum")]
@@ -288,6 +414,28 @@ pub enum AmlRiskLevelEnum {
     Medium,
     #[sea_orm(string_value = "HIGH")]
     High,
+    #[sea_orm(string_value = "CRITICAL")]
+    Critical,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_rule_actions")]
+pub enum AmlRuleActions {
+    #[sea_orm(string_value = "LOG_ONLY")]
+    LogOnly,
+    #[sea_orm(string_value = "GENERATE_ALERT")]
+    GenerateAlert,
+    #[sea_orm(string_value = "REQUIRE_ADDITIONAL_AUTHENTICATION")]
+    RequireAdditionalAuthentication,
+    #[sea_orm(string_value = "HOLD_TRANSACTION")]
+    HoldTransaction,
+    #[sea_orm(string_value = "REJECT_TRANSACTION")]
+    RejectTransaction,
+    #[sea_orm(string_value = "FREEZE_ACCOUNT")]
+    FreezeAccount,
+    #[sea_orm(string_value = "ESCALATE_TO_INVESTIGATOR")]
+    EscalateToInvestigator,
+    #[sea_orm(string_value = "FILE_SAR_AUTOMATICALLY")]
+    FileSarAutomatically,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(
@@ -306,16 +454,106 @@ pub enum AmlRulesActionOnTrigger {
     BlockTransaction,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "Enum",
+    db_type = "Enum",
+    enum_name = "aml_rules_execution_stage"
+)]
+pub enum AmlRulesExecutionStage {
+    #[sea_orm(string_value = "PRE_TRANSACTION")]
+    PreTransaction,
+    #[sea_orm(string_value = "POST_TRANSACTION")]
+    PostTransaction,
+    #[sea_orm(string_value = "BOTH")]
+    Both,
+    #[sea_orm(string_value = "ON_TRANSACTION")]
+    OnTransaction,
+    #[sea_orm(string_value = "ON_ACCOUNT")]
+    OnAccount,
+    #[sea_orm(string_value = "BATCH")]
+    Batch,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_rules_rule_type")]
 pub enum AmlRulesRuleType {
-    #[sea_orm(string_value = "VELOCITY")]
-    Velocity,
+    #[sea_orm(string_value = "TRANSACTION_AMOUNT")]
+    TransactionAmount,
+    #[sea_orm(string_value = "TRANSACTION_VELOCITY")]
+    TransactionVelocity,
+    #[sea_orm(string_value = "TRANSACTION_PATTERN")]
+    TransactionPattern,
     #[sea_orm(string_value = "STRUCTURING")]
     Structuring,
+    #[sea_orm(string_value = "GEOGRAPHIC_RISK")]
+    GeographicRisk,
+    #[sea_orm(string_value = "SANCTIONS_SCREENING")]
+    SanctionsScreening,
+    #[sea_orm(string_value = "PEP_SCREENING")]
+    PepScreening,
+    #[sea_orm(string_value = "ADVERSE_MEDIA_SCREENING")]
+    AdverseMediaScreening,
+    #[sea_orm(string_value = "CUSTOMER_RISK")]
+    CustomerRisk,
+    #[sea_orm(string_value = "ACCOUNT_ACTIVITY")]
+    AccountActivity,
+    #[sea_orm(string_value = "BENEFICIARY_RISK")]
+    BeneficiaryRisk,
+    #[sea_orm(string_value = "DEVICE_RISK")]
+    DeviceRisk,
+    #[sea_orm(string_value = "IMPOSSIBLE_TRAVEL")]
+    ImpossibleTravel,
+    #[sea_orm(string_value = "BEHAVIOURAL_ANOMALY")]
+    BehaviouralAnomaly,
+    #[sea_orm(string_value = "DORMANT_ACCOUNT_ACTIVITY")]
+    DormantAccountActivity,
+    #[sea_orm(string_value = "CASH_ACTIVITY")]
+    CashActivity,
+    #[sea_orm(string_value = "ACCOUNT_TAKEOVER")]
+    AccountTakeover,
+    #[sea_orm(string_value = "MULE_ACCOUNT")]
+    MuleAccount,
+    #[sea_orm(string_value = "FUNDS_CYCLING")]
+    FundsCycling,
+    #[sea_orm(string_value = "ROUND_TRIPPING")]
+    RoundTripping,
+    #[sea_orm(string_value = "CUSTOM_RULE")]
+    CustomRule,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "Enum",
+    db_type = "Enum",
+    enum_name = "aml_watchlists_list_type"
+)]
+pub enum AmlWatchlistsListType {
     #[sea_orm(string_value = "SANCTIONS")]
     Sanctions,
     #[sea_orm(string_value = "PEP")]
     Pep,
+    #[sea_orm(string_value = "TERRORIST_FINANCING")]
+    TerroristFinancing,
+    #[sea_orm(string_value = "WANTED_PERSON")]
+    WantedPerson,
+    #[sea_orm(string_value = "LAW_ENFORCEMENT")]
+    LawEnforcement,
+    #[sea_orm(string_value = "ADVERSE_MEDIA")]
+    AdverseMedia,
+    #[sea_orm(string_value = "INTERNAL_BLACKLIST")]
+    InternalBlacklist,
+    #[sea_orm(string_value = "INTERNAL_WATCHLIST")]
+    InternalWatchlist,
+    #[sea_orm(string_value = "FRAUD")]
+    Fraud,
+    #[sea_orm(string_value = "MONEY_LAUNDERING")]
+    MoneyLaundering,
+    #[sea_orm(string_value = "HIGH_RISK_ENTITY")]
+    HighRiskEntity,
+    #[sea_orm(string_value = "HIGH_RISK_COUNTRY")]
+    HighRiskCountry,
+    #[sea_orm(string_value = "REGULATORY")]
+    Regulatory,
+    #[sea_orm(string_value = "OTHER")]
+    Other,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "audit_trails_action")]

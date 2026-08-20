@@ -1,6 +1,9 @@
 use sea_orm_migration::prelude::*;
 
-use crate::{m20251204_150208_create_branches::Staff, m20251208_093551_create_tellers::Tellers};
+use crate::{
+    m20251204_150208_create_branches::Staff, m20251205_193221_create_transactions::Transactions,
+    m20251208_093551_create_tellers::Tellers,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -31,7 +34,7 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .not_null(),
             )
-            .col(ColumnDef::new(TellerCashDrawers::OpeningBalance).big_integer())
+            .col(ColumnDef::new(TellerCashDrawers::OpeningCashAmount).big_integer())
             .col(ColumnDef::new(TellerCashDrawers::OpeningCash).json_binary())
             .col(
                 ColumnDef::new(TellerCashDrawers::TotalCashIn)
@@ -43,18 +46,21 @@ impl MigrationTrait for Migration {
                     .big_integer()
                     .default(0),
             )
+            .col(ColumnDef::new(TellerCashDrawers::ChequeCount).integer())
             .col(
-                ColumnDef::new(TellerCashDrawers::TotalCheques)
+                ColumnDef::new(TellerCashDrawers::TotalChequeAmount)
                     .big_integer()
                     .default(0),
             )
+            .col(ColumnDef::new(TellerCashDrawers::TransferInCount).integer())
             .col(
-                ColumnDef::new(TellerCashDrawers::TotalTransfersIn)
+                ColumnDef::new(TellerCashDrawers::TotalTransferInAmount)
                     .big_integer()
                     .default(0),
             )
+            .col(ColumnDef::new(TellerCashDrawers::TransferOutCount).integer())
             .col(
-                ColumnDef::new(TellerCashDrawers::TotalTransfersOut)
+                ColumnDef::new(TellerCashDrawers::TotalTransferOutAmount)
                     .big_integer()
                     .default(0),
             )
@@ -105,13 +111,41 @@ impl MigrationTrait for Migration {
         manager.create_table(cash_drawers).await?;
 
         manager
+            .alter_table(
+                Table::alter()
+                    .table(Transactions::Table)
+                    .add_column(ColumnDef::new(Transactions::TellerCashDrawerId).big_integer())
+                    .add_foreign_key(
+                        TableForeignKey::new()
+                            .from_tbl(Transactions::Table)
+                            .from_col(Transactions::TellerCashDrawerId)
+                            .to_tbl(TellerCashDrawers::Table)
+                            .to_col(TellerCashDrawers::Id)
+                            .on_delete(ForeignKeyAction::Restrict)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
             .get_connection()
             .execute_unprepared(
                 r#"
-                    ALTER TABLE teller_cash_drawers
-                    ADD CONSTRAINT unique_tel_cash_teller_opened
-                    UNIQUE (teller_id, opened_at);
+                    CREATE UNIQUE INDEX unique_open_teller_drawer
+                    ON teller_cash_drawers (teller_id)
+                    WHERE status = 'OPEN';
                 "#,
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .name("idx_transactions_teller_cash_drawer_id")
+                    .table(Transactions::Table)
+                    .col(Transactions::TellerCashDrawerId)
+                    .to_owned(),
             )
             .await?;
 
@@ -130,13 +164,16 @@ pub enum TellerCashDrawers {
     Table,
     Id,
     TellerId,
-    OpeningBalance,
+    OpeningCashAmount,
     OpeningCash,
     TotalCashIn,
     TotalCashOut,
-    TotalCheques,
-    TotalTransfersIn,
-    TotalTransfersOut,
+    ChequeCount,
+    TotalChequeAmount,
+    TransferInCount,
+    TotalTransferInAmount,
+    TransferOutCount,
+    TotalTransferOutAmount,
     ClosingBalance,
     ClosingCash,
     ExpectedAmount,
