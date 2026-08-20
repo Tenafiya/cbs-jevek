@@ -1,7 +1,7 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlCasesPriority, AmlEntityType, AmlRiskLevelEnum, AmlRuleActions,
-    AmlRulesActionOnTrigger, AmlRulesRuleType, AmlWatchlistsListType,
+    AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesRuleType, AmlWatchlistsListType,
 };
 use migration::prelude::rust_decimal;
 use serde::{Deserialize, Serialize};
@@ -20,6 +20,7 @@ pub struct AmlRulesModel {
     pub rule_type: AmlRulesRuleType,
     pub condition_logic: Value,
     pub trigger_action: AmlRulesActionOnTrigger,
+    pub execution_stage: AmlRulesExecutionStage,
     pub desc: Option<String>,
     pub priority: Option<i32>,
     pub version: Option<i32>,
@@ -138,7 +139,10 @@ pub struct CreateAmlRulesParams {
     pub rule_type: AmlRulesRuleType,
 
     #[serde(rename = "conditionLogic")]
-    pub condition_logic: ConditionGroup,
+    pub condition_logic: Vec<ConditionGroup>,
+
+    #[serde(rename = "executionStage")]
+    pub execution_stage: AmlRulesExecutionStage,
 
     #[serde(rename = "triggerAction")]
     pub trigger_action: AmlRulesActionOnTrigger,

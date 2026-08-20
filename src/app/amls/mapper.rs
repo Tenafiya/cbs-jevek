@@ -1,8 +1,8 @@
 use chrono::{DateTime, FixedOffset};
 use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlAlertsStatus, AmlCaseStatus, AmlCasesPriority, AmlRiskLevelEnum,
-    AmlRulesActionOnTrigger, AmlRulesRuleType, CustomerType, StaffEmploymentEnum,
-    TransactionCategoryType, TransactionStatus, TransactionType,
+    AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesRuleType, CustomerType,
+    StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
 };
 use sea_orm::{FromQueryResult, prelude::*};
 use serde::{Deserialize, Serialize};
@@ -23,6 +23,7 @@ pub struct AmlRuleRow {
     pub rule_type: AmlRulesRuleType,
     pub condition_logic: Value,
     pub action_on_trigger: AmlRulesActionOnTrigger,
+    pub execution_stage: Option<AmlRulesExecutionStage>,
     pub is_enabled: Option<bool>,
     pub priority: Option<i32>,
     pub stop_processing: Option<bool>,
@@ -45,6 +46,7 @@ pub struct AmlRuleFlat {
     pub rule_type: AmlRulesRuleType,
     pub condition_logic: Value,
     pub action_on_trigger: AmlRulesActionOnTrigger,
+    pub execution_stage: Option<AmlRulesExecutionStage>,
     pub is_enabled: Option<bool>,
     pub priority: Option<i32>,
     pub stop_processing: Option<bool>,
@@ -87,6 +89,7 @@ impl From<AmlRuleFlat> for AmlRuleRow {
             rule_type: value.rule_type,
             condition_logic: value.condition_logic,
             action_on_trigger: value.action_on_trigger,
+            execution_stage: value.execution_stage,
             is_enabled: value.is_enabled,
             priority: value.priority,
             stop_processing: value.stop_processing,

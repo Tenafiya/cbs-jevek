@@ -43,6 +43,7 @@ pub async fn create_new_rule(
         desc: data.description,
         priority: data.priority,
         version: data.version,
+        execution_stage: data.execution_stage,
         effective_from: data.effective_dates.as_ref().map(|d| d.effective_from),
         effective_to: data.effective_dates.as_ref().map(|d| d.effective_to),
     };

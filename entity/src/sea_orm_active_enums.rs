@@ -454,6 +454,26 @@ pub enum AmlRulesActionOnTrigger {
     BlockTransaction,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "Enum",
+    db_type = "Enum",
+    enum_name = "aml_rules_execution_stage"
+)]
+pub enum AmlRulesExecutionStage {
+    #[sea_orm(string_value = "PRE_TRANSACTION")]
+    PreTransaction,
+    #[sea_orm(string_value = "POST_TRANSACTION")]
+    PostTransaction,
+    #[sea_orm(string_value = "BOTH")]
+    Both,
+    #[sea_orm(string_value = "ON_TRANSACTION")]
+    OnTransaction,
+    #[sea_orm(string_value = "ON_ACCOUNT")]
+    OnAccount,
+    #[sea_orm(string_value = "BATCH")]
+    Batch,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_rules_rule_type")]
 pub enum AmlRulesRuleType {
     #[sea_orm(string_value = "TRANSACTION_AMOUNT")]

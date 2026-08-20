@@ -132,6 +132,15 @@ impl MigrationTrait for Migration {
             .get_connection()
             .execute_unprepared(
                 r#"
+                    CREATE TYPE aml_rules_execution_stage AS ENUM ('PRE_TRANSACTION', 'POST_TRANSACTION', 'BOTH', 'ON_TRANSACTION', 'ON_ACCOUNT', 'BATCH')
+                "#,
+            )
+            .await?;
+
+        manager
+            .get_connection()
+            .execute_unprepared(
+                r#"
                     CREATE TYPE aml_rule_actions AS ENUM ('LOG_ONLY', 'GENERATE_ALERT', 'REQUIRE_ADDITIONAL_AUTHENTICATION', 'HOLD_TRANSACTION', 'REJECT_TRANSACTION', 'FREEZE_ACCOUNT', 'ESCALATE_TO_INVESTIGATOR', 'FILE_SAR_AUTOMATICALLY')
                 "#,
             )
@@ -204,6 +213,11 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(AmlRules::RuleType)
                     .custom("aml_rules_rule_type")
+                    .not_null(),
+            )
+            .col(
+                ColumnDef::new(AmlRules::ExecutionStage)
+                    .custom("aml_rules_execution_stage")
                     .not_null(),
             )
             .col(
@@ -781,6 +795,7 @@ pub enum AmlRules {
     RuleType,
     ConditionLogic,
     ActionOnTrigger,
+    ExecutionStage,
     IsEnabled,
     Priority,
     StopProcessing,

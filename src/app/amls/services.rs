@@ -38,6 +38,7 @@ pub async fn save_aml(
         version: Set(data.version),
         effective_from: Set(data.effective_from),
         effective_to: Set(data.effective_to),
+        execution_stage: Set(data.execution_stage),
         ..Default::default()
     };
 
@@ -156,6 +157,7 @@ pub async fn get_aml_rules(
             ar.rule_type::TEXT,
             ar.condition_logic,
             ar.action_on_trigger::TEXT,
+            ar.execution_stage::TEXT,
             ar.is_enabled,
             ar.priority,
             ar.stop_processing,
