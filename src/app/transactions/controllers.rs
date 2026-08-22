@@ -39,8 +39,8 @@ pub async fn create_trans_channel(
         channel_name: Some(data.channel_name),
         channel_code: Some(code),
         description: data.description,
-        requires_maker_checker: false,
-        metadata: None,
+        requires_maker_checker: data.requires_approval,
+        metadata: data.metadata,
     };
 
     match services::add_trans_channel(&channel, &state).await {
@@ -102,6 +102,60 @@ pub async fn create_trans_limit(
         ))),
         Err(e) => {
             tracing::error!(error = ?e, "Failed to add transaction limit");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}
+
+pub async fn get_trans_checkers(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+) -> Result<HttpResponse, ApiError> {
+    match services::fetch_checker_limits(staff.institution_id, &state).await {
+        Ok(limits) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            limits,
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch checker limits");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}
+
+pub async fn get_trans_limits(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+) -> Result<HttpResponse, ApiError> {
+    match services::fetch_transaction_limits(staff.institution_id, &state).await {
+        Ok(limits) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            limits,
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch transaction limits");
+            Err(ApiError::InternalServerError)
+        }
+    }
+}
+
+pub async fn get_trans_channels(
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+    staff: web::ReqData<StaffResponseModel>,
+) -> Result<HttpResponse, ApiError> {
+    match services::fetch_transaction_channels(staff.institution_id, &state).await {
+        Ok(channels) => Ok(HttpResponse::Ok().json(ApiResponse::success(
+            ApiCode::OperationSuccess,
+            "Successful",
+            channels,
+        ))),
+        Err(e) => {
+            tracing::error!(error = ?e, "Failed to fetch transaction channels");
             Err(ApiError::InternalServerError)
         }
     }
