@@ -22,6 +22,20 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                     .to(controllers::create_trans_limit)
                     .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
+            )
+            .route(
+                "/limits",
+                web::get()
+                    .to(controllers::get_trans_limits)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
+                    .wrap(from_fn(jwt_auth)),
+            )
+            .route(
+                "/channels",
+                web::get()
+                    .to(controllers::get_trans_channels)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
+                    .wrap(from_fn(jwt_auth)),
             ),
     );
 }
