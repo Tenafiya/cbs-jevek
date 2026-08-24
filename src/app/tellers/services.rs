@@ -37,6 +37,7 @@ pub async fn add_teller(
         teller_number: Set(data.teller_number),
         staff_id: Set(data.staff_id),
         branch_id: Set(data.branch_id),
+        drawer_limit: Set(data.drawer_limit),
         ..Default::default()
     };
 

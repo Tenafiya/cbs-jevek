@@ -1,6 +1,6 @@
 use actix_web::{HttpRequest, HttpResponse, web};
 use entity::sea_orm_active_enums::TellerReconType;
-use sea_orm::TransactionTrait;
+use sea_orm::{TransactionTrait, prelude::Decimal};
 use validator::Validate;
 
 use crate::{
@@ -48,12 +48,15 @@ pub async fn create_teller(
 
     let num = gen_snow_ids::get_code(3);
 
+    let limit = conversions::minor_conversion(Decimal::new(100000, 2), "GHS");
+
     let teller = AddTellerModel {
         institution_id: teller_staff.institution_id,
         branch_id: gen_snow_ids::id_parser(&data.branch_id, "Branch ID")?,
         teller_name,
         teller_number: num,
         staff_id: teller_staff.id,
+        drawer_limit: limit,
     };
 
     match services::add_teller(&teller, &state).await {

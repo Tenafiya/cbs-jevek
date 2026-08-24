@@ -13,6 +13,7 @@ pub struct AddTellerModel {
     pub teller_name: String,
     pub teller_number: String,
     pub staff_id: i64,
+    pub drawer_limit: i64,
 }
 
 #[derive(Debug, Clone)]
