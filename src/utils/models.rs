@@ -10,6 +10,13 @@ use validator::Validate;
 
 use crate::utils::validators::{validate_cash_type, validate_date_range, validate_income};
 
+#[derive(Debug, Clone)]
+pub struct CurrencyModel {
+    pub name: String,
+    pub symbol: String,
+    pub precision: Option<i32>,
+}
+
 #[derive(Debug, Deserialize, Validate)]
 #[validate(schema(function = "validate_date_range"))]
 pub struct DateStruct {
@@ -190,6 +197,34 @@ pub struct CashParams {
     #[validate(custom(function = "validate_cash_type"))]
     #[serde(rename = "cashType")]
     pub cash_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct ChequeParams {
+    #[serde(rename = "chequeNumber")]
+    pub cheque_number: String,
+
+    #[serde(rename = "bankName")]
+    pub bank_name: String,
+
+    #[serde(rename = "branchName")]
+    pub branch_name: Option<String>,
+
+    #[serde(rename = "accountNumber")]
+    pub account_number: Option<String>,
+
+    #[validate(custom(function = "validate_income"))]
+    pub amount: Decimal,
+
+    #[serde(rename = "currency")]
+    pub currency: String,
+
+    #[serde(rename = "issueDate")]
+    pub issue_date: Option<chrono::NaiveDate>,
+
+    #[serde(rename = "drawerName")]
+    pub drawer_name: Option<String>,
 }
 
 #[derive(Debug, Serialize)]

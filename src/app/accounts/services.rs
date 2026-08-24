@@ -444,3 +444,74 @@ pub async fn get_account_limit(
         .await?
         .ok_or_else(|| DbErr::Custom("account limit not found".to_string()))
 }
+
+pub async fn fetch_customer_acc_id(
+    customer_id: i64,
+    account_id: i64,
+    status: AccTypeStatus,
+    state: &web::Data<AppState>,
+) -> Result<Option<AccountRow>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            acc.id,
+            acc.institution_id,
+            acc.acccount_number,
+            acc.account_name,
+            acc.currency,
+            acc.current_balance,
+            acc.available_balance,
+            acc.ledger_balance,
+            acc.hold_balance,
+            acc.status::TEXT AS status,
+            acc.activation_date,
+            acc.dormancy_date,
+            acc.frozen_at,
+            acc.frozen_reason,
+            acc.is_overdraft_allowable,
+            acc.overdraft_limit,
+            acc.overdraft_used,
+            acc.tags,
+
+            pa.id AS parent_account_id,
+            pa.account_number AS parent_account_acccount_number,
+            pa.account_name AS parent_account_account_name,
+            pa.currency AS parent_account_currency,
+            pa.current_balance AS parent_account_current_balance,
+            pa.available_balance AS parent_account_available_balance,
+            pa.ledger_balance AS parent_account_ledger_balance,
+            pa.hold_balance AS parent_account_hold_balance,
+
+            at.id AS account_type_id,
+            at.name AS account_type_name,
+            at.code AS account_type_code,
+            at.description AS account_type_description,
+            at.minimum_balance AS account_type_minimum_balance,
+            at.maximum_balance AS account_type_maximum_balance,
+            at.interest_rate AS account_type_interest_rate,
+            at.maintenance_fee AS account_type_maintenance_fee,
+            at.withdrawal_fee AS account_type_withdrawal_fee,
+
+            cu.id AS customer_id,
+            cu.customer_type::TEXT AS customer_type,
+            cu.customer_number,
+            cu.first_name AS customer_first_name,
+            cu.last_name AS customer_last_name,
+
+        FROM accounts acc
+        JOIN account_types at ON acc.account_type_id = at.id
+        JOIN customers cu ON acc.customer_id = cu.id
+        LEFT JOIN accounts pa ON acc.parent_account_id = pa.id
+        WHHERE acc.customer_id = $1
+        AND acc.id = $2
+        AND acc.status = $3::acc_type_status;
+        "#,
+        vec![customer_id.into(), account_id.into(), status.into()],
+    );
+
+    AccountFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await
+        .map(|opt_row| opt_row.map(Into::into))
+}

@@ -6,8 +6,9 @@ use crate::{
     app::{
         amls::{
             models::{
-                AmlActionsModel, AmlCaseNotesModel, AmlRulesModel, CreateAmlActionParams,
-                CreateAmlCaseNodes, CreateAmlRulesParams,
+                AmlActionsModel, AmlCaseNotesModel, AmlRulesModel, ConditionField, ConditionParams,
+                CreateAmlActionParams, CreateAmlCaseNodes, CreateAmlRulesParams, FIELD_DEFINITIONS,
+                FieldDefinition,
             },
             services,
         },
@@ -18,6 +19,29 @@ use crate::{
         gen_snow_ids,
     },
 };
+
+pub fn get_field_definition(field: ConditionField) -> Option<&'static FieldDefinition> {
+    FIELD_DEFINITIONS
+        .iter()
+        .find(|definition| definition.field == field)
+}
+
+pub fn validate_condition(conditions: &[ConditionParams]) -> Result<(), ApiError> {
+    for condition in conditions {
+        let definition = get_field_definition(condition.field).ok_or_else(|| {
+            ApiError::BadRequest(format!("Unknown condition field: {:?}", condition.field))
+        })?;
+
+        if !definition.allowed_operators.contains(&condition.operator) {
+            return Err(ApiError::BadRequest(format!(
+                "Operator {:?} is not allowed for field {:?}",
+                condition.operator, condition.field
+            )));
+        }
+    }
+
+    Ok(())
+}
 
 pub async fn create_new_rule(
     _req: HttpRequest,
@@ -30,6 +54,10 @@ pub async fn create_new_rule(
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let data = payload.into_inner();
+
+    for condition in &data.condition_logic {
+        validate_condition(&condition.conditions)?;
+    }
 
     let logic = serde_json::to_value(&data.condition_logic)
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;

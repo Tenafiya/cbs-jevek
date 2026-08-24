@@ -1,3 +1,4 @@
+use crate::utils::models::CashParams;
 use sea_orm::prelude::Decimal;
 
 pub fn major_conversion(price: i64, currency: &str) -> Decimal {
@@ -8,7 +9,7 @@ pub fn major_conversion(price: i64, currency: &str) -> Decimal {
     };
 
     let divisor = Decimal::from(10_i64.pow(decimal_places));
-    
+
     Decimal::from(price) / divisor
 }
 
@@ -24,4 +25,13 @@ pub fn minor_conversion(price: Decimal, currency: &str) -> i64 {
     let minor = (price * multiplier).round();
 
     minor.to_string().parse::<i64>().unwrap_or(0)
+}
+
+pub fn calculate_cash_total(cash: &[CashParams]) -> i64 {
+    let total: Decimal = cash
+        .iter()
+        .map(|item| item.denomination * Decimal::from(item.quantity))
+        .sum();
+
+    minor_conversion(total, "GHS")
 }
