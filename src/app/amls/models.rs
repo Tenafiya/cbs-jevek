@@ -3,127 +3,12 @@ use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlCasesPriority, AmlEntityType, AmlRiskLevelEnum, AmlRuleActions,
     AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesRuleType, AmlWatchlistsListType,
 };
-use migration::prelude::rust_decimal;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use validator::Validate;
 
+use crate::app::amls::util::{ConditionField, ConditionOperator, ConditionValue, LogicalOperator};
 use crate::utils::{models::DateStruct, validators::validate_snowflake};
-
-//=================================================================
-// Enums
-//=================================================================
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ConditionOperator {
-    Eq,
-    Ne,
-    Gt,
-    Gte,
-    Lt,
-    Lte,
-    In,
-    NotIn,
-    Contains,
-    StartsWith,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum LogicalOperator {
-    And,
-    Or,
-}
-
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
-pub enum ConditionField {
-    #[serde(rename = "transaction.amount")]
-    TransactionAmount,
-
-    #[serde(rename = "transaction.currency")]
-    TransactionCurrency,
-
-    #[serde(rename = "transaction.type")]
-    TransactionType,
-
-    #[serde(rename = "transaction.channel")]
-    TransactionChannel,
-
-    #[serde(rename = "account.balance")]
-    AccountBalance,
-
-    #[serde(rename = "account.status")]
-    AccountStatus,
-
-    #[serde(rename = "account.age_days")]
-    AccountAgeDays,
-
-    #[serde(rename = "customer.risk_score")]
-    CustomerRiskScore,
-
-    #[serde(rename = "customer.cash_deposit_count_24h")]
-    CustomerCashDepositCount24h,
-
-    #[serde(rename = "customer.cash_deposit_amount_24h")]
-    CustomerCashDepositAmount24h,
-
-    #[serde(rename = "customer.transaction_count_24h")]
-    CustomerTransactionCount24h,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ConditionValueType {
-    String,
-    Integer,
-    Decimal,
-    Boolean,
-}
-
-//=================================================================
-// Checkers
-//=================================================================
-
-pub struct FieldDefinition {
-    pub field: ConditionField,
-    pub value_type: ConditionValueType,
-    pub allowed_operators: &'static [ConditionOperator],
-}
-
-pub static FIELD_DEFINITIONS: &[FieldDefinition] = &[
-    FieldDefinition {
-        field: ConditionField::TransactionAmount,
-        value_type: ConditionValueType::Decimal,
-        allowed_operators: &[
-            ConditionOperator::Eq,
-            ConditionOperator::Gt,
-            ConditionOperator::Gte,
-            ConditionOperator::Lt,
-            ConditionOperator::Lte,
-        ],
-    },
-    FieldDefinition {
-        field: ConditionField::TransactionCurrency,
-        value_type: ConditionValueType::String,
-        allowed_operators: &[
-            ConditionOperator::Eq,
-            ConditionOperator::Ne,
-            ConditionOperator::In,
-            ConditionOperator::NotIn,
-        ],
-    },
-    FieldDefinition {
-        field: ConditionField::CustomerCashDepositCount24h,
-        value_type: ConditionValueType::Integer,
-        allowed_operators: &[
-            ConditionOperator::Eq,
-            ConditionOperator::Gt,
-            ConditionOperator::Gte,
-            ConditionOperator::Lt,
-            ConditionOperator::Lte,
-        ],
-    },
-];
 
 //=================================================================
 // Models
@@ -214,19 +99,15 @@ pub struct AmlBlackListModel {
     pub severity: AmlRiskLevelEnum,
 }
 
+#[derive(Debug, Clone)]
+pub struct AmlModel {
+    pub institution_id: i64,
+    pub stage: AmlRulesExecutionStage,
+}
+
 //=================================================================
 // Params
 //=================================================================
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(untagged)]
-pub enum ConditionValue {
-    String(String),
-    Integer(i64),
-    Decimal(rust_decimal::Decimal),
-    Boolean(bool),
-    Strings(Vec<String>),
-    Integers(Vec<i64>),
-}
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 #[serde(deny_unknown_fields)]

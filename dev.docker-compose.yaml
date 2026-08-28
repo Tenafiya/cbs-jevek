@@ -1,4 +1,15 @@
 services:
+  dragonfly:
+    container_name: dragonfly
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonfly_data:/data
+    ulimits:
+      memlock: -1
+
   rustfs:
     container_name: rustfs
     image: docker.io/rustfs/rustfs:latest
@@ -15,5 +26,37 @@ services:
     volumes:
       - jevek_fs:/data
 
+  nats:
+    image: docker.io/nats:2.11-alpine
+    container_name: nats
+    restart: unless-stopped
+    command:
+      - "--jetstream"
+      - "--store_dir=/data/jetstream"
+      - "--http_port=8222"
+    ports:
+      - "4222:4222" # Client connections
+      - "8222:8222" # HTTP monitoring
+    volumes:
+      - nats_data:/data/jetstream
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:8222/healthz || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  nats_data:
+    driver: local
+    options:
+      oci-compatible: "true"
+      size: 100m
+
 volumes:
   jevek_fs:
+  nats_data:
+  dragonfly_data:

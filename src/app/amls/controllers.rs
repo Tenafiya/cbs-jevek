@@ -6,11 +6,11 @@ use crate::{
     app::{
         amls::{
             models::{
-                AmlActionsModel, AmlCaseNotesModel, AmlRulesModel, ConditionField, ConditionParams,
-                CreateAmlActionParams, CreateAmlCaseNodes, CreateAmlRulesParams, FIELD_DEFINITIONS,
-                FieldDefinition,
+                AmlActionsModel, AmlCaseNotesModel, AmlRulesModel, ConditionParams,
+                CreateAmlActionParams, CreateAmlCaseNodes, CreateAmlRulesParams,
             },
             services,
+            util::{ConditionField, FIELD_DEFINITIONS, FieldDefinition},
         },
         staffs::models::StaffResponseModel,
     },
@@ -36,6 +36,13 @@ pub fn validate_condition(conditions: &[ConditionParams]) -> Result<(), ApiError
             return Err(ApiError::BadRequest(format!(
                 "Operator {:?} is not allowed for field {:?}",
                 condition.operator, condition.field
+            )));
+        }
+
+        if condition.value.value_type() != definition.value_type {
+            return Err(ApiError::BadRequest(format!(
+                "Invalid value type for field {:?}",
+                condition.field
             )));
         }
     }

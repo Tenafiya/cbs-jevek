@@ -13,6 +13,24 @@ use crate::utils::models::{
     StaffSummary, TransactionSummary,
 };
 
+#[derive(Debug, FromQueryResult, Clone)]
+pub struct AmlRule {
+    pub id: i64,
+    pub institution_id: i64,
+    pub rule_name: String,
+    pub rule_description: Option<String>,
+    pub rule_type: AmlRulesRuleType,
+    pub execution_stage: AmlRulesExecutionStage,
+    pub condition_logic: Json,
+    pub action_on_trigger: AmlRulesActionOnTrigger,
+    pub is_enabled: Option<bool>,
+    pub priority: Option<i32>,
+    pub stop_processing: Option<bool>,
+    pub version: Option<i32>,
+    pub effective_from: Option<DateTime<FixedOffset>>,
+    pub effective_to: Option<DateTime<FixedOffset>>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AmlRuleRow {
     #[serde(rename = "_id")]

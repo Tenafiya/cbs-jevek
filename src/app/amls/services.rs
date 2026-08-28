@@ -1,13 +1,16 @@
 use actix_web::web;
+use entity::sea_orm_active_enums::AmlRulesExecutionStage;
 use sea_orm::{
-    ActiveValue::Set, DatabaseBackend, DatabaseTransaction, DbErr, EntityTrait, FromQueryResult,
-    InsertResult, Statement,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseBackend, DatabaseTransaction, DbErr,
+    EntityTrait, FromQueryResult, InsertResult, QueryFilter, Statement,
 };
 
 use crate::{
     AppState,
     app::amls::{
-        mapper::{AmlAlertFlat, AmlAlertRow, AmlCaseFlat, AmlCaseRow, AmlRuleFlat, AmlRuleRow},
+        mapper::{
+            AmlAlertFlat, AmlAlertRow, AmlCaseFlat, AmlCaseRow, AmlRule, AmlRuleFlat, AmlRuleRow,
+        },
         models::{
             AmlActionsModel, AmlAlertsModel, AmlCaseNotesModel, AmlCasesModel, AmlRulesModel,
         },
@@ -39,6 +42,7 @@ pub async fn save_aml(
         effective_from: Set(data.effective_from),
         effective_to: Set(data.effective_to),
         execution_stage: Set(data.execution_stage),
+        is_enabled: Set(Some(true)),
         ..Default::default()
     };
 
@@ -385,4 +389,67 @@ pub async fn get_aml_alerts(
         .all(state.pgdb.get_ref())
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect())
+}
+
+pub async fn fetch_execution_rules(
+    institution_id: i64,
+    stage: AmlRulesExecutionStage,
+    trn: &DatabaseTransaction,
+) -> Result<Vec<AmlRule>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            id,
+            institution_id,
+            rule_name,
+            rule_description,
+            rule_type,
+            execution_stage,
+            condition_logic,
+            action_on_trigger,
+            is_enabled,
+            priority,
+            stop_processing,
+            version,
+            effective_from,
+            effective_to
+        FROM aml_rules
+        WHERE institution_id = $1
+          AND is_enabled = TRUE
+          AND execution_stage = $2::aml_rules_execution_stage
+          AND (effective_from IS NULL OR effective_from <= NOW())
+          AND (effective_to IS NULL OR effective_to > NOW())
+        ORDER BY priority ASC, id ASC;
+        "#,
+        vec![institution_id.into(), stage.into()],
+    );
+
+    AmlRule::find_by_statement(stmt).all(trn).await
+}
+
+pub async fn toggle_aml_rule(
+    institution_id: i64,
+    rule_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<(), DbErr> {
+    use entity::aml_rules::{ActiveModel, Column, Entity};
+
+    let rule = Entity::find_by_id(rule_id)
+        .filter(Column::InstitutionId.eq(institution_id))
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Rule not found".to_string()))?;
+
+    let is_enabled = rule.is_enabled.unwrap_or(false);
+
+    let mut active_rule: ActiveModel = rule.into();
+
+    active_rule.is_enabled = Set(Some(!is_enabled));
+
+    active_rule.updated_at = Set(Some(chrono::Utc::now().into()));
+
+    ActiveModelTrait::update(active_rule, state.pgdb.get_ref()).await?;
+
+    Ok(())
 }
