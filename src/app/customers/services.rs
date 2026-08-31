@@ -1,7 +1,9 @@
 use actix_web::web;
 use migration::Expr;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DbErr, EntityTrait, ExprTrait, InsertResult, PaginatorTrait, QueryFilter, QueryOrder,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, ConnectionTrait, DatabaseBackend,
+    DbErr, EntityTrait, ExprTrait, InsertResult, PaginatorTrait, QueryFilter, QueryOrder,
+    Statement,
 };
 
 use crate::{
@@ -306,4 +308,30 @@ pub async fn customer_delete(id: i64, state: &web::Data<AppState>) -> Result<(),
     };
 
     Ok(())
+}
+
+pub async fn fetch_customer_info(
+    id: i64,
+    cus_type: String,
+    state: &web::Data<AppState>,
+) -> Result<bool, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT EXISTS (
+            SELECT 1
+            FROM customers
+            WHERE id = $1
+              AND customer_type = $2::customer_type
+        )
+        "#,
+        vec![id.into(), cus_type.into()],
+    );
+
+    let row = state.pgdb.get_ref().query_one_raw(stmt).await?;
+
+    Ok(row
+        .map(|row| row.try_get("", "exists"))
+        .transpose()?
+        .unwrap_or(false))
 }

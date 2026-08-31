@@ -2,6 +2,8 @@
 
 pub mod prelude;
 
+pub mod enum_impls;
+
 pub mod account_balances;
 pub mod account_categories;
 pub mod account_limits;

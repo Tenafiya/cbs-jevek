@@ -15,7 +15,7 @@ pub enum ConditionFieldClassify {
     Cash,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(untagged)]
 pub enum ConditionValue {
     String(String),
@@ -188,6 +188,17 @@ pub static FIELD_DEFINITIONS: &[FieldDefinition] = &[
             ConditionOperator::Ne,
             ConditionOperator::In,
             ConditionOperator::NotIn,
+        ],
+    },
+    FieldDefinition {
+        field: ConditionField::TransactionAmount,
+        value_type: ConditionValueType::Integer,
+        allowed_operators: &[
+            ConditionOperator::Eq,
+            ConditionOperator::Lt,
+            ConditionOperator::Gt,
+            ConditionOperator::Gte,
+            ConditionOperator::Lte,
         ],
     },
     FieldDefinition {
