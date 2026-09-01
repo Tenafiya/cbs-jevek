@@ -1,8 +1,10 @@
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlCasesPriority, AmlEntityType, AmlRiskLevelEnum, AmlRuleActions,
-    AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesRuleType, AmlWatchlistsListType,
+    AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesPriority, AmlRulesRuleType,
+    AmlWatchlistsListType,
 };
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use validator::Validate;
@@ -21,8 +23,8 @@ pub struct AmlRulesModel {
     pub condition_logic: Value,
     pub trigger_action: AmlRulesActionOnTrigger,
     pub execution_stage: AmlRulesExecutionStage,
+    pub priority: AmlRulesPriority,
     pub desc: Option<String>,
-    pub priority: Option<i32>,
     pub version: Option<i32>,
     pub effective_from: Option<DateTime<FixedOffset>>,
     pub effective_to: Option<DateTime<FixedOffset>>,
@@ -32,6 +34,10 @@ pub struct AmlRulesModel {
 pub struct AmlExecutionModel {
     pub institution_id: i64,
     pub rule_id: i64,
+    pub is_matched: bool,
+    pub risk_score: Decimal,
+    pub evaluation: Value,
+    pub execution_ms: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -47,7 +53,6 @@ pub struct AmlAlertsModel {
 #[derive(Debug, Clone)]
 pub struct AmlCasesModel {
     pub institution_id: i64,
-    pub case_number: String,
     pub title: String,
     pub priority: AmlCasesPriority,
     pub investigator: Option<i64>,
@@ -67,7 +72,7 @@ pub struct AmlActionsModel {
     pub case_id: i64,
     pub alert_id: i64,
     pub action_type: AmlRuleActions,
-    pub performed_by: i64,
+    pub performed_by: Option<i64>,
     pub metadata: Option<Value>,
 }
 
@@ -146,11 +151,10 @@ pub struct CreateAmlRulesParams {
     #[validate(length(max = 255))]
     pub description: Option<String>,
 
-    #[validate(range(min = 1, max = 10))]
-    pub priority: Option<i32>,
-
     #[validate(range(min = 1))]
     pub version: Option<i32>,
+
+    pub priority: AmlRulesPriority,
 
     #[validate(nested)]
     #[serde(rename = "effectiveDates")]

@@ -1,5 +1,4 @@
 // enum_impls/customer_type.rs
-
 use crate::sea_orm_active_enums::CustomerType;
 use std::fmt;
 

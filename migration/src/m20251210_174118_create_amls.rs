@@ -40,6 +40,20 @@ impl MigrationTrait for Migration {
             .get_connection()
             .execute_unprepared(
                 r#"
+                    CREATE TYPE aml_rules_priority AS ENUM (
+                        'LOW',
+                        'MEDIUM',
+                        'HIGH',
+                        'CRITICAL'
+                    )
+                "#,
+            )
+            .await?;
+
+        manager
+            .get_connection()
+            .execute_unprepared(
+                r#"
                     CREATE TYPE aml_rules_rule_type AS ENUM (
                         'TRANSACTION_AMOUNT',
                         'TRANSACTION_VELOCITY',
@@ -231,7 +245,12 @@ impl MigrationTrait for Migration {
                     .not_null(),
             )
             .col(ColumnDef::new(AmlRules::IsEnabled).boolean())
-            .col(ColumnDef::new(AmlRules::Priority).integer().default(1))
+            .col(
+                ColumnDef::new(AmlRules::Priority)
+                    .custom("aml_rules_priority")
+                    .default("LOW")
+                    .not_null(),
+            )
             .col(ColumnDef::new(AmlRules::StopProcessing).boolean())
             .col(ColumnDef::new(AmlRules::Version).integer())
             .col(ColumnDef::new(AmlRules::EffectiveFrom).timestamp_with_time_zone())

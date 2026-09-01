@@ -12,7 +12,8 @@ use crate::{
             AmlAlertFlat, AmlAlertRow, AmlCaseFlat, AmlCaseRow, AmlRule, AmlRuleFlat, AmlRuleRow,
         },
         models::{
-            AmlActionsModel, AmlAlertsModel, AmlCaseNotesModel, AmlCasesModel, AmlRulesModel,
+            AmlActionsModel, AmlAlertsModel, AmlCaseNotesModel, AmlCasesModel, AmlExecutionModel,
+            AmlRulesModel,
         },
     },
     utils::gen_snow_ids,
@@ -37,11 +38,11 @@ pub async fn save_aml(
         condition_logic: Set(data.condition_logic),
         action_on_trigger: Set(data.trigger_action),
         rule_description: Set(data.desc),
-        priority: Set(data.priority),
         version: Set(data.version),
         effective_from: Set(data.effective_from),
         effective_to: Set(data.effective_to),
         execution_stage: Set(data.execution_stage),
+        priority: Set(data.priority),
         is_enabled: Set(Some(true)),
         ..Default::default()
     };
@@ -80,7 +81,7 @@ pub async fn save_aml_cases(
 ) -> Result<InsertResult<entity::aml_cases::ActiveModel>, DbErr> {
     use entity::aml_cases::{ActiveModel, Entity};
 
-    let (snowflake, _) =
+    let (snowflake, slug) =
         gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
 
     let data = model.clone();
@@ -88,7 +89,7 @@ pub async fn save_aml_cases(
     let case = ActiveModel {
         id: Set(snowflake),
         institution_id: Set(data.institution_id),
-        case_number: Set(data.case_number),
+        case_number: Set(slug),
         title: Set(data.title),
         priority: Set(data.priority),
         assigned_investigator: Set(data.investigator),
@@ -123,7 +124,7 @@ pub async fn save_aml_case_notes(
 
 pub async fn save_aml_action(
     model: &AmlActionsModel,
-    state: &web::Data<AppState>,
+    trn: &DatabaseTransaction,
 ) -> Result<InsertResult<entity::aml_actions::ActiveModel>, DbErr> {
     use entity::aml_actions::{ActiveModel, Entity};
 
@@ -138,12 +139,37 @@ pub async fn save_aml_action(
         case_id: Set(data.case_id),
         alert_id: Set(data.alert_id),
         action_type: Set(Some(data.action_type)),
-        performedby: Set(Some(data.performed_by)),
+        performedby: Set(data.performed_by),
         metadata: Set(data.metadata),
         ..Default::default()
     };
 
-    Entity::insert(action).exec(state.pgdb.get_ref()).await
+    Entity::insert(action).exec(trn).await
+}
+
+pub async fn save_aml_rule_execution(
+    model: &AmlExecutionModel,
+    trn: &DatabaseTransaction,
+) -> Result<InsertResult<entity::aml_rule_executions::ActiveModel>, DbErr> {
+    use entity::aml_rule_executions::{ActiveModel, Entity};
+
+    let data = model.clone();
+
+    let (snowflake, _) =
+        gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
+
+    let exection = ActiveModel {
+        id: Set(snowflake),
+        institution_id: Set(data.institution_id),
+        is_matched: Set(data.is_matched),
+        risk_score: Set(data.risk_score),
+        evaluation_details: Set(data.evaluation),
+        execution_time_ms: Set(data.execution_ms),
+        executed_at: Set(chrono::Utc::now().into()),
+        ..Default::default()
+    };
+
+    Entity::insert(exection).exec(trn).await
 }
 
 pub async fn get_aml_rules(
@@ -163,7 +189,7 @@ pub async fn get_aml_rules(
             ar.action_on_trigger::TEXT,
             ar.execution_stage::TEXT,
             ar.is_enabled,
-            ar.priority,
+            ar.priority::TEXT,
             ar.stop_processing,
             ar.version,
             ar.effective_from,
@@ -404,12 +430,12 @@ pub async fn fetch_execution_rules(
             institution_id,
             rule_name,
             rule_description,
-            rule_type,
-            execution_stage,
+            rule_type::TEXT,
+            execution_stage::TEXT,
             condition_logic,
-            action_on_trigger,
+            action_on_trigger::TEXT,
             is_enabled,
-            priority,
+            priority::TEXT,
             stop_processing,
             version,
             effective_from,

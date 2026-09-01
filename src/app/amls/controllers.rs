@@ -6,8 +6,8 @@ use crate::{
     app::{
         amls::{
             models::{
-                AmlActionsModel, AmlCaseNotesModel, AmlRulesModel, ConditionParams,
-                CreateAmlActionParams, CreateAmlCaseNodes, CreateAmlRulesParams,
+                AmlCaseNotesModel, AmlRulesModel, ConditionParams, CreateAmlCaseNodes,
+                CreateAmlRulesParams,
             },
             services,
             util::{ConditionField, FIELD_DEFINITIONS, FieldDefinition},
@@ -76,8 +76,8 @@ pub async fn create_new_rule(
         condition_logic: logic,
         trigger_action: data.trigger_action,
         desc: data.description,
-        priority: data.priority,
         version: data.version,
+        priority: data.priority,
         execution_stage: data.execution_stage,
         effective_from: data.effective_dates.as_ref().map(|d| d.effective_from),
         effective_to: data.effective_dates.as_ref().map(|d| d.effective_to),
@@ -127,43 +127,43 @@ pub async fn create_new_case_note(
     }
 }
 
-pub async fn create_aml_action(
-    _req: HttpRequest,
-    state: web::Data<AppState>,
-    staff: web::ReqData<StaffResponseModel>,
-    payload: web::Json<CreateAmlActionParams>,
-) -> Result<HttpResponse, ApiError> {
-    payload
-        .validate()
-        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+// pub async fn create_aml_action(
+//     _req: HttpRequest,
+//     state: web::Data<AppState>,
+//     staff: web::ReqData<StaffResponseModel>,
+//     payload: web::Json<CreateAmlActionParams>,
+// ) -> Result<HttpResponse, ApiError> {
+//     payload
+//         .validate()
+//         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
-    let StaffResponseModel {
-        id, institution_id, ..
-    } = staff.into_inner();
+//     let StaffResponseModel {
+//         id, institution_id, ..
+//     } = staff.into_inner();
 
-    let data = payload.into_inner();
+//     let data = payload.into_inner();
 
-    let action = AmlActionsModel {
-        case_id: gen_snow_ids::id_parser(&data.case_id, "Case ID")?,
-        alert_id: gen_snow_ids::id_parser(&data.alert_id, "Alert ID")?,
-        action_type: data.action_type,
-        metadata: data.metadata,
-        institution_id: institution_id,
-        performed_by: id,
-    };
+//     let action = AmlActionsModel {
+//         case_id: gen_snow_ids::id_parser(&data.case_id, "Case ID")?,
+//         alert_id: gen_snow_ids::id_parser(&data.alert_id, "Alert ID")?,
+//         action_type: data.action_type,
+//         metadata: data.metadata,
+//         institution_id: institution_id,
+//         performed_by: Some(id),
+//     };
 
-    match services::save_aml_action(&action, &state).await {
-        Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
-            ApiCode::ResourceCreated,
-            "Successful",
-            {},
-        ))),
-        Err(e) => {
-            tracing::error!(error = ?e, "Failed to create Aml Action");
-            Err(ApiError::InternalServerError)
-        }
-    }
-}
+//     match services::save_aml_action(&action, &state).await {
+//         Ok(_) => Ok(HttpResponse::Created().json(ApiResponse::success(
+//             ApiCode::ResourceCreated,
+//             "Successful",
+//             {},
+//         ))),
+//         Err(e) => {
+//             tracing::error!(error = ?e, "Failed to create Aml Action");
+//             Err(ApiError::InternalServerError)
+//         }
+//     }
+// }
 
 pub async fn fetch_aml_rules(
     _req: HttpRequest,

@@ -1481,6 +1481,7 @@ dependencies = [
  "rand 0.10.2",
  "regex",
  "reqwest",
+ "rust_decimal",
  "sea-orm",
  "serde",
  "serde_json",
