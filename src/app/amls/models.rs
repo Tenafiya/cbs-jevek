@@ -30,7 +30,7 @@ pub struct AmlRulesModel {
     pub effective_to: Option<DateTime<FixedOffset>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AmlExecutionModel {
     pub institution_id: i64,
     pub rule_id: i64,

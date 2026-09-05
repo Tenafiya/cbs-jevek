@@ -515,3 +515,29 @@ pub async fn fetch_customer_acc_id(
         .await
         .map(|opt_row| opt_row.map(Into::into))
 }
+
+pub async fn toggle_account_status(
+    id: i64,
+    status: AccTypeStatus,
+    state: &web::Data<AppState>,
+) -> Result<(), DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        UPDATE accounts
+        SET status = $2::acc_type_status
+        WHERE id = $1
+        "#,
+        vec![id.into(), status.into()],
+    );
+
+    let result = state.pgdb.get_ref().execute_raw(stmt).await?;
+
+    if result.rows_affected() == 0 {
+        return Err(DbErr::RecordNotFound(
+            "Could not update account status".to_string(),
+        ));
+    };
+
+    Ok(())
+}

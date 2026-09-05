@@ -9,6 +9,7 @@ services:
       - dragonfly_data:/data
     ulimits:
       memlock: -1
+    command: ["--proactor_threads=2", "--maxmemory=512mb"]
 
   rustfs:
     container_name: rustfs
@@ -50,13 +51,8 @@ services:
       retries: 5
       start_period: 10s
 
-  nats_data:
-    driver: local
-    options:
-      oci-compatible: "true"
-      size: 100m
-
 volumes:
   jevek_fs:
-  nats_data:
   dragonfly_data:
+  nats_data:
+    driver: local

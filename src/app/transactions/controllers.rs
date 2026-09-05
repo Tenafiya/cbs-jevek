@@ -7,8 +7,8 @@ use crate::{
         staffs::models::StaffResponseModel,
         transactions::{
             models::{
-                AddTransChannelParams, AddTransLimitParams, AddTransactionChannelModel,
-                AddTransactionLimitModel,
+                AddDepositParams, AddTransChannelParams, AddTransLimitParams,
+                AddTransactionChannelModel, AddTransactionLimitModel,
             },
             services,
         },
@@ -160,3 +160,12 @@ pub async fn get_trans_channels(
         }
     }
 }
+
+// pub async fn process_deposit_trans(_req: HttpRequest, state: web::Data<AppState>, staff: web::ReqData<StaffResponseModel>, payload: web::Json<AddDepositParams>) -> Result<HttpResponse, ApiError> {
+//     payload.validate().map_err(|e| {
+//         ApiError::BadRequest(e.to_string())
+//     })?;
+
+//     let data = payload.into_inner();
+
+// }

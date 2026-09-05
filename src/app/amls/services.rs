@@ -52,7 +52,7 @@ pub async fn save_aml(
 
 pub async fn save_aml_alerts(
     model: &AmlAlertsModel,
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::aml_alerts::ActiveModel>, DbErr> {
     use entity::aml_alerts::{ActiveModel, Entity};
 
@@ -72,7 +72,7 @@ pub async fn save_aml_alerts(
         ..Default::default()
     };
 
-    Entity::insert(alert).exec(trn).await
+    Entity::insert(alert).exec(state.pgdb.get_ref()).await
 }
 
 pub async fn save_aml_cases(
@@ -149,7 +149,7 @@ pub async fn save_aml_action(
 
 pub async fn save_aml_rule_execution(
     model: &AmlExecutionModel,
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::aml_rule_executions::ActiveModel>, DbErr> {
     use entity::aml_rule_executions::{ActiveModel, Entity};
 
@@ -169,7 +169,7 @@ pub async fn save_aml_rule_execution(
         ..Default::default()
     };
 
-    Entity::insert(exection).exec(trn).await
+    Entity::insert(exection).exec(state.pgdb.get_ref()).await
 }
 
 pub async fn get_aml_rules(
@@ -420,7 +420,7 @@ pub async fn get_aml_alerts(
 pub async fn fetch_execution_rules(
     institution_id: i64,
     stage: AmlRulesExecutionStage,
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
 ) -> Result<Vec<AmlRule>, DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
@@ -451,7 +451,9 @@ pub async fn fetch_execution_rules(
         vec![institution_id.into(), stage.into()],
     );
 
-    AmlRule::find_by_statement(stmt).all(trn).await
+    AmlRule::find_by_statement(stmt)
+        .all(state.pgdb.get_ref())
+        .await
 }
 
 pub async fn toggle_aml_rule(
@@ -478,4 +480,16 @@ pub async fn toggle_aml_rule(
     ActiveModelTrait::update(active_rule, state.pgdb.get_ref()).await?;
 
     Ok(())
+}
+
+pub async fn get_action_list(
+    created: Vec<i64>,
+    state: &web::Data<AppState>,
+) -> Result<Vec<entity::aml_actions::Model>, DbErr> {
+    use entity::aml_actions::{Column, Entity};
+
+    Entity::find()
+        .filter(Column::Id.is_in(created))
+        .all(state.pgdb.get_ref())
+        .await
 }

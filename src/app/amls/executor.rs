@@ -1,14 +1,20 @@
-use crate::app::amls::{
-    mapper::AmlRule,
-    models::{
-        AmlActionsModel, AmlAlertsModel, AmlCasesModel, AmlExecutionModel, AmlModel,
-        ConditionGroup, ConditionParams,
-    },
-    services,
-    util::{
-        ConditionField, ConditionFieldClassify, ConditionOperator, ConditionValue, LogicalOperator,
+use crate::{
+    AppState,
+    app::amls::{
+        action_processes::{freeze_account, log_action},
+        mapper::AmlRule,
+        models::{
+            AmlActionsModel, AmlAlertsModel, AmlCasesModel, AmlExecutionModel, AmlModel,
+            ConditionGroup, ConditionParams,
+        },
+        services,
+        util::{
+            ConditionField, ConditionFieldClassify, ConditionOperator, ConditionValue,
+            LogicalOperator,
+        },
     },
 };
+use actix_web::web;
 use chrono::{DateTime, Utc};
 use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlCasesPriority, AmlRiskLevelEnum, AmlRuleActions,
@@ -16,24 +22,25 @@ use entity::sea_orm_active_enums::{
     TransactionCategoryType, TransactionType,
 };
 use rust_decimal::Decimal;
-use sea_orm::{DatabaseTransaction, InsertResult};
+use sea_orm::{InsertResult, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Instant;
+use thiserror::Error;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Error)]
 pub enum AmlError {
-    InvalidOpcode(u8),
-    InvalidLength,
+    #[error("Invalid resource type")]
     InvalidResourceType,
-    InvalidArgumentCount,
-    NamespaceLookupFailed(String),
-    InvalidDataType,
+    #[error("IO error")]
     IoError,
-    ParserError(usize),
+    #[error("Parser error")]
+    ParserError,
+    #[error("Method execution error")]
     MethodExecutionError,
-    RuleExecutionError,
+    #[error("Rule fetch error")]
     RuleFetchError,
+    #[error("Unsupported operator")]
     UnsupportedOperator,
 }
 
@@ -41,6 +48,13 @@ pub enum AmlError {
 pub struct CheckerParams {
     pub params: Value,
     pub field: ConditionField,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SaveActionMeta {
+    pub rule_action_type: AmlRulesActionOnTrigger,
+    pub context: AmlContext,
+    pub timestamp: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -129,9 +143,9 @@ impl AmlContext {
 }
 
 pub async fn evaluate(
-    trn: &DatabaseTransaction,
-    context: &AmlContext,
     model: &AmlModel,
+    context: &AmlContext,
+    state: &web::Data<AppState>,
 ) -> Result<AmlEvaluationResult, AmlError> {
     let model = model.clone();
     let mut matched_rules: Vec<RuleEvaluation> = Vec::new();
@@ -140,7 +154,7 @@ pub async fn evaluate(
     let mut risk_score = Decimal::ZERO;
 
     // 1. Load rules
-    let rule_models = services::fetch_execution_rules(model.institution_id, model.stage, trn)
+    let rule_models = services::fetch_execution_rules(model.institution_id, model.stage, state)
         .await
         .map_err(|e| {
             tracing::error!("Failed to fetch execution rules: {:?}", e);
@@ -152,6 +166,7 @@ pub async fn evaluate(
         let start = Instant::now();
 
         let rule_condition = rule_model.condition_logic.clone();
+
         let condition_groups: Vec<ConditionGroup> = serde_json::from_value(rule_condition)
             .map_err(|e| {
                 tracing::error!("Failed to parse from rule model: {}", e);
@@ -172,13 +187,13 @@ pub async fn evaluate(
 
             if !result {
                 let (alert, score) =
-                    create_aml_alert(trn, model.institution_id, result, &rule_model, &context)
+                    create_aml_alert(state, model.institution_id, result, &rule_model, &context)
                         .await?;
 
                 risk_score = score;
 
                 let action = create_aml_actions(
-                    trn,
+                    state,
                     model.institution_id,
                     &rule_model,
                     alert.last_insert_id,
@@ -200,21 +215,42 @@ pub async fn evaluate(
                 risk_score,
                 evaluation: serde_json::to_value(evaluation).map_err(|e| {
                     tracing::error!("Failed to parse evaluation: {}", e);
-                    AmlError::ParserError(0)
+                    AmlError::ParserError
                 })?,
                 execution_ms: start.elapsed().as_millis() as i32,
             };
 
-            services::save_aml_rule_execution(&execution, trn)
+            // use nats here
+            let message = serde_json::to_string(&execution).map_err(|e| {
+                tracing::error!("Failed to parse evaluation: {}", e);
+                AmlError::ParserError
+            })?;
+
+            state
+                .streamer
+                .publish_to_stream("amls.execution.new", message)
                 .await
                 .map_err(|e| {
-                    tracing::error!("Failed to record execution: {}", e);
+                    tracing::error!("Failed to parse evaluation: {}", e);
                     AmlError::MethodExecutionError
                 })?;
         }
     }
 
     // 4. Write to nats jetstream to execute actions
+    let action_messages = serde_json::to_string(&created_actions).map_err(|e| {
+        tracing::error!("Failed to parse created actions: {}", e);
+        AmlError::ParserError
+    })?;
+
+    state
+        .streamer
+        .publish_to_stream("amls.actions.new", action_messages)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to parse evaluation: {}", e);
+            AmlError::MethodExecutionError
+        })?;
 
     // 5. Return result
     Ok(AmlEvaluationResult {
@@ -300,7 +336,7 @@ fn extract_field_value(
     Ok(current_value)
 }
 
-fn get_customer_value(context: &AmlContext) -> Result<Value, AmlError> {
+pub fn get_customer_value(context: &AmlContext) -> Result<Value, AmlError> {
     match context {
         AmlContext::Deposit(ctx) => serde_json::to_value(&ctx.customer),
     }
@@ -310,7 +346,7 @@ fn get_customer_value(context: &AmlContext) -> Result<Value, AmlError> {
     })
 }
 
-fn get_transaction_value(context: &AmlContext) -> Result<Value, AmlError> {
+pub fn get_transaction_value(context: &AmlContext) -> Result<Value, AmlError> {
     match context {
         AmlContext::Deposit(ctx) => serde_json::to_value(&ctx.transaction),
     }
@@ -320,7 +356,7 @@ fn get_transaction_value(context: &AmlContext) -> Result<Value, AmlError> {
     })
 }
 
-fn get_account_value(context: &AmlContext) -> Result<Value, AmlError> {
+pub fn get_account_value(context: &AmlContext) -> Result<Value, AmlError> {
     match context {
         AmlContext::Deposit(ctx) => serde_json::to_value(&ctx.account),
     }
@@ -382,15 +418,6 @@ fn map_priority_to_risk_level(priority: &AmlRulesPriority) -> AmlRiskLevelEnum {
     }
 }
 
-fn map_priority_to_case_priority(priority: &AmlRulesPriority) -> AmlCasesPriority {
-    match priority {
-        AmlRulesPriority::Critical => AmlCasesPriority::Critical,
-        AmlRulesPriority::High => AmlCasesPriority::High,
-        AmlRulesPriority::Medium => AmlCasesPriority::Normal,
-        AmlRulesPriority::Low => AmlCasesPriority::Low,
-    }
-}
-
 fn determine_case_priority(
     rule_priority: &AmlRulesPriority,
     risk_score: Decimal,
@@ -399,7 +426,12 @@ fn determine_case_priority(
         return AmlCasesPriority::Urgent;
     }
 
-    map_priority_to_case_priority(rule_priority)
+    match rule_priority {
+        AmlRulesPriority::Critical => AmlCasesPriority::Critical,
+        AmlRulesPriority::High => AmlCasesPriority::High,
+        AmlRulesPriority::Medium => AmlCasesPriority::Normal,
+        AmlRulesPriority::Low => AmlCasesPriority::Low,
+    }
 }
 
 fn set_alert_type(rule: &AmlRule, context: &AmlContext) -> AmlAlertsAlertType {
@@ -460,7 +492,7 @@ fn map_action_type(action_type: &AmlRulesActionOnTrigger) -> AmlRuleActions {
 }
 
 async fn create_aml_alert(
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
     institution_id: i64,
     rule_pass: bool,
     rule: &AmlRule,
@@ -494,7 +526,7 @@ async fn create_aml_alert(
 
     let breakdown = serde_json::to_value(risk_breakdown).map_err(|e| {
         tracing::error!("Failed to parse breakdown: {}", e);
-        AmlError::ParserError(0)
+        AmlError::ParserError
     })?;
 
     let alert = AmlAlertsModel {
@@ -506,22 +538,29 @@ async fn create_aml_alert(
         risk_breakdown: Some(breakdown),
     };
 
-    let result = services::save_aml_alerts(&alert, trn).await.map_err(|e| {
-        tracing::error!("Failed to save alert: {}", e);
-        AmlError::MethodExecutionError
-    })?;
+    let result = services::save_aml_alerts(&alert, state)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to save alert: {}", e);
+            AmlError::MethodExecutionError
+        })?;
 
     Ok((result, risk_score))
 }
 
 async fn create_aml_actions(
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
     institution_id: i64,
     rule: &AmlRule,
     alert_id: i64,
     context: &AmlContext,
     risk_score: Decimal,
 ) -> Result<InsertResult<entity::aml_actions::ActiveModel>, AmlError> {
+    let trn = state.pgdb.get_ref().begin().await.map_err(|e| {
+        tracing::error!("Failed to start db transaction: {}", e);
+        AmlError::MethodExecutionError
+    })?;
+
     let rule = rule.clone();
 
     let case_model = AmlCasesModel {
@@ -532,18 +571,18 @@ async fn create_aml_actions(
         desc: Some(format!("Aml Cases created for Alert : {}", alert_id)),
     };
 
-    let case = services::save_aml_cases(&case_model, trn)
+    let case = services::save_aml_cases(&case_model, &trn)
         .await
         .map_err(|e| {
             tracing::error!("Failed to create case: {}", e);
             AmlError::MethodExecutionError
         })?;
 
-    let action_meta = serde_json::json!({
-        "rule_action_type": rule.action_on_trigger,
-        "context": context,
-        "timestamp": Utc::now().to_rfc3339(),
-    });
+    let action_meta = SaveActionMeta {
+        rule_action_type: rule.action_on_trigger.clone(),
+        context: context.clone(),
+        timestamp: Utc::now().to_rfc3339(),
+    };
 
     let action = AmlActionsModel {
         institution_id,
@@ -551,11 +590,21 @@ async fn create_aml_actions(
         alert_id,
         action_type: map_action_type(&rule.action_on_trigger),
         performed_by: None,
-        metadata: Some(action_meta),
+        metadata: Some(serde_json::to_value(action_meta).map_err(|e| {
+            tracing::error!("Failed to create case: {}", e);
+            AmlError::ParserError
+        })?),
     };
 
-    let action = services::save_aml_action(&action, trn).await.map_err(|e| {
-        tracing::error!("Failed to create action: {}", e);
+    let action = services::save_aml_action(&action, &trn)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to create action: {}", e);
+            AmlError::MethodExecutionError
+        })?;
+
+    trn.commit().await.map_err(|e| {
+        tracing::error!("Failed to commit db transaction: {}", e);
         AmlError::MethodExecutionError
     })?;
 
@@ -630,7 +679,7 @@ pub fn evaluate_eq_condition(
                 ConditionValue::String(value) => {
                     let val = value.parse::<i64>().map_err(|e| {
                         tracing::error!("Parse Error: {}", e);
-                        AmlError::ParserError(0)
+                        AmlError::ParserError
                     })?;
 
                     val == transaction_value.channel_id
@@ -787,4 +836,51 @@ pub fn evaluate_in_condition(
     };
 
     Ok(result)
+}
+
+pub async fn process_aml_actions(
+    created_actions: String,
+    state: &web::Data<AppState>,
+) -> Result<(), AmlError> {
+    let action_ids: Vec<i64> = serde_json::from_str(&created_actions).map_err(|e| {
+        tracing::error!("Failed to parse created actions: {}", e);
+        AmlError::ParserError
+    })?;
+
+    let actions = services::get_action_list(action_ids, &state)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to fetch list of actions: {}", e);
+            AmlError::MethodExecutionError
+        })?;
+
+    for action in actions {
+        let action_meta: SaveActionMeta =
+            serde_json::from_value(action.metadata.clone().ok_or_else(|| {
+                tracing::error!("Metadata is missing");
+                AmlError::ParserError
+            })?)
+            .map_err(|e| {
+                tracing::error!("Failed to parse evaluation: {}", e);
+                AmlError::ParserError
+            })?;
+
+        let context: AmlContext = action_meta.context;
+
+        match action.action_type {
+            None => {
+                tracing::warn!("No action type specified for action: {}", action.id);
+            }
+            Some(AmlRuleActions::LogOnly) => log_action(&action).await?,
+            Some(AmlRuleActions::EscalateToInvestigator) => {}
+            Some(AmlRuleActions::FileSarAutomatically) => {}
+            Some(AmlRuleActions::FreezeAccount) => freeze_account(&action, &context, state).await?,
+            Some(AmlRuleActions::GenerateAlert) => {}
+            Some(AmlRuleActions::HoldTransaction) => {}
+            Some(AmlRuleActions::RejectTransaction) => {}
+            Some(AmlRuleActions::RequireAdditionalAuthentication) => {}
+        }
+    }
+
+    Ok(())
 }

@@ -6,7 +6,7 @@ use sea_orm::ConnectionTrait;
 use serde_json::json;
 
 mod common;
-use common::{body_json, build_state, setup_test_database};
+use common::{body_json, build_state, setup_test_database, setup_test_dragonfly};
 
 async fn test_app() -> impl actix_web::dev::Service<
     Request,
@@ -27,8 +27,8 @@ async fn table_exists(state: &AppState, name: &str) -> bool {
             WHERE table_schema = 'public'
             AND table_name = $1
         "#,
-            vec![name.into()],
-        );
+        vec![name.into()],
+    );
 
     let row = state.pgdb.query_one_raw(stmt).await.unwrap().unwrap();
 
@@ -61,7 +61,12 @@ async fn migrate_up_and_down_via_endpoint() {
         return;
     };
 
-    let state = build_state(&db_url).await;
+    let Some(cache_url) = setup_test_dragonfly().await else {
+        eprintln!("Skipping test: Dragonfly container could not be started");
+        return;
+    };
+
+    let state = build_state(&db_url, &cache_url).await;
 
     let app = test::init_service(
         App::new().app_data(web::Data::new(state.clone())).service(
