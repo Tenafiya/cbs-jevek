@@ -3,7 +3,7 @@ use actix_web::{middleware::from_fn, web};
 use crate::{
     AppState,
     app::transactions::controllers,
-    middlewares::{account, jwt::jwt_auth},
+    middlewares::{account, jwt::jwt_auth, teller_drawer::teller_drawer},
 };
 
 pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
@@ -34,6 +34,14 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                 "/channels",
                 web::get()
                     .to(controllers::get_trans_channels)
+                    .wrap(from_fn(account::staff::verify(state.clone())))
+                    .wrap(from_fn(jwt_auth)),
+            )
+            .route(
+                "/create/deposit",
+                web::post()
+                    .to(controllers::process_deposit_trans)
+                    .wrap(from_fn(teller_drawer(state.clone())))
                     .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             ),

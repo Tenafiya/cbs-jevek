@@ -119,7 +119,7 @@ pub struct CustomerAmlContext {
 pub struct AccountAmlContext {
     pub id: i64,
     pub account_type_id: i64,
-    pub balance: i64,
+    pub balance: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,7 +1,7 @@
 use actix_web::web;
 use sea_orm::{
-    ActiveValue::Set, ConnectionTrait, DatabaseBackend, DatabaseTransaction, DbErr, EntityTrait,
-    FromQueryResult, InsertResult, Statement,
+    ActiveValue::Set, ColumnTrait, ConnectionTrait, DatabaseBackend, DatabaseTransaction, DbErr,
+    EntityTrait, FromQueryResult, InsertResult, QueryFilter, Statement,
 };
 
 use crate::{
@@ -340,7 +340,7 @@ pub async fn get_teller_drawers(
     );
 
     TellerCashDrawerFlat::find_by_statement(stmt)
-        .one(state.pgdb.get_ref())
+        .all(state.pgdb.get_ref())
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect())
 }
@@ -414,7 +414,7 @@ pub async fn get_institution_drawers(
     );
 
     TellerCashDrawerFlat::find_by_statement(stmt)
-        .one(state.pgdb.get_ref())
+        .all(state.pgdb.get_ref())
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect())
 }
@@ -460,7 +460,7 @@ pub async fn get_teller_recons(
     );
 
     TellerReconFlat::find_by_statement(stmt)
-        .one(state.pgdb.get_ref())
+        .all(state.pgdb.get_ref())
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect())
 }
@@ -499,7 +499,88 @@ pub async fn get_institution_recons(
     );
 
     TellerReconFlat::find_by_statement(stmt)
-        .one(state.pgdb.get_ref())
+        .all(state.pgdb.get_ref())
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect())
+}
+
+pub async fn get_teller_open_drawer(
+    staff_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<TellerCashDrawerRow, DbErr> {
+    let teller = entity::tellers::Entity::find()
+        .filter(entity::tellers::Column::StaffId.eq(staff_id))
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::RecordNotFound("Teller not found".to_string()))?;
+
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            -- Drawer
+            tcd.id,
+            tcd.opening_cash_amount,
+            tcd.opening_cash,
+            tcd.total_cash_in,
+            tcd.total_cash_out,
+            tcd.cheque_count,
+            tcd.total_cheque_amount,
+            tcd.transfer_in_count,
+            tcd.total_transfer_in_amount,
+            tcd.transfer_out_count,
+            tcd.total_transfer_out_amount,
+            tcd.closing_balance,
+            tcd.closing_cash,
+            tcd.expected_amount,
+            tcd.variance_amount,
+            tcd.variance_reason,
+            tcd.status,
+            tcd.opened_at,
+            tcd.closed_at,
+
+            -- Teller
+            t.id AS teller_id,
+            t.teller_name,
+            t.teller_number,
+            t.branch_id,
+
+            -- Supervisor
+            s.id AS supervisor_id,
+            s.employee_number AS supervisor_employee_number,
+            s.full_name AS supervisor_full_name,
+            s.first_name AS supervisor_first_name,
+            s.last_name AS supervisor_last_name,
+            s.phone_number AS supervisor_phone_number,
+            s.email_address AS supervisor_email_address,
+            s.job_title AS supervisor_job_title,
+            s.department AS supervisor_department,
+            s.employment_status AS supervisor_employment_status
+
+        FROM teller_cash_drawers tcd
+
+        INNER JOIN tellers t
+            ON t.id = tcd.teller_id
+            AND t.institution_id = tcd.institution_id
+
+        LEFT JOIN staff s
+            ON s.id = t.supervisor_id
+            AND s.institution_id = t.institution_id
+
+        WHERE tcd.institution_id = $1
+        AND tcd.teller_id = $2
+        WHERE ts.opened_at < DATE_TRUNC('day', NOW()) + INTERVAL '1 day'
+          AND (
+              ts.closed_at IS NULL
+              OR ts.closed_at >= DATE_TRUNC('day', NOW())
+          )
+        "#,
+        vec![teller.institution_id.into(), teller.id.into()],
+    );
+
+    TellerCashDrawerFlat::find_by_statement(stmt)
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::RecordNotFound("Drawer not found".to_string()))
+        .map(|row| row.into())
 }

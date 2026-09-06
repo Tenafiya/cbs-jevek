@@ -1,10 +1,16 @@
 use crate::utils::errors::ApiError;
+use chrono::Local;
 use once_cell::sync::Lazy;
 use rand::distr::Alphanumeric;
 use rand::{RngExt, rng};
 use serde::Serialize;
 use serde_json::Value;
 use snowflake_me::Snowflake;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+// Atomic counter to ensure uniqueness within the same nanosecond
+static COUNTER: AtomicU64 = AtomicU64::new(0);
 
 pub const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -108,4 +114,34 @@ pub fn generate_account_number(branch_code: i64, customer_id: i64) -> String {
     let check_digit = luhn_check_digit(&base);
 
     format!("{}{}", base, check_digit)
+}
+
+pub fn generate_reference_number(prefix: &str) -> String {
+    let now = Local::now();
+
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos();
+
+    // Get the last 8 digits of nanoseconds for uniqueness
+    let time_part = (nanos % 100_000_000) as u64;
+
+    let year = now.format("%y").to_string();
+
+    // Get an atomic counter to ensure uniqueness if two calls happen in the same nanosecond
+    let counter = COUNTER.fetch_add(1, Ordering::SeqCst);
+
+    let unique_number = if time_part < 99_999_999 {
+        let base = time_part * 100 + (counter % 100);
+        format!("{:010}", base)
+    } else {
+        let val = (counter % 99_999_999) * 100 + (counter % 100);
+        format!("{:010}", val)
+    };
+
+    let main_part = &unique_number[0..8];
+    let year_part = &year[0..2];
+
+    format!("{}{}{}", prefix, main_part, year_part)
 }

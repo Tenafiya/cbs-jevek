@@ -66,6 +66,7 @@ pub struct AddDepositModel {
     pub description: Option<String>,
     pub credit_account_id: i64,
     pub credit_customer_id: i64,
+    pub drawer_id: i64,
 }
 
 #[derive(Debug, Clone)]
@@ -189,7 +190,7 @@ pub struct AddDepositParams {
     pub customer_id: String,
 
     #[validate(custom(function = "validate_income"))]
-    amount: Decimal,
+    pub amount: Decimal,
 
     #[validate(nested)]
     pub currency: CurrencyParams,

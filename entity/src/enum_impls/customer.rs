@@ -13,3 +13,9 @@ impl fmt::Display for CustomerType {
         })
     }
 }
+
+impl Default for CustomerType {
+    fn default() -> Self {
+        CustomerType::Individual
+    }
+}

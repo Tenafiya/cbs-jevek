@@ -411,10 +411,14 @@ pub async fn get_aml_alerts(
         vec![institution_id.into()],
     );
 
-    AmlAlertFlat::find_by_statement(stmt)
+    let rows = AmlAlertFlat::find_by_statement(stmt)
         .all(state.pgdb.get_ref())
-        .await
-        .map(|rows| rows.into_iter().map(Into::into).collect())
+        .await?;
+
+    rows.into_iter()
+        .map(AmlAlertRow::try_from)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|_| DbErr::Custom("Data parsing failed".into()))
 }
 
 pub async fn fetch_execution_rules(

@@ -35,3 +35,10 @@ pub fn calculate_cash_total(cash: &[CashParams]) -> i64 {
 
     minor_conversion(total, "GHS")
 }
+
+#[derive(Debug)]
+pub enum MoneyError {
+    Overflow,
+    InvalidConversion,
+    InvalidCurrency,
+}

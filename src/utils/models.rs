@@ -1,7 +1,8 @@
 use chrono::{DateTime, FixedOffset, Utc};
 use entity::sea_orm_active_enums::{
     AmlCaseStatus, AmlCasesPriority, AmlRulesActionOnTrigger, AmlRulesRuleType, CustomerType,
-    StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
+    StaffEmploymentEnum, TellerCashDrawersStatus, TransactionCategoryType, TransactionStatus,
+    TransactionType,
 };
 use sea_orm::prelude::Decimal;
 use serde::{Deserialize, Serialize};
@@ -112,7 +113,7 @@ pub struct TransactionSummary {
     pub transaction_group_id: uuid::Uuid,
     pub transaction_type: TransactionType,
     pub transaction_category: TransactionCategoryType,
-    pub amount: i64,
+    pub amount: Decimal,
     pub currency: Option<Value>,
     pub status: TransactionStatus,
     pub posted_at: Option<DateTime<FixedOffset>>,
@@ -144,6 +145,16 @@ pub struct AmlCaseSummary {
     pub description: Option<String>,
     pub priority: AmlCasesPriority,
     pub status: AmlCaseStatus,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TellerCashDrawerSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub status: Option<TellerCashDrawersStatus>,
+
+    pub teller: TellerSummary,
+    pub supervisor: Option<StaffSummary>,
 }
 
 #[derive(Debug, Validate, Deserialize)]

@@ -1,3 +1,4 @@
+use redis::AsyncCommands;
 use std::{fmt::Debug, future::Future, pin::Pin};
 
 use actix_web::{
@@ -10,6 +11,9 @@ use actix_web::{
 
 use serde::{Serialize, de::DeserializeOwned};
 
+#[derive(Clone, Debug)]
+pub struct SessionId(pub uuid::Uuid);
+
 use crate::{
     AppState,
     app::staffs::{models::StaffResponseModel, services::get_staff_by_session},
@@ -18,7 +22,7 @@ use crate::{
 
 pub trait AuthSubject: DeserializeOwned + Serialize + Send + Sync + Debug + 'static {
     const CACHE_PREFIX: &'static str;
-    const _CACHE_TTL: u64 = 3600;
+    const CACHE_TTL: u64 = 3600;
 
     fn fetch(
         session: uuid::Uuid,
@@ -56,11 +60,30 @@ where
                 .and_then(|claim| uuid::Uuid::parse_str(&claim.sub).ok())
                 .ok_or(ApiError::Unauthorized)?;
 
-            let _cache_key = format!("{}:{}", S::CACHE_PREFIX, session);
+            let mut conn = state.cache.get_ref().clone();
 
-            req.extensions_mut().insert(session);
+            let cache_key = format!("{}:{}", S::CACHE_PREFIX, session);
 
-            let account = S::fetch(session, &state).await?;
+            req.extensions_mut().insert(SessionId(session));
+
+            let account: S = match conn.get::<_, String>(&cache_key).await {
+                Ok(cached) => {
+                    serde_json::from_str(&cached).map_err(|_| ApiError::InternalServerError)?
+                }
+                Err(_) => {
+                    let subject = S::fetch(session, &state).await?;
+
+                    let json = serde_json::to_string(&subject)
+                        .map_err(|_| ApiError::InternalServerError)?;
+
+                    let _: () = conn
+                        .set_ex(&cache_key, json, S::CACHE_TTL)
+                        .await
+                        .map_err(|_| ApiError::InternalServerError)?;
+
+                    subject
+                }
+            };
 
             req.extensions_mut().insert(account);
 

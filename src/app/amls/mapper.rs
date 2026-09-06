@@ -8,9 +8,12 @@ use sea_orm::{FromQueryResult, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::utils::models::{
-    AccountSummary, AmlCaseSummary, AmlRuleSummary, CustomerSummary, StaffSelectFields,
-    StaffSummary, TransactionSummary,
+use crate::utils::{
+    conversions,
+    models::{
+        AccountSummary, AmlCaseSummary, AmlRuleSummary, CustomerSummary, StaffSelectFields,
+        StaffSummary, TransactionSummary,
+    },
 };
 
 #[derive(Debug, FromQueryResult, Clone)]
@@ -334,9 +337,13 @@ pub struct AmlAlertFlat {
     pub transaction_failed_at: Option<DateTime<FixedOffset>>,
 }
 
-impl From<AmlAlertFlat> for AmlAlertRow {
-    fn from(flat: AmlAlertFlat) -> Self {
-        Self {
+impl TryFrom<AmlAlertFlat> for AmlAlertRow {
+    type Error = conversions::MoneyError;
+
+    fn try_from(flat: AmlAlertFlat) -> Result<Self, Self::Error> {
+        let amount = conversions::major_conversion(flat.transaction_amount, "GHS");
+
+        Ok(Self {
             id: flat.id.to_string(),
             institution_id: flat.institution_id.to_string(),
             risk_level: flat.risk_level,
@@ -401,13 +408,13 @@ impl From<AmlAlertFlat> for AmlAlertRow {
                 transaction_group_id: flat.transaction_group_id,
                 transaction_type: flat.transaction_type,
                 transaction_category: flat.transaction_category,
-                amount: flat.transaction_amount,
+                amount,
                 currency: flat.transaction_currency,
                 status: flat.transaction_status,
                 posted_at: flat.transaction_posted_at,
                 completed_at: flat.transaction_completed_at,
                 failed_at: flat.transaction_failed_at,
             }),
-        }
+        })
     }
 }
