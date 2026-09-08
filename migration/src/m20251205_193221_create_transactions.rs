@@ -129,6 +129,11 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new(Transactions::CreatedBy).big_integer())
             .col(ColumnDef::new(Transactions::ApprovedBy).big_integer())
             .col(
+                ColumnDef::new(Transactions::RequiresApproval)
+                    .boolean()
+                    .not_null(),
+            )
+            .col(
                 ColumnDef::new(Transactions::CreatedAt)
                     .timestamp_with_time_zone()
                     .default(Expr::current_timestamp()),
@@ -325,6 +330,7 @@ pub enum Transactions {
     AmlAlertId,
     CustomFields,
     CreatedBy,
+    RequiresApproval,
     ApprovedBy,
     ApprovedAt,
     CreatedAt,

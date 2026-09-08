@@ -53,11 +53,14 @@ pub struct CoreTransactionModel {
     pub transaction_group_id: uuid::Uuid,
     pub amount: i64,
     pub currency: Value,
+    pub fee_amount: Option<i64>,
+    pub vat_amount: Option<i64>,
     pub total_amount: Option<i64>,
     pub ip_address: Option<String>,
     pub approved_at: Option<DateTime<FixedOffset>>,
     pub created_by: i64,
     pub approved_by: Option<i64>,
+    pub requires_approval: bool,
 }
 
 #[derive(Debug, Clone)]

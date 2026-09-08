@@ -9,6 +9,7 @@ pub mod branches;
 pub mod countries;
 pub mod customers;
 pub mod health;
+pub mod idem_keys;
 pub mod institutions;
 pub mod media;
 pub mod staffs;

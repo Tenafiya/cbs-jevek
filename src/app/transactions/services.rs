@@ -66,6 +66,9 @@ pub async fn add_deposit_transaction(
         amount: Set(data.core.amount),
         currency: Set(Some(data.core.currency)),
         total_amount: Set(data.core.total_amount),
+        fee_amount: Set(data.core.fee_amount),
+        vat_amount: Set(data.core.vat_amount),
+        requires_approval: Set(data.core.requires_approval),
         transaction_group_id: Set(data.core.transaction_group_id),
         transaction_type: Set(data.core.transaction_type),
         transaction_category: Set(data.core.transaction_category),
@@ -111,7 +114,7 @@ pub async fn add_trans_channel(
 pub async fn fetch_checker_limit(
     institution_id: i64,
     channel_id: i64,
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
 ) -> Result<TransactionCheckerRow, DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
@@ -150,7 +153,7 @@ pub async fn fetch_checker_limit(
     );
 
     TransactionCheckerFlat::find_by_statement(stmt)
-        .one(trn)
+        .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::Custom("Transaction Checker Not Found".to_string()))
         .map(Into::into)
@@ -258,7 +261,6 @@ pub async fn fetch_transaction_limit(
 
         ORDER BY
             tl.customer_type,
-            tl.kyc_tier,
             tl.limit_type;
         "#,
         vec![institution_id.into(), trn_id.into()],

@@ -214,15 +214,25 @@ pub async fn process_deposit_trans(
     let group_id = uuid::Uuid::new_v4();
     let currency =
         serde_json::to_value(&data.currency).map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    let channel_id = gen_snow_ids::id_parser(&data.trans_channel_id, "Transaction Channel ID")?;
 
-    // confirm and implement maker checker, and also increment customer balances and write to ledger
+    let transaction_check = services::fetch_checker_limit(staff.institution_id, channel_id, &state)
+        .await
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Transaction checker query fail: {}", e);
+            ApiError::InternalServerError
+        })?;
+
+    let requires_approval = if transaction_check.channel.requires_maker_checker {
+        true
+    } else {
+        false
+    };
+
     let deposit = AddDepositModel {
         core: CoreTransactionModel {
             institution_id: staff.institution_id,
-            trans_channel_id: gen_snow_ids::id_parser(
-                &data.trans_channel_id,
-                "Transaction Channel ID",
-            )?,
+            trans_channel_id: gen_snow_ids::id_parser(&transaction_check.channel.id, "Channel ID")?,
             transaction_type: TransactionType::Credit,
             transaction_category: TransactionCategoryType::CashDeposit,
             status: TransactionStatus::Pending,
@@ -231,10 +241,13 @@ pub async fn process_deposit_trans(
             amount,
             currency,
             created_by: staff.id,
+            fee_amount: None,
+            vat_amount: None,
             total_amount: Some(amount),
             ip_address: None,
             approved_at: None,
             approved_by: None,
+            requires_approval,
         },
         description: Some("Deposit Transaction".to_string()),
         credit_account_id: gen_snow_ids::id_parser(&customer_account.id, "Customer Account ID")?,
@@ -258,6 +271,7 @@ pub async fn process_deposit_trans(
             channel_id: transaction.transaction_channel_id,
             category: transaction.transaction_category,
             currency_name: "GHS".to_string(),
+            requires_approval,
         },
         account: AccountAmlContext {
             id: gen_snow_ids::id_parser(&customer_account.id, "Account ID")?,

@@ -23,7 +23,7 @@ pub async fn start_aml_processor(state: web::Data<AppState>) {
                                 handle_processing_error(&message, e).await;
                             } else {
                                 if let Err(e) = message.ack().await {
-                                    tracing::error!("Failed to ack message: {}", e);
+                                    tracing::error!("Failed to ack aml.execution message: {}", e);
                                 }
                             }
                         };

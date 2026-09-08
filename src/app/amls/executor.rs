@@ -106,6 +106,7 @@ pub struct TransactionAmlContext {
     pub channel_id: i64,
     pub category: TransactionCategoryType,
     pub currency_name: String,
+    pub requires_approval: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -231,7 +232,7 @@ pub async fn evaluate(
                 .publish_to_stream("amls.execution.new", message)
                 .await
                 .map_err(|e| {
-                    tracing::error!("Failed to parse evaluation: {}", e);
+                    tracing::error!("Failed to publish evaluation: {}", e);
                     AmlError::MethodExecutionError
                 })?;
         }

@@ -50,6 +50,7 @@ pub struct Model {
     pub approved_at: Option<DateTimeWithTimeZone>,
     pub created_by: Option<i64>,
     pub approved_by: Option<i64>,
+    pub requires_approval: bool,
     pub created_at: Option<DateTimeWithTimeZone>,
     pub updated_at: Option<DateTimeWithTimeZone>,
     pub teller_cash_drawer_id: Option<i64>,

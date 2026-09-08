@@ -58,7 +58,7 @@ pub struct TransactionChannelSummary {
     pub institution_id: String,
     pub channel_name: Option<String>,
     pub channel_code: Option<String>,
-    pub requires_maker_checker: Option<bool>,
+    pub requires_maker_checker: bool,
     pub metadata: Option<Value>,
 }
 
@@ -90,7 +90,7 @@ pub struct TransactionCheckerFlat {
     pub institution_id: i64,
     pub channel_name: Option<String>,
     pub channel_code: Option<String>,
-    pub requires_maker_checker: Option<bool>,
+    pub requires_maker_checker: bool,
     pub metadata: Option<Value>,
 
     pub limit_id: Option<i64>,
@@ -186,7 +186,7 @@ pub struct TransactionLimitFlat {
     pub channel_institution_id: i64,
     pub channel_name: Option<String>,
     pub channel_code: Option<String>,
-    pub requires_maker_checker: Option<bool>,
+    pub requires_maker_checker: bool,
     pub metadata: Option<Value>,
 
     pub account_category_id: i64,
@@ -264,6 +264,7 @@ pub struct TransactionRow {
     pub value_date: Option<NaiveDate>,
     pub is_suspicious: Option<bool>,
     pub aml_alert_id: Option<String>,
+    pub requires_approval: bool,
     pub approved_at: Option<DateTime<FixedOffset>>,
 
     pub parent_transaction: Option<TransactionSummary>,
@@ -301,6 +302,7 @@ pub struct TransactionFlat {
     pub value_date: Option<NaiveDate>,
     pub is_suspicious: Option<bool>,
     pub aml_alert_id: Option<String>,
+    pub requires_approval: bool,
     pub approved_at: Option<DateTime<FixedOffset>>,
 
     pub parent_transaction_id: Option<i64>,
@@ -393,6 +395,7 @@ impl TryFrom<TransactionFlat> for TransactionRow {
             value_date: flat.value_date,
             is_suspicious: flat.is_suspicious,
             aml_alert_id: flat.aml_alert_id,
+            requires_approval: flat.requires_approval,
             approved_at: flat.approved_at,
 
             parent_transaction: flat.parent_transaction_id.map(|id| TransactionSummary {

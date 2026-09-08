@@ -150,6 +150,14 @@ pub async fn setup_nats() -> Result<StreamManager, Box<dyn std::error::Error>> {
         .register_stream("AMLS", vec!["amls.>".into()], "aml-processor".to_string())
         .await?;
 
+    stream_manager
+        .register_stream(
+            "IDEMS",
+            vec!["idems.>".into()],
+            "idem-processor".to_string(),
+        )
+        .await?;
+
     Ok(stream_manager)
 }
 
