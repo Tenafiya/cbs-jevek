@@ -99,7 +99,6 @@ pub enum AmlContacts<'a> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransactionAmlContext {
-    pub id: i64,
     pub amount: i64,
     pub transaction_type: TransactionType,
     pub group_id: uuid::Uuid,
@@ -208,7 +207,6 @@ pub async fn evaluate(
             };
 
             // 3. Record execution
-            // Write key to nats jetstream to save this async
             let execution = AmlExecutionModel {
                 institution_id: model.institution_id,
                 rule_id: rule_model.id,

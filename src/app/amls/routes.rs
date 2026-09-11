@@ -25,13 +25,6 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                     .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
-            // .route(
-            //     "/actions",
-            //     web::post()
-            //         .to(create_aml_action)
-            //         .wrap(from_fn(account::staff::verify(state.clone())))
-            //         .wrap(from_fn(jwt_auth)),
-            // )
             .route(
                 "/rules/get",
                 web::get()

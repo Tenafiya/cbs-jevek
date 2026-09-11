@@ -210,11 +210,19 @@ pub async fn process_deposit_trans(
         ApiError::BadRequest("Customer account not found".to_string())
     })?;
 
+    let account_id = gen_snow_ids::id_parser(&customer_account.id, "Customer Account ID")?;
     let amount = conversions::minor_conversion(data.amount, "GHS");
     let group_id = uuid::Uuid::new_v4();
     let currency =
         serde_json::to_value(&data.currency).map_err(|e| ApiError::BadRequest(e.to_string()))?;
     let channel_id = gen_snow_ids::id_parser(&data.trans_channel_id, "Transaction Channel ID")?;
+
+    accounts::services::get_account_limit(account_id, amount, 1, &state)
+        .await
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to get account limit");
+            ApiError::InternalServerError
+        })?;
 
     let transaction_check = services::fetch_checker_limit(staff.institution_id, channel_id, &state)
         .await
@@ -229,47 +237,13 @@ pub async fn process_deposit_trans(
         false
     };
 
-    let deposit = AddDepositModel {
-        core: CoreTransactionModel {
-            institution_id: staff.institution_id,
-            trans_channel_id: gen_snow_ids::id_parser(&transaction_check.channel.id, "Channel ID")?,
-            transaction_type: TransactionType::Credit,
-            transaction_category: TransactionCategoryType::CashDeposit,
-            status: TransactionStatus::Pending,
-            reference: gen_snow_ids::generate_reference_number("DEP"),
-            transaction_group_id: group_id,
-            amount,
-            currency,
-            created_by: staff.id,
-            fee_amount: None,
-            vat_amount: None,
-            total_amount: Some(amount),
-            ip_address: None,
-            approved_at: None,
-            approved_by: None,
-            requires_approval,
-        },
-        description: Some("Deposit Transaction".to_string()),
-        credit_account_id: gen_snow_ids::id_parser(&customer_account.id, "Customer Account ID")?,
-        credit_customer_id: gen_snow_ids::id_parser(&customer_account.customer.id, "Customer ID")?,
-        drawer_id: gen_snow_ids::id_parser(&drawer.id, "Drawer ID")?,
-    };
-
-    let transaction = services::add_deposit_transaction(&deposit, &state)
-        .await
-        .map_err(|e| {
-            tracing::error!(error = ?e, "Failed to save transaction");
-            ApiError::InternalServerError
-        })?;
-
     let aml_context = DepositAmlContext {
         transaction: TransactionAmlContext {
-            id: transaction.id,
-            amount: transaction.amount,
-            transaction_type: transaction.transaction_type,
-            group_id: transaction.transaction_group_id,
-            channel_id: transaction.transaction_channel_id,
-            category: transaction.transaction_category,
+            amount: amount,
+            transaction_type: TransactionType::Credit,
+            group_id,
+            channel_id,
+            category: TransactionCategoryType::CashDeposit,
             currency_name: "GHS".to_string(),
             requires_approval,
         },
@@ -300,6 +274,39 @@ pub async fn process_deposit_trans(
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "Failed to start aml execution");
+            ApiError::InternalServerError
+        })?;
+
+    let deposit = AddDepositModel {
+        core: CoreTransactionModel {
+            institution_id: staff.institution_id,
+            trans_channel_id: gen_snow_ids::id_parser(&transaction_check.channel.id, "Channel ID")?,
+            transaction_type: TransactionType::Credit,
+            transaction_category: TransactionCategoryType::CashDeposit,
+            status: TransactionStatus::Pending,
+            reference: gen_snow_ids::generate_reference_number("DEP"),
+            transaction_group_id: group_id,
+            amount,
+            currency,
+            created_by: staff.id,
+            fee_amount: None,
+            vat_amount: None,
+            total_amount: Some(amount),
+            ip_address: None,
+            approved_at: None,
+            approved_by: None,
+            requires_approval,
+        },
+        description: Some("Deposit Transaction".to_string()),
+        credit_account_id: account_id,
+        credit_customer_id: gen_snow_ids::id_parser(&customer_account.customer.id, "Customer ID")?,
+        drawer_id: gen_snow_ids::id_parser(&drawer.id, "Drawer ID")?,
+    };
+
+    services::add_deposit_transaction(&deposit, &state)
+        .await
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to save transaction");
             ApiError::InternalServerError
         })?;
 

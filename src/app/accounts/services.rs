@@ -415,28 +415,48 @@ pub async fn fetch_limit_for_update(
 
 pub async fn get_account_limit(
     acc_id: i64,
+    amount: i64,
+    count: i32,
     state: &web::Data<AppState>,
 ) -> Result<AccountLimitRow, DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
         r#"
-            SELECT
-                id::TEXT as id,
-                account_id::TEXT as account_id,
-                limit_type::TEXT as limit_type,
-                limit_unit::TEXT as limit_unit,
-                limit_value,
-                current_value,
-                last_reset_at,
-                is_active,
-                effective_from,
-                effective_to,
-                created_at,
-                updated_at
+        WITH before AS (
+            SELECT id, limit_value, current_value
             FROM account_limits
             WHERE account_id = $1
+              AND is_active  = TRUE
+              AND effective_from <= NOW()
+              AND effective_to   >  NOW()
+              AND limit_type IN (
+                  'DAILY_CREDIT','WEEKLY_CREDIT','MONTHLY_CREDIT',
+                  'DAILY_COUNT','WEEKLY_COUNT','MONTHLY_COUNT'
+              )
+        ),
+        updated AS (
+            UPDATE account_limits al
+            SET current_value = al.current_value
+                    + CASE al.limit_unit
+                          WHEN 'AMOUNT' THEN $2::bigint
+                          WHEN 'COUNT'  THEN $3::bigint
+                      END,
+                updated_at = NOW()
+            FROM before b
+            WHERE al.id = b.id
+              AND b.current_value
+                  + CASE al.limit_unit
+                        WHEN 'AMOUNT' THEN $2::bigint
+                        WHEN 'COUNT'  THEN $3::bigint
+                    END
+                  <= b.limit_value
+            RETURNING al.limit_type
+        )
+        SELECT
+            (SELECT COUNT(*) FROM before)  AS limits_found,
+            (SELECT COUNT(*) FROM updated) AS limits_passed;
         "#,
-        vec![acc_id.into()],
+        vec![acc_id.into(), amount.into(), count.into()],
     );
 
     AccountLimitRow::find_by_statement(stmt)
