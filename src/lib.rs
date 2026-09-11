@@ -9,33 +9,42 @@ use actix_web::{
 use config::Config;
 
 pub mod app;
+pub mod fileskit;
 mod middlewares;
+pub mod nats;
 pub mod setup;
 pub mod utils;
-pub mod fileskit;
 
 use crate::fileskit::config::StorageService;
 use crate::middlewares::request_id::request_id;
+use crate::nats::config::StreamManager;
+use crate::nats::config::setup_nats;
 use crate::setup::init_system;
-use crate::setup::postgres::pgdb;
+use crate::setup::{dragonfly::df, postgres::pgdb};
 use crate::{app::app_routes, middlewares::helmet::security_headers};
 
 #[derive(Clone)]
 pub struct AppState {
     pub config: Config,
     pub pgdb: Data<sea_orm::DatabaseConnection>,
-    pub storage: Data<StorageService>
+    pub storage: Data<StorageService>,
+    pub cache: Data<redis::aio::ConnectionManager>,
+    pub streamer: Data<StreamManager>,
 }
 
 async fn setup_app_state() -> Result<Data<AppState>, Box<dyn std::error::Error>> {
     let settings = init_system::load_config()?;
     let pg_conn = Data::new(pgdb::connector(&settings).await);
     let storager = Data::new(StorageService::new().await);
+    let dragonfly = Data::new(df::connector().await);
+    let streamer = Data::new(setup_nats().await?);
 
     Ok(Data::new(AppState {
         config: settings,
         pgdb: pg_conn,
         storage: storager,
+        cache: dragonfly,
+        streamer,
     }))
 }
 
@@ -64,9 +73,7 @@ pub async fn start_server() -> Result<(), std::io::Error> {
 
         App::new()
             .app_data(state.clone())
-            .app_data(
-                JsonConfig::default().limit(64 * 1024),
-            )
+            .app_data(JsonConfig::default().limit(64 * 1024))
             .wrap(from_fn(security_headers))
             .wrap(from_fn(request_id))
             .wrap(Logger::new(

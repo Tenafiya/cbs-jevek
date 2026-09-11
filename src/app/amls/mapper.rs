@@ -1,17 +1,38 @@
 use chrono::{DateTime, FixedOffset};
 use entity::sea_orm_active_enums::{
     AmlAlertsAlertType, AmlAlertsStatus, AmlCaseStatus, AmlCasesPriority, AmlRiskLevelEnum,
-    AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesRuleType, CustomerType,
-    StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
+    AmlRulesActionOnTrigger, AmlRulesExecutionStage, AmlRulesPriority, AmlRulesRuleType,
+    CustomerType, StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
 };
 use sea_orm::{FromQueryResult, prelude::*};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::utils::models::{
-    AccountSummary, AmlCaseSummary, AmlRuleSummary, CustomerSummary, StaffSelectFields,
-    StaffSummary, TransactionSummary,
+use crate::utils::{
+    conversions,
+    models::{
+        AccountSummary, AmlCaseSummary, AmlRuleSummary, CustomerSummary, StaffSelectFields,
+        StaffSummary, TransactionSummary,
+    },
 };
+
+#[derive(Debug, FromQueryResult, Clone)]
+pub struct AmlRule {
+    pub id: i64,
+    pub institution_id: i64,
+    pub rule_name: String,
+    pub rule_description: Option<String>,
+    pub rule_type: AmlRulesRuleType,
+    pub execution_stage: AmlRulesExecutionStage,
+    pub condition_logic: Json,
+    pub action_on_trigger: AmlRulesActionOnTrigger,
+    pub is_enabled: Option<bool>,
+    pub priority: AmlRulesPriority,
+    pub stop_processing: Option<bool>,
+    pub version: Option<i32>,
+    pub effective_from: Option<DateTime<FixedOffset>>,
+    pub effective_to: Option<DateTime<FixedOffset>>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AmlRuleRow {
@@ -25,7 +46,7 @@ pub struct AmlRuleRow {
     pub action_on_trigger: AmlRulesActionOnTrigger,
     pub execution_stage: Option<AmlRulesExecutionStage>,
     pub is_enabled: Option<bool>,
-    pub priority: Option<i32>,
+    pub priority: AmlRulesPriority,
     pub stop_processing: Option<bool>,
     pub version: Option<i32>,
     pub effective_from: Option<DateTime<FixedOffset>>,
@@ -48,7 +69,7 @@ pub struct AmlRuleFlat {
     pub action_on_trigger: AmlRulesActionOnTrigger,
     pub execution_stage: Option<AmlRulesExecutionStage>,
     pub is_enabled: Option<bool>,
-    pub priority: Option<i32>,
+    pub priority: AmlRulesPriority,
     pub stop_processing: Option<bool>,
     pub version: Option<i32>,
     pub effective_from: Option<DateTime<FixedOffset>>,
@@ -316,9 +337,13 @@ pub struct AmlAlertFlat {
     pub transaction_failed_at: Option<DateTime<FixedOffset>>,
 }
 
-impl From<AmlAlertFlat> for AmlAlertRow {
-    fn from(flat: AmlAlertFlat) -> Self {
-        Self {
+impl TryFrom<AmlAlertFlat> for AmlAlertRow {
+    type Error = conversions::MoneyError;
+
+    fn try_from(flat: AmlAlertFlat) -> Result<Self, Self::Error> {
+        let amount = conversions::major_conversion(flat.transaction_amount, "GHS");
+
+        Ok(Self {
             id: flat.id.to_string(),
             institution_id: flat.institution_id.to_string(),
             risk_level: flat.risk_level,
@@ -383,13 +408,13 @@ impl From<AmlAlertFlat> for AmlAlertRow {
                 transaction_group_id: flat.transaction_group_id,
                 transaction_type: flat.transaction_type,
                 transaction_category: flat.transaction_category,
-                amount: flat.transaction_amount,
+                amount,
                 currency: flat.transaction_currency,
                 status: flat.transaction_status,
                 posted_at: flat.transaction_posted_at,
                 completed_at: flat.transaction_completed_at,
                 failed_at: flat.transaction_failed_at,
             }),
-        }
+        })
     }
 }

@@ -11,7 +11,7 @@ use crate::{
             TransactionChannelResponseModel, TransactionCheckerFlat, TransactionCheckerRow,
             TransactionLimitFlat, TransactionLimitRow,
         },
-        models::{AddTransactionChannelModel, AddTransactionLimitModel},
+        models::{AddDepositModel, AddTransactionChannelModel, AddTransactionLimitModel},
     },
     utils::gen_snow_ids,
 };
@@ -45,6 +45,47 @@ pub async fn add_trans_limit(
     Entity::insert(limit).exec(state.pgdb.get_ref()).await
 }
 
+pub async fn add_deposit_transaction(
+    model: &AddDepositModel,
+    state: &web::Data<AppState>,
+) -> Result<entity::transactions::Model, DbErr> {
+    use entity::transactions::{ActiveModel, Entity};
+
+    let (snowflake, _) =
+        gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
+
+    let data = model.clone();
+
+    let deposit = ActiveModel {
+        id: Set(snowflake),
+        institution_id: Set(data.core.institution_id),
+        transaction_channel_id: Set(data.core.trans_channel_id),
+        transaction_reference: Set(Some(data.core.reference)),
+        credit_account_id: Set(Some(data.credit_account_id)),
+        credit_customer_id: Set(Some(data.credit_customer_id)),
+        amount: Set(data.core.amount),
+        currency: Set(Some(data.core.currency)),
+        total_amount: Set(data.core.total_amount),
+        fee_amount: Set(data.core.fee_amount),
+        vat_amount: Set(data.core.vat_amount),
+        requires_approval: Set(data.core.requires_approval),
+        transaction_group_id: Set(data.core.transaction_group_id),
+        transaction_type: Set(data.core.transaction_type),
+        transaction_category: Set(data.core.transaction_category),
+        description: Set(data.description),
+        status: Set(data.core.status),
+        posted_at: Set(Some(chrono::Utc::now().into())),
+        ip_address: Set(data.core.ip_address),
+        created_by: Set(Some(data.core.created_by)),
+        teller_cash_drawer_id: Set(Some(data.drawer_id)),
+        ..Default::default()
+    };
+
+    Entity::insert(deposit)
+        .exec_with_returning(state.pgdb.get_ref())
+        .await
+}
+
 pub async fn add_trans_channel(
     model: &AddTransactionChannelModel,
     state: &web::Data<AppState>,
@@ -73,7 +114,7 @@ pub async fn add_trans_channel(
 pub async fn fetch_checker_limit(
     institution_id: i64,
     channel_id: i64,
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
 ) -> Result<TransactionCheckerRow, DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
@@ -112,7 +153,7 @@ pub async fn fetch_checker_limit(
     );
 
     TransactionCheckerFlat::find_by_statement(stmt)
-        .one(trn)
+        .one(state.pgdb.get_ref())
         .await?
         .ok_or_else(|| DbErr::Custom("Transaction Checker Not Found".to_string()))
         .map(Into::into)
@@ -175,7 +216,7 @@ pub async fn fetch_transaction_limit(
             tl.id,
             tl.institution_id,
             tl.customer_type,
-            tl.limit_type,
+            tl.limit_type::TEXT,
             tl.max_amount,
             tl.max_count,
             tl.currency,
@@ -195,7 +236,7 @@ pub async fn fetch_transaction_limit(
 
             ac.id AS account_category_id,
             ac.name AS category_name,
-            ac.category_type,
+            ac.category_type::TEXT,
             ac.description AS category_description,
             ac.is_active AS category_is_active
 
@@ -220,7 +261,6 @@ pub async fn fetch_transaction_limit(
 
         ORDER BY
             tl.customer_type,
-            tl.kyc_tier,
             tl.limit_type;
         "#,
         vec![institution_id.into(), trn_id.into()],
@@ -244,7 +284,7 @@ pub async fn fetch_transaction_limits(
             tl.id,
             tl.institution_id,
             tl.customer_type,
-            tl.limit_type,
+            tl.limit_type::TEXT,
             tl.max_amount,
             tl.max_count,
             tl.currency,
@@ -264,7 +304,7 @@ pub async fn fetch_transaction_limits(
 
             ac.id AS account_category_id,
             ac.name AS category_name,
-            ac.category_type,
+            ac.category_type::TEXT,
             ac.description AS category_description,
             ac.is_active AS category_is_active
 

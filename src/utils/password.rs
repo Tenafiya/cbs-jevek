@@ -1,9 +1,13 @@
 use bcrypt::DEFAULT_COST;
-use dotenvy::dotenv;
-use sha2::{Digest, Sha512};
+use sha2::{Digest, Sha256, Sha512};
+
+pub fn compute_hash(body: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(body);
+    hex::encode(hasher.finalize())
+}
 
 fn preprocess_password(password: &str, salt: &uuid::Uuid) -> String {
-    dotenv().ok();
     let pepper = std::env::var("PEPPER").expect("PEPPER not set");
 
     let combined = format!("{}{}{}", password, salt.to_string(), pepper);
@@ -22,12 +26,9 @@ fn preprocess_password(password: &str, salt: &uuid::Uuid) -> String {
 
 pub async fn encrypt_password(password: &str, salt: &uuid::Uuid) -> String {
     let prehashed = preprocess_password(password, salt);
-    tokio::task::spawn_blocking(move || {
-        bcrypt::hash(prehashed, DEFAULT_COST)
-            .unwrap()
-    })
-    .await
-    .expect("Spawn Failed")
+    tokio::task::spawn_blocking(move || bcrypt::hash(prehashed, DEFAULT_COST).unwrap())
+        .await
+        .expect("Spawn Failed")
 }
 
 pub async fn validate_password(password: &str, salt: &uuid::Uuid, hash: &str) -> bool {

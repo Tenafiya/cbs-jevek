@@ -1,7 +1,8 @@
 use chrono::{DateTime, FixedOffset, Utc};
 use entity::sea_orm_active_enums::{
     AmlCaseStatus, AmlCasesPriority, AmlRulesActionOnTrigger, AmlRulesRuleType, CustomerType,
-    StaffEmploymentEnum, TransactionCategoryType, TransactionStatus, TransactionType,
+    StaffEmploymentEnum, TellerCashDrawersStatus, TransactionCategoryType, TransactionStatus,
+    TransactionType,
 };
 use sea_orm::prelude::Decimal;
 use serde::{Deserialize, Serialize};
@@ -9,6 +10,13 @@ use serde_json::Value;
 use validator::Validate;
 
 use crate::utils::validators::{validate_cash_type, validate_date_range, validate_income};
+
+#[derive(Debug, Clone)]
+pub struct CurrencyModel {
+    pub name: String,
+    pub symbol: String,
+    pub precision: Option<i32>,
+}
 
 #[derive(Debug, Deserialize, Validate)]
 #[validate(schema(function = "validate_date_range"))]
@@ -105,7 +113,7 @@ pub struct TransactionSummary {
     pub transaction_group_id: uuid::Uuid,
     pub transaction_type: TransactionType,
     pub transaction_category: TransactionCategoryType,
-    pub amount: i64,
+    pub amount: Decimal,
     pub currency: Option<Value>,
     pub status: TransactionStatus,
     pub posted_at: Option<DateTime<FixedOffset>>,
@@ -137,6 +145,16 @@ pub struct AmlCaseSummary {
     pub description: Option<String>,
     pub priority: AmlCasesPriority,
     pub status: AmlCaseStatus,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TellerCashDrawerSummary {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub status: Option<TellerCashDrawersStatus>,
+
+    pub teller: TellerSummary,
+    pub supervisor: Option<StaffSummary>,
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -190,6 +208,34 @@ pub struct CashParams {
     #[validate(custom(function = "validate_cash_type"))]
     #[serde(rename = "cashType")]
     pub cash_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct ChequeParams {
+    #[serde(rename = "chequeNumber")]
+    pub cheque_number: String,
+
+    #[serde(rename = "bankName")]
+    pub bank_name: String,
+
+    #[serde(rename = "branchName")]
+    pub branch_name: Option<String>,
+
+    #[serde(rename = "accountNumber")]
+    pub account_number: Option<String>,
+
+    #[validate(custom(function = "validate_income"))]
+    pub amount: Decimal,
+
+    #[serde(rename = "currency")]
+    pub currency: String,
+
+    #[serde(rename = "issueDate")]
+    pub issue_date: Option<chrono::NaiveDate>,
+
+    #[serde(rename = "drawerName")]
+    pub drawer_name: Option<String>,
 }
 
 #[derive(Debug, Serialize)]

@@ -474,6 +474,18 @@ pub enum AmlRulesExecutionStage {
     Batch,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_rules_priority")]
+pub enum AmlRulesPriority {
+    #[sea_orm(string_value = "LOW")]
+    Low,
+    #[sea_orm(string_value = "MEDIUM")]
+    Medium,
+    #[sea_orm(string_value = "HIGH")]
+    High,
+    #[sea_orm(string_value = "CRITICAL")]
+    Critical,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "Enum", db_type = "Enum", enum_name = "aml_rules_rule_type")]
 pub enum AmlRulesRuleType {
     #[sea_orm(string_value = "TRANSACTION_AMOUNT")]

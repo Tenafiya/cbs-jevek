@@ -1,15 +1,19 @@
 use actix_web::web;
+use entity::sea_orm_active_enums::AmlRulesExecutionStage;
 use sea_orm::{
-    ActiveValue::Set, DatabaseBackend, DatabaseTransaction, DbErr, EntityTrait, FromQueryResult,
-    InsertResult, Statement,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseBackend, DatabaseTransaction, DbErr,
+    EntityTrait, FromQueryResult, InsertResult, QueryFilter, Statement,
 };
 
 use crate::{
     AppState,
     app::amls::{
-        mapper::{AmlAlertFlat, AmlAlertRow, AmlCaseFlat, AmlCaseRow, AmlRuleFlat, AmlRuleRow},
+        mapper::{
+            AmlAlertFlat, AmlAlertRow, AmlCaseFlat, AmlCaseRow, AmlRule, AmlRuleFlat, AmlRuleRow,
+        },
         models::{
-            AmlActionsModel, AmlAlertsModel, AmlCaseNotesModel, AmlCasesModel, AmlRulesModel,
+            AmlActionsModel, AmlAlertsModel, AmlCaseNotesModel, AmlCasesModel, AmlExecutionModel,
+            AmlRulesModel,
         },
     },
     utils::gen_snow_ids,
@@ -34,11 +38,12 @@ pub async fn save_aml(
         condition_logic: Set(data.condition_logic),
         action_on_trigger: Set(data.trigger_action),
         rule_description: Set(data.desc),
-        priority: Set(data.priority),
         version: Set(data.version),
         effective_from: Set(data.effective_from),
         effective_to: Set(data.effective_to),
         execution_stage: Set(data.execution_stage),
+        priority: Set(data.priority),
+        is_enabled: Set(Some(true)),
         ..Default::default()
     };
 
@@ -47,7 +52,7 @@ pub async fn save_aml(
 
 pub async fn save_aml_alerts(
     model: &AmlAlertsModel,
-    trn: &DatabaseTransaction,
+    state: &web::Data<AppState>,
 ) -> Result<InsertResult<entity::aml_alerts::ActiveModel>, DbErr> {
     use entity::aml_alerts::{ActiveModel, Entity};
 
@@ -67,7 +72,7 @@ pub async fn save_aml_alerts(
         ..Default::default()
     };
 
-    Entity::insert(alert).exec(trn).await
+    Entity::insert(alert).exec(state.pgdb.get_ref()).await
 }
 
 pub async fn save_aml_cases(
@@ -76,7 +81,7 @@ pub async fn save_aml_cases(
 ) -> Result<InsertResult<entity::aml_cases::ActiveModel>, DbErr> {
     use entity::aml_cases::{ActiveModel, Entity};
 
-    let (snowflake, _) =
+    let (snowflake, slug) =
         gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
 
     let data = model.clone();
@@ -84,7 +89,7 @@ pub async fn save_aml_cases(
     let case = ActiveModel {
         id: Set(snowflake),
         institution_id: Set(data.institution_id),
-        case_number: Set(data.case_number),
+        case_number: Set(slug),
         title: Set(data.title),
         priority: Set(data.priority),
         assigned_investigator: Set(data.investigator),
@@ -119,7 +124,7 @@ pub async fn save_aml_case_notes(
 
 pub async fn save_aml_action(
     model: &AmlActionsModel,
-    state: &web::Data<AppState>,
+    trn: &DatabaseTransaction,
 ) -> Result<InsertResult<entity::aml_actions::ActiveModel>, DbErr> {
     use entity::aml_actions::{ActiveModel, Entity};
 
@@ -134,12 +139,37 @@ pub async fn save_aml_action(
         case_id: Set(data.case_id),
         alert_id: Set(data.alert_id),
         action_type: Set(Some(data.action_type)),
-        performedby: Set(Some(data.performed_by)),
+        performedby: Set(data.performed_by),
         metadata: Set(data.metadata),
         ..Default::default()
     };
 
-    Entity::insert(action).exec(state.pgdb.get_ref()).await
+    Entity::insert(action).exec(trn).await
+}
+
+pub async fn save_aml_rule_execution(
+    model: &AmlExecutionModel,
+    state: &web::Data<AppState>,
+) -> Result<InsertResult<entity::aml_rule_executions::ActiveModel>, DbErr> {
+    use entity::aml_rule_executions::{ActiveModel, Entity};
+
+    let data = model.clone();
+
+    let (snowflake, _) =
+        gen_snow_ids::gen_snowflake_slug().map_err(|e| DbErr::Custom(e.to_string()))?;
+
+    let exection = ActiveModel {
+        id: Set(snowflake),
+        institution_id: Set(data.institution_id),
+        is_matched: Set(data.is_matched),
+        risk_score: Set(data.risk_score),
+        evaluation_details: Set(data.evaluation),
+        execution_time_ms: Set(data.execution_ms),
+        executed_at: Set(chrono::Utc::now().into()),
+        ..Default::default()
+    };
+
+    Entity::insert(exection).exec(state.pgdb.get_ref()).await
 }
 
 pub async fn get_aml_rules(
@@ -159,7 +189,7 @@ pub async fn get_aml_rules(
             ar.action_on_trigger::TEXT,
             ar.execution_stage::TEXT,
             ar.is_enabled,
-            ar.priority,
+            ar.priority::TEXT,
             ar.stop_processing,
             ar.version,
             ar.effective_from,
@@ -381,8 +411,89 @@ pub async fn get_aml_alerts(
         vec![institution_id.into()],
     );
 
-    AmlAlertFlat::find_by_statement(stmt)
+    let rows = AmlAlertFlat::find_by_statement(stmt)
+        .all(state.pgdb.get_ref())
+        .await?;
+
+    rows.into_iter()
+        .map(AmlAlertRow::try_from)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|_| DbErr::Custom("Data parsing failed".into()))
+}
+
+pub async fn fetch_execution_rules(
+    institution_id: i64,
+    stage: AmlRulesExecutionStage,
+    state: &web::Data<AppState>,
+) -> Result<Vec<AmlRule>, DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        SELECT
+            id,
+            institution_id,
+            rule_name,
+            rule_description,
+            rule_type::TEXT,
+            execution_stage::TEXT,
+            condition_logic,
+            action_on_trigger::TEXT,
+            is_enabled,
+            priority::TEXT,
+            stop_processing,
+            version,
+            effective_from,
+            effective_to
+        FROM aml_rules
+        WHERE institution_id = $1
+          AND is_enabled = TRUE
+          AND execution_stage = $2::aml_rules_execution_stage
+          AND (effective_from IS NULL OR effective_from <= NOW())
+          AND (effective_to IS NULL OR effective_to > NOW())
+        ORDER BY priority ASC, id ASC;
+        "#,
+        vec![institution_id.into(), stage.into()],
+    );
+
+    AmlRule::find_by_statement(stmt)
         .all(state.pgdb.get_ref())
         .await
-        .map(|rows| rows.into_iter().map(Into::into).collect())
+}
+
+pub async fn toggle_aml_rule(
+    institution_id: i64,
+    rule_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<(), DbErr> {
+    use entity::aml_rules::{ActiveModel, Column, Entity};
+
+    let rule = Entity::find_by_id(rule_id)
+        .filter(Column::InstitutionId.eq(institution_id))
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::Custom("Rule not found".to_string()))?;
+
+    let is_enabled = rule.is_enabled.unwrap_or(false);
+
+    let mut active_rule: ActiveModel = rule.into();
+
+    active_rule.is_enabled = Set(Some(!is_enabled));
+
+    active_rule.updated_at = Set(Some(chrono::Utc::now().into()));
+
+    ActiveModelTrait::update(active_rule, state.pgdb.get_ref()).await?;
+
+    Ok(())
+}
+
+pub async fn get_action_list(
+    created: Vec<i64>,
+    state: &web::Data<AppState>,
+) -> Result<Vec<entity::aml_actions::Model>, DbErr> {
+    use entity::aml_actions::{Column, Entity};
+
+    Entity::find()
+        .filter(Column::Id.is_in(created))
+        .all(state.pgdb.get_ref())
+        .await
 }

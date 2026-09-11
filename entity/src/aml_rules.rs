@@ -2,6 +2,7 @@
 
 use super::sea_orm_active_enums::AmlRulesActionOnTrigger;
 use super::sea_orm_active_enums::AmlRulesExecutionStage;
+use super::sea_orm_active_enums::AmlRulesPriority;
 use super::sea_orm_active_enums::AmlRulesRuleType;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -21,7 +22,7 @@ pub struct Model {
     pub condition_logic: Json,
     pub action_on_trigger: AmlRulesActionOnTrigger,
     pub is_enabled: Option<bool>,
-    pub priority: Option<i32>,
+    pub priority: AmlRulesPriority,
     pub stop_processing: Option<bool>,
     pub version: Option<i32>,
     pub effective_from: Option<DateTimeWithTimeZone>,

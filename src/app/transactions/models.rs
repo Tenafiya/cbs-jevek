@@ -10,19 +10,13 @@ use serde_json::Value;
 use validator::Validate;
 
 use crate::utils::{
-    models::{CurrencyParams, DateStruct},
-    validators::validate_snowflake,
+    models::{CashParams, ChequeParams, CurrencyParams, DateStruct},
+    validators::{validate_income, validate_snowflake},
 };
 
 // ===========================================
 // Models
 // ===========================================
-#[derive(Debug, Clone)]
-pub struct CurrencyModel {
-    pub name: String,
-    pub symbol: String,
-    pub precision: Option<i32>,
-}
 
 #[derive(Debug, Clone)]
 pub struct AddTransactionLimitModel {
@@ -59,11 +53,14 @@ pub struct CoreTransactionModel {
     pub transaction_group_id: uuid::Uuid,
     pub amount: i64,
     pub currency: Value,
+    pub fee_amount: Option<i64>,
+    pub vat_amount: Option<i64>,
     pub total_amount: Option<i64>,
     pub ip_address: Option<String>,
     pub approved_at: Option<DateTime<FixedOffset>>,
     pub created_by: i64,
     pub approved_by: Option<i64>,
+    pub requires_approval: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -72,6 +69,7 @@ pub struct AddDepositModel {
     pub description: Option<String>,
     pub credit_account_id: i64,
     pub credit_customer_id: i64,
+    pub drawer_id: i64,
 }
 
 #[derive(Debug, Clone)]
@@ -177,4 +175,36 @@ pub struct AddTransLimitParams {
     #[validate(nested)]
     #[serde(rename = "effectiveDates")]
     pub effective_dates: Option<DateStruct>,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct AddDepositParams {
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "accountId")]
+    pub account_id: String,
+
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "transactionChannelId")]
+    pub trans_channel_id: String,
+
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "customerId")]
+    pub customer_id: String,
+
+    #[validate(custom(function = "validate_income"))]
+    pub amount: Decimal,
+
+    #[validate(nested)]
+    pub currency: CurrencyParams,
+
+    #[validate(nested)]
+    #[serde(rename = "cashBreakdown")]
+    pub cash_breakdown: Option<Vec<CashParams>>,
+
+    #[validate(nested)]
+    pub cheques: Option<Vec<ChequeParams>>,
+
+    #[validate(length(min = 1, max = 255))]
+    pub narration: Option<String>,
 }
