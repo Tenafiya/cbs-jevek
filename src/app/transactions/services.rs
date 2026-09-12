@@ -328,14 +328,13 @@ pub async fn fetch_transaction_limits(
 
         ORDER BY
             tl.customer_type,
-            tl.kyc_tier,
             tl.limit_type;
         "#,
         vec![institution_id.into()],
     );
 
     TransactionLimitFlat::find_by_statement(stmt)
-        .one(state.pgdb.get_ref())
+        .all(state.pgdb.get_ref())
         .await
         .map(|rows| rows.into_iter().map(Into::into).collect::<Vec<_>>())
 }
