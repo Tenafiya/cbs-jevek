@@ -22,7 +22,7 @@ pub enum IdemError {
     UnsupportedOperator,
 }
 
-pub async fn handle_idem_processing(
+pub async fn create_idempotency_record(
     idem: &String,
     state: &web::Data<AppState>,
 ) -> Result<(), IdemError> {

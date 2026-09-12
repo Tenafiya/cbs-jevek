@@ -20,33 +20,38 @@ pub async fn start_idem_processor(state: web::Data<AppState>) {
                         match message.subject.as_str() {
                             "idems.initialize.new" => {
                                 if let Err(e) =
-                                    controllers::handle_idem_processing(&payload, &state).await
+                                    controllers::create_idempotency_record(&payload, &state).await
                                 {
-                                    tracing::error!("Failed to process aml action: {:?}", e);
+                                    tracing::error!(
+                                        "Failed to process creating idempotency record: {:?}",
+                                        e
+                                    );
                                     handle_processing_error(&message, e).await;
                                 } else {
                                     if let Err(e) = message.ack().await {
                                         tracing::error!(
-                                            "Failed to ack idem.deposit message: {}",
+                                            "Failed to ack idem.initialize message: {}",
                                             e
                                         );
                                     }
                                 }
                             }
                             _ => {
-                                tracing::error!("Idem consumer subject fail");
+                                tracing::error!("Idempotency consumer subject fail");
                             }
                         }
                     }
                 }
                 Err(e) => {
-                    tracing::error!("Error consuming from stream: {}", e);
+                    tracing::error!("Error consuming from idempotency stream: {}", e);
                     retry_count += 1;
 
                     let backoff = Duration::from_secs(2u64.pow(retry_count.min(6) as u32));
 
                     if retry_count >= max_retries {
-                        tracing::error!("Max retries reached, backing off longer...");
+                        tracing::error!(
+                            "Max retries reached (Idempotency Processing), backing off longer..."
+                        );
                         sleep(Duration::from_secs(30)).await;
                         retry_count = 0;
                     } else {

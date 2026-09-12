@@ -192,7 +192,7 @@ pub static FIELD_DEFINITIONS: &[FieldDefinition] = &[
     },
     FieldDefinition {
         field: ConditionField::TransactionAmount,
-        value_type: ConditionValueType::Integer,
+        value_type: ConditionValueType::Decimal,
         allowed_operators: &[
             ConditionOperator::Eq,
             ConditionOperator::Lt,
