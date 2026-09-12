@@ -13,6 +13,7 @@ use crate::{
             LogicalOperator,
         },
     },
+    utils::conversions,
 };
 use actix_web::web;
 use chrono::{DateTime, Utc};
@@ -637,7 +638,10 @@ pub fn evaluate_eq_condition(
             })?;
 
             match &rule_params.value {
-                ConditionValue::Integer(value) => value == &transaction_value.amount,
+                ConditionValue::Decimal(value) => {
+                    let amount = conversions::minor_conversion(*value, "GHS");
+                    amount == transaction_value.amount
+                }
                 _ => false,
             }
         }
@@ -710,7 +714,10 @@ pub fn evaluate_gt_condition(
             })?;
 
             match &rule_params.value {
-                ConditionValue::Integer(value) => value > &transaction_value.amount,
+                ConditionValue::Decimal(value) => {
+                    let amount = conversions::minor_conversion(*value, "GHS");
+                    amount > transaction_value.amount
+                }
                 _ => false,
             }
         }
@@ -738,7 +745,10 @@ pub fn evaluate_gte_condition(
             })?;
 
             match &rule_params.value {
-                ConditionValue::Integer(value) => value >= &transaction_value.amount,
+                ConditionValue::Decimal(value) => {
+                    let amount = conversions::minor_conversion(*value, "GHS");
+                    amount >= transaction_value.amount
+                }
                 _ => false,
             }
         }
@@ -766,7 +776,10 @@ pub fn evaluate_lt_condition(
             })?;
 
             match &rule_params.value {
-                ConditionValue::Integer(value) => value < &transaction_value.amount,
+                ConditionValue::Decimal(value) => {
+                    let amount = conversions::minor_conversion(*value, "GHS");
+                    amount < transaction_value.amount
+                }
                 _ => false,
             }
         }
@@ -794,7 +807,10 @@ pub fn evaluate_lte_condition(
             })?;
 
             match &rule_params.value {
-                ConditionValue::Integer(value) => value <= &transaction_value.amount,
+                ConditionValue::Decimal(value) => {
+                    let amount = conversions::minor_conversion(*value, "GHS");
+                    amount <= transaction_value.amount
+                }
                 _ => false,
             }
         }

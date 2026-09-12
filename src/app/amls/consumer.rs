@@ -30,13 +30,15 @@ pub async fn start_aml_processor(state: web::Data<AppState>) {
                     }
                 }
                 Err(e) => {
-                    tracing::error!("Error consuming from stream: {}", e);
+                    tracing::error!("Error consuming from aml executor stream: {}", e);
                     retry_count += 1;
 
                     let backoff = Duration::from_secs(2u64.pow(retry_count.min(6) as u32));
 
                     if retry_count >= max_retries {
-                        tracing::error!("Max retries reached, backing off longer...");
+                        tracing::error!(
+                            "Max retries reached (AML Execution), backing off longer..."
+                        );
                         sleep(Duration::from_secs(30)).await;
                         retry_count = 0;
                     } else {

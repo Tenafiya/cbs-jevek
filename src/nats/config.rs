@@ -147,15 +147,11 @@ pub async fn setup_nats() -> Result<StreamManager, Box<dyn std::error::Error>> {
     let mut stream_manager = StreamManager::new().await?;
 
     stream_manager
-        .register_stream("AMLS", vec!["amls.>".into()], "aml-processor".to_string())
+        .register_stream("AMLS", vec!["amls.>".into()], "aml".to_string())
         .await?;
 
     stream_manager
-        .register_stream(
-            "IDEMS",
-            vec!["idems.>".into()],
-            "idem-processor".to_string(),
-        )
+        .register_stream("IDEMS", vec!["idems.>".into()], "idems".to_string())
         .await?;
 
     Ok(stream_manager)
