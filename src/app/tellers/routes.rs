@@ -31,16 +31,16 @@ pub fn init(cfg: &mut web::ServiceConfig, state: web::Data<AppState>) {
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
-                "/{id}",
+                "/all",
                 web::get()
-                    .to(controllers::fetch_teller_details)
+                    .to(controllers::fetch_teller_list)
                     .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             )
             .route(
-                "/all",
+                "/{id}",
                 web::get()
-                    .to(controllers::fetch_teller_list)
+                    .to(controllers::fetch_teller_details)
                     .wrap(from_fn(account::staff::verify(state.clone())))
                     .wrap(from_fn(jwt_auth)),
             ),
