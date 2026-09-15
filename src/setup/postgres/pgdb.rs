@@ -17,7 +17,7 @@ pub async fn connector(settings: &Config) -> DatabaseConnection {
     let (database_url, sqlx_logger) = match db_env_check.as_str() {
         "TEST" => (
             std::env::var("DATABASE_URL").expect("Cannot Find DATABASE URL"),
-            false,
+            true,
         ),
         _ => (
             std::env::var("DATABASE_URL").expect("Cannot Find DATABASE URL"),
