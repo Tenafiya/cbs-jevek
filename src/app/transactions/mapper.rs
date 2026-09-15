@@ -94,11 +94,11 @@ pub struct TransactionCheckerFlat {
     pub metadata: Option<Value>,
 
     pub limit_id: Option<i64>,
-    pub limit_institution_id: i64,
-    pub limit_transaction_channel_id: i64,
-    pub limit_account_category_id: i64,
-    pub limit_customer_type: CustomerType,
-    pub limit_limit_type: TransactionLimitsLimitType,
+    pub limit_institution_id: Option<i64>,
+    pub limit_transaction_channel_id: Option<i64>,
+    pub limit_account_category_id: Option<i64>,
+    pub limit_customer_type: Option<CustomerType>,
+    pub limit_limit_type: Option<TransactionLimitsLimitType>,
     pub limit_max_amount: Option<i64>,
     pub limit_max_count: Option<i64>,
     pub limit_currency: Option<Value>,
@@ -121,11 +121,20 @@ impl From<TransactionCheckerFlat> for TransactionCheckerRow {
             limit: value.limit_id.and_then(|id| {
                 Some(TransactionLimitSummary {
                     id: id.to_string(),
-                    institution_id: value.limit_institution_id.to_string(),
-                    transaction_channel_id: value.limit_transaction_channel_id.to_string(),
-                    account_category_id: value.limit_account_category_id.to_string(),
-                    customer_type: value.limit_customer_type,
-                    limit_type: value.limit_limit_type,
+                    institution_id: value
+                        .limit_institution_id
+                        .map(|lii| lii.to_string())
+                        .unwrap_or_default(),
+                    transaction_channel_id: value
+                        .limit_transaction_channel_id
+                        .map(|ltci| ltci.to_string())
+                        .unwrap_or_default(),
+                    account_category_id: value
+                        .limit_account_category_id
+                        .map(|laci| laci.to_string())
+                        .unwrap_or_default(),
+                    customer_type: value.limit_customer_type.unwrap_or_default(),
+                    limit_type: value.limit_limit_type.unwrap_or_default(),
                     max_amount: value.limit_max_amount,
                     max_count: value.limit_max_count,
                     currency: value.limit_currency,
@@ -307,40 +316,40 @@ pub struct TransactionFlat {
 
     pub parent_transaction_id: Option<i64>,
     pub parent_transaction_reference: Option<String>,
-    pub parent_transaction_group_id: uuid::Uuid,
-    pub parent_transaction_type: TransactionType,
-    pub parent_transaction_category: TransactionCategoryType,
-    pub parent_amount: i64,
+    pub parent_transaction_group_id: Option<uuid::Uuid>,
+    pub parent_transaction_type: Option<TransactionType>,
+    pub parent_transaction_category: Option<TransactionCategoryType>,
+    pub parent_amount: Option<i64>,
     pub parent_currency: Option<Value>,
-    pub parent_status: TransactionStatus,
+    pub parent_status: Option<TransactionStatus>,
     pub parent_posted_at: Option<DateTime<FixedOffset>>,
     pub parent_completed_at: Option<DateTime<FixedOffset>>,
     pub parent_failed_at: Option<DateTime<FixedOffset>>,
 
     pub cash_drawer_id: Option<i64>,
     pub drawer_status: Option<TellerCashDrawersStatus>,
-    pub drawer_teller_id: i64,
-    pub drawer_teller_name: String,
-    pub drawer_teller_number: String,
-    pub drawer_teller_branch_id: i64,
+    pub drawer_teller_id: Option<i64>,
+    pub drawer_teller_name: Option<String>,
+    pub drawer_teller_number: Option<String>,
+    pub drawer_teller_branch_id: Option<i64>,
     pub drawer_supervisor_id: Option<i64>,
-    pub drawer_employee_number: String,
+    pub drawer_employee_number: Option<String>,
     pub drawer_full_name: Option<String>,
-    pub drawer_first_name: String,
-    pub drawer_last_name: String,
-    pub drawer_phone_number: String,
-    pub drawer_email_address: String,
+    pub drawer_first_name: Option<String>,
+    pub drawer_last_name: Option<String>,
+    pub drawer_phone_number: Option<String>,
+    pub drawer_email_address: Option<String>,
     pub drawer_job_title: Option<String>,
     pub drawer_department: Option<String>,
     pub drawer_employment_status: Option<StaffEmploymentEnum>,
 
     pub approved_by_id: Option<i64>,
-    pub approved_employee_number: String,
+    pub approved_employee_number: Option<String>,
     pub approved_full_name: Option<String>,
-    pub approved_first_name: String,
-    pub approved_last_name: String,
-    pub approved_phone_number: String,
-    pub approved_email_address: String,
+    pub approved_first_name: Option<String>,
+    pub approved_last_name: Option<String>,
+    pub approved_phone_number: Option<String>,
+    pub approved_email_address: Option<String>,
     pub approved_job_title: Option<String>,
     pub approved_department: Option<String>,
     pub approved_employment_status: Option<StaffEmploymentEnum>,
@@ -364,7 +373,8 @@ impl TryFrom<TransactionFlat> for TransactionRow {
             .total_amount
             .map(|tot| conversions::major_conversion(tot, "GHS"));
 
-        let parent_amount = conversions::major_conversion(flat.parent_amount, "GHS");
+        let parent_amount =
+            conversions::major_conversion(flat.parent_amount.unwrap_or_default(), "GHS");
 
         Ok(Self {
             id: flat.id.to_string(),
@@ -402,11 +412,11 @@ impl TryFrom<TransactionFlat> for TransactionRow {
                 id: id.to_string(),
                 transaction_reference: flat.parent_transaction_reference,
                 transaction_group_id: flat.transaction_group_id,
-                transaction_type: flat.parent_transaction_type,
-                transaction_category: flat.parent_transaction_category,
+                transaction_type: flat.parent_transaction_type.unwrap_or_default(),
+                transaction_category: flat.parent_transaction_category.unwrap_or_default(),
                 amount: parent_amount,
                 currency: flat.parent_currency,
-                status: flat.parent_status,
+                status: flat.parent_status.unwrap_or_default(),
                 posted_at: flat.parent_posted_at,
                 completed_at: flat.parent_completed_at,
                 failed_at: flat.parent_failed_at,
@@ -416,19 +426,25 @@ impl TryFrom<TransactionFlat> for TransactionRow {
                 id: id.to_string(),
                 status: flat.drawer_status,
                 teller: TellerSummary {
-                    id: flat.drawer_teller_id.to_string(),
-                    teller_name: flat.drawer_teller_name,
-                    teller_number: flat.drawer_teller_number,
-                    branch_id: flat.drawer_teller_branch_id.to_string(),
+                    id: flat
+                        .drawer_teller_id
+                        .map(|dti| dti.to_string())
+                        .unwrap_or_default(),
+                    teller_name: flat.drawer_teller_name.unwrap_or_default(),
+                    teller_number: flat.drawer_teller_number.unwrap_or_default(),
+                    branch_id: flat
+                        .drawer_teller_branch_id
+                        .map(|dtbi| dtbi.to_string())
+                        .unwrap_or_default(),
                 },
                 supervisor: flat.drawer_supervisor_id.map(|sid| StaffSummary {
                     id: sid.to_string(),
-                    employee_number: flat.drawer_employee_number,
+                    employee_number: flat.drawer_employee_number.unwrap_or_default(),
                     full_name: flat.drawer_full_name,
-                    first_name: flat.drawer_first_name,
-                    last_name: flat.drawer_last_name,
-                    phone_number: flat.drawer_phone_number,
-                    email_address: flat.drawer_email_address,
+                    first_name: flat.drawer_first_name.unwrap_or_default(),
+                    last_name: flat.drawer_last_name.unwrap_or_default(),
+                    phone_number: flat.drawer_phone_number.unwrap_or_default(),
+                    email_address: flat.drawer_email_address.unwrap_or_default(),
                     job_title: flat.drawer_job_title,
                     department: flat.drawer_department,
                     employment_status: flat.drawer_employment_status,
@@ -437,12 +453,12 @@ impl TryFrom<TransactionFlat> for TransactionRow {
 
             approved_by: flat.approved_by_id.map(|id| StaffSummary {
                 id: id.to_string(),
-                employee_number: flat.approved_employee_number,
+                employee_number: flat.approved_employee_number.unwrap_or_default(),
                 full_name: flat.approved_full_name,
-                first_name: flat.approved_first_name,
-                last_name: flat.approved_last_name,
-                phone_number: flat.approved_phone_number,
-                email_address: flat.approved_email_address,
+                first_name: flat.approved_first_name.unwrap_or_default(),
+                last_name: flat.approved_last_name.unwrap_or_default(),
+                phone_number: flat.approved_phone_number.unwrap_or_default(),
+                email_address: flat.approved_email_address.unwrap_or_default(),
                 job_title: flat.approved_job_title,
                 department: flat.approved_department,
                 employment_status: flat.approved_employment_status,
