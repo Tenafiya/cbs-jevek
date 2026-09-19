@@ -1,11 +1,8 @@
 use config::Config;
-use dotenvy::dotenv;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::time::Duration;
 
 pub async fn connector(settings: &Config) -> DatabaseConnection {
-    dotenv().unwrap();
-
     let idle_timeout = settings.get::<u64>("pg.idle_timeout").unwrap();
     let connect_timeout = settings.get::<u64>("pg.connect_timeout").unwrap();
     let acquire_timeout = settings.get::<u64>("pg.acquire_timeout").unwrap();

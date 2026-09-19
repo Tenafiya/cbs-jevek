@@ -44,6 +44,7 @@ pub struct AddTransactionChannelModel {
 
 #[derive(Debug, Clone)]
 pub struct CoreTransactionModel {
+    pub id: Option<i64>,
     pub institution_id: i64,
     pub trans_channel_id: i64,
     pub transaction_type: TransactionType, //'DEBIT', 'CREDIT'

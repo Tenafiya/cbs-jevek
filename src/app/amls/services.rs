@@ -1,5 +1,6 @@
 use actix_web::web;
 use entity::sea_orm_active_enums::AmlRulesExecutionStage;
+use futures_util::StreamExt;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseBackend, DatabaseTransaction, DbErr,
     EntityTrait, FromQueryResult, InsertResult, QueryFilter, Statement,
@@ -15,6 +16,7 @@ use crate::{
             AmlActionsModel, AmlAlertsModel, AmlCaseNotesModel, AmlCasesModel, AmlExecutionModel,
             AmlRulesModel,
         },
+        mongo_model::{AmlActionTriggerModel, AmlTrigModel, AmlTrigger},
     },
     utils::gen_snow_ids,
 };
@@ -496,4 +498,71 @@ pub async fn get_action_list(
         .filter(Column::Id.is_in(created))
         .all(state.pgdb.get_ref())
         .await
+}
+
+pub async fn write_action_info(
+    model: &AmlTrigModel,
+    state: &web::Data<AppState>,
+) -> Result<(), mongodb::error::Error> {
+    let data = model.clone();
+
+    let act = AmlActionTriggerModel {
+        id: None,
+        action_id: data.action_id,
+        entity: data.entity,
+        entity_id: data.entity_id,
+        action: data.action,
+        created_at: mongodb::bson::DateTime::now(),
+        updated_at: mongodb::bson::DateTime::now(),
+    };
+
+    state.mongo.aml_actions.insert_one(act).await?;
+
+    Ok(())
+}
+
+pub async fn find_action_info(
+    entity_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<Option<AmlTrigger>, mongodb::error::Error> {
+    let start = mongodb::bson::DateTime::now();
+    let end = mongodb::bson::DateTime::from_millis(start.timestamp_millis() + 20 * 60 * 1000); //20 minutes
+
+    let filter = mongodb::bson::doc! {
+        "created_at": {
+            "$gte": start,
+            "$lte": end,
+        },
+        "entity_id": entity_id
+    };
+
+    let result = state.mongo.aml_actions.find_one(filter).await?;
+
+    Ok(result.map(Into::into))
+}
+
+pub async fn find_all_action_info(
+    entity_ids: Vec<i64>,
+    state: &web::Data<AppState>,
+) -> Result<Vec<AmlTrigger>, mongodb::error::Error> {
+    let start = mongodb::bson::DateTime::now();
+    let end = mongodb::bson::DateTime::from_millis(start.timestamp_millis() + 20 * 60 * 1000);
+
+    let filter = mongodb::bson::doc! {
+        "created_at": { "$gte": start, "$lte": end },
+        "entity_id":  { "$in": &entity_ids },
+    };
+
+    let mut cursor = state.mongo.aml_actions.find(filter).await?;
+
+    let mut triggers: Vec<AmlTrigger> = Vec::new();
+
+    while let Some(result) = cursor.next().await {
+        match result {
+            Ok(doc) => triggers.push(doc.into()),
+            Err(e) => return Err(e),
+        }
+    }
+
+    Ok(triggers)
 }

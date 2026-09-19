@@ -6,9 +6,12 @@ use sea_orm::{
 
 use crate::{
     AppState,
-    app::account_charts::models::{
-        AccountCategoryResponseModel, AccountTypeFlat, AccountTypeRow, AddAccountCategoryModel,
-        AddAccountChartModel, AddAccountTypeModel, ChartOfAccountResponseModel,
+    app::account_charts::{
+        account_codes::GlAccountCode,
+        models::{
+            AccountCategoryResponseModel, AccountTypeFlat, AccountTypeRow, AddAccountCategoryModel,
+            AddAccountChartModel, AddAccountTypeModel, ChartOfAccountResponseModel,
+        },
     },
     utils::gen_snow_ids,
 };
@@ -24,9 +27,8 @@ pub async fn save_acc_chart(
 
     let chart = entity::chart_of_accounts::ActiveModel {
         id: Set(snowflake),
-        account_code: Set(Some(data.acc_code)),
+        account_code: Set(data.acc_code.to_string()),
         account_name: Set(Some(data.acc_name)),
-        account_type: Set(Some(data.acc_type)),
         parent_account_id: Set(data.parent_acc_id),
         is_system_account: Set(Some(data.is_system_acc)),
         institution_id: Set(data.institution_id),
@@ -47,6 +49,25 @@ pub async fn get_charts(
         .await;
 
     charts
+}
+
+pub async fn get_chart_of_account(
+    institution_id: i64,
+    acc_code: GlAccountCode,
+    state: &web::Data<AppState>,
+) -> Result<ChartOfAccountResponseModel, DbErr> {
+    use entity::chart_of_accounts::{Column, Entity};
+
+    Entity::find()
+        .filter(
+            Condition::all()
+                .add(Column::InstitutionId.eq(institution_id))
+                .add(Column::AccountCode.eq(acc_code.to_string())),
+        )
+        .into_model::<ChartOfAccountResponseModel>()
+        .one(state.pgdb.get_ref())
+        .await?
+        .ok_or_else(|| DbErr::RecordNotFound("Chart of Account not found".to_string()))
 }
 
 pub async fn save_account_category(

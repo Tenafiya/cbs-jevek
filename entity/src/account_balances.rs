@@ -10,8 +10,8 @@ pub struct Model {
     pub id: i64,
     #[sea_orm(unique_key = "unique_acc_bal_acc_id")]
     pub account_id: i64,
-    #[sea_orm(unique)]
-    pub balance_date: Option<Date>,
+    #[sea_orm(unique_key = "unique_acc_bal_acc_id")]
+    pub balance_date: Date,
     pub opening_balance: i64,
     pub total_credits: Option<i64>,
     pub total_debits: Option<i64>,

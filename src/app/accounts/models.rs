@@ -22,7 +22,7 @@ pub struct AddAccountModel {
 #[derive(Debug, Clone)]
 pub struct AddAccountBalanceModel {
     pub account_id: i64,
-    pub balance_date: Option<NaiveDate>,
+    pub balance_date: NaiveDate,
     pub opening_balance: i64,
 }
 

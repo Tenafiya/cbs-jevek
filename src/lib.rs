@@ -20,6 +20,7 @@ use crate::middlewares::request_id::request_id;
 use crate::nats::config::StreamManager;
 use crate::nats::config::setup_nats;
 use crate::setup::init_system;
+use crate::setup::mongo::mongodb::MongoDatabase;
 use crate::setup::{dragonfly::df, postgres::pgdb};
 use crate::{app::app_routes, middlewares::helmet::security_headers};
 
@@ -30,6 +31,7 @@ pub struct AppState {
     pub storage: Data<StorageService>,
     pub cache: Data<redis::aio::ConnectionManager>,
     pub streamer: Data<StreamManager>,
+    pub mongo: Data<MongoDatabase>,
 }
 
 async fn setup_app_state() -> Result<Data<AppState>, Box<dyn std::error::Error>> {
@@ -38,6 +40,7 @@ async fn setup_app_state() -> Result<Data<AppState>, Box<dyn std::error::Error>>
     let storager = Data::new(StorageService::new().await);
     let dragonfly = Data::new(df::connector().await);
     let streamer = Data::new(setup_nats().await?);
+    let mongo_conn = Data::new(MongoDatabase::connector(&settings).await);
 
     Ok(Data::new(AppState {
         config: settings,
@@ -45,6 +48,7 @@ async fn setup_app_state() -> Result<Data<AppState>, Box<dyn std::error::Error>>
         storage: storager,
         cache: dragonfly,
         streamer,
+        mongo: mongo_conn,
     }))
 }
 

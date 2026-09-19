@@ -1,10 +1,11 @@
 use actix_web::{body::to_bytes, web};
-use cbs_jevek::setup::init_system::load_config;
+use cbs_jevek::setup::{init_system::load_config, mongo::mongodb::MongoDatabase};
 use cbs_jevek::{AppState, fileskit::config::StorageService, nats::config::StreamManager};
 use redis::aio::ConnectionManager;
 use sea_orm::{Database, DatabaseConnection};
 use serde_json::Value;
 use testcontainers_modules::{
+    mongo::Mongo,
     postgres::Postgres,
     testcontainers::{GenericImage, ImageExt, core::ContainerPort, runners::AsyncRunner},
 };
@@ -54,6 +55,23 @@ async fn start_dragonfly() -> Option<String> {
     Some(format!("redis://localhost:{port}"))
 }
 
+async fn start_mongodb() -> Option<String> {
+    let container = match Mongo::default().start().await {
+        Ok(container) => container,
+        Err(_) => {
+            eprintln!("Warning: Could not start MongoDB container. Make sure Docker is running.");
+            return None;
+        }
+    };
+
+    let port = container
+        .get_host_port_ipv4(27017)
+        .await
+        .expect("no port mapped");
+
+    Some(format!("mongodb://localhost:{port}"))
+}
+
 async fn start_natsjs() -> Option<String> {
     let image = GenericImage::new("nats", "latest")
         .with_exposed_port(4222.into())
@@ -84,6 +102,7 @@ pub async fn build_state(db_url: &str, cache_url: &str) -> web::Data<AppState> {
         .await
         .expect("Redis connection failed");
     let stream_manager = setup_test_nats().await.expect("Failed to setup NATS");
+    let mongo_conn = MongoDatabase::connector(&settings).await;
 
     let state = AppState {
         pgdb: web::Data::new(db),
@@ -91,6 +110,7 @@ pub async fn build_state(db_url: &str, cache_url: &str) -> web::Data<AppState> {
         storage: web::Data::new(storage),
         cache: web::Data::new(cache),
         streamer: web::Data::new(stream_manager),
+        mongo: web::Data::new(mongo_conn),
     };
 
     web::Data::new(state)
@@ -124,4 +144,8 @@ pub async fn setup_test_nats() -> Result<StreamManager, Box<dyn std::error::Erro
         .await?;
 
     Ok(stream_manager)
+}
+
+pub async fn setup_test_mongo() -> Option<String> {
+    start_mongodb().await
 }

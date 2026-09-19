@@ -6,7 +6,13 @@ use serde_json::Value;
 use serde_with::{DisplayFromStr, serde_as};
 use validator::Validate;
 
-use crate::utils::{models::AccountCategorySummary, validators::{validate_acc_cat_type, validate_income, validate_snowflake}};
+use crate::{
+    app::account_charts::account_codes::GlAccountCode,
+    utils::{
+        models::AccountCategorySummary,
+        validators::{validate_acc_cat_type, validate_income, validate_snowflake},
+    },
+};
 
 #[serde_as]
 #[derive(Debug, Clone, Serialize, DerivePartialModel)]
@@ -36,7 +42,7 @@ pub struct ChartOfAccountResponseModel {
     #[sea_orm(from_col = "is_system_account")]
     pub is_system_account: Option<bool>,
 
-     #[sea_orm(from_col = "currency_code")]
+    #[sea_orm(from_col = "currency_code")]
     pub currency_code: Option<String>,
 
     #[sea_orm(from_col = "created_at")]
@@ -95,7 +101,7 @@ pub struct AccountTypeRow {
     pub created_at: Option<DateTime<FixedOffset>>,
     pub updated_at: Option<DateTime<FixedOffset>>,
 
-    pub category: AccountCategorySummary
+    pub category: AccountCategorySummary,
 }
 
 #[derive(FromQueryResult, Debug, Clone)]
@@ -133,12 +139,11 @@ pub struct AccountTypeFlat {
 #[derive(Debug, Clone)]
 pub struct AddAccountChartModel {
     pub institution_id: i64,
-    pub acc_code: String,
+    pub acc_code: GlAccountCode,
     pub acc_name: String,
-    pub acc_type: String,
     pub currency_code: String,
     pub parent_acc_id: Option<i64>,
-    pub is_system_acc: bool
+    pub is_system_acc: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -160,14 +165,14 @@ pub struct AddAccountTypeModel {
     pub dormancy_period: Option<i32>,
     pub maintenance_fee: Option<i64>,
     pub withdrawal_fee: Option<i64>,
-    pub status: AccTypeStatus
+    pub status: AccTypeStatus,
 }
 
 #[derive(Debug, Clone)]
 pub struct AddAccountCategoryModel {
     pub institution_id: i64,
     pub name: Option<String>,
-    pub category_type: Option<String>,  //'SAVINGS', 'CURRENT', 'FIXED_DEPOSIT', 'LOAN', 'WALLET', 'AGENT_FLOAT', 'SUSU'
+    pub category_type: Option<String>, //'SAVINGS', 'CURRENT', 'FIXED_DEPOSIT', 'LOAN', 'WALLET', 'AGENT_FLOAT', 'SUSU'
     pub description: Option<String>,
 }
 
@@ -192,9 +197,8 @@ pub struct AddAccountChartParams {
     #[serde(rename = "accountName")]
     pub acc_name: String,
 
-    #[validate(length(min = 2, max = 50, message = "Invalid account type"))]
-    #[serde(rename = "accountType")]
-    pub acc_type: String,
+    #[serde(rename = "accountCode")]
+    pub acc_code: GlAccountCode,
 
     #[validate(length(min = 2, max = 10, message = "Invalid currency code"))]
     #[serde(rename = "currencyCode")]
@@ -205,7 +209,7 @@ pub struct AddAccountChartParams {
     pub parent_account: Option<String>,
 
     #[serde(rename = "isSystemAccount")]
-    pub is_system_acc: bool
+    pub is_system_acc: bool,
 }
 
 #[derive(Debug, Deserialize, Validate)]
@@ -254,7 +258,7 @@ pub struct AddAccountTypeParams {
     #[serde(rename = "dormancyPeriod")]
     pub dormancy_period: Option<i32>,
 
-     #[validate(custom(function = "validate_income"))]
+    #[validate(custom(function = "validate_income"))]
     #[serde(rename = "maintenanceFee")]
     pub maintenance_fee: Option<Decimal>,
 
@@ -263,7 +267,7 @@ pub struct AddAccountTypeParams {
     pub withdrawal_fee: Option<Decimal>,
 
     #[validate(nested)]
-    pub currency: Option<CurrencyLayout>
+    pub currency: Option<CurrencyLayout>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
