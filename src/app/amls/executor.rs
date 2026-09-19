@@ -166,6 +166,15 @@ pub async fn evaluate(
             AmlError::RuleFetchError
         })?;
 
+    if rule_models.len() == 0 {
+        tracing::info!("No rules found for this stage");
+        return Ok(AmlEvaluationResult {
+            matched_rules: matched_rules,
+            alerts_created: created_alerts,
+            actions_created: created_actions,
+        });
+    };
+
     // 2. Evaluate each rule
     for rule_model in rule_models {
         let start = Instant::now();
@@ -634,6 +643,58 @@ pub fn evaluate_eq_condition(
                 _ => false,
             }
         }
+        ConditionField::CustomerRiskScore => {
+            let customer_value: CustomerAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                    tracing::error!("Failed to parse customer value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            // write query to find risk score
+            match &rule_params.value {
+                ConditionValue::String(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::CustomerCashDepositCount24h => {
+            let customer_value: CustomerAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                    tracing::error!("Failed to parse customer value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            // write query to find the deposit count
+            match &rule_params.value {
+                ConditionValue::String(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::CustomerCashDepositAmount24h => {
+            let customer_value: CustomerAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                    tracing::error!("Failed to parse customer value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            // write query to find the deposit amount
+            match &rule_params.value {
+                ConditionValue::String(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::CustomerTransactionCount24h => {
+            let customer_value: CustomerAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                    tracing::error!("Failed to parse customer value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            // write query to find the transaction count
+            match &rule_params.value {
+                ConditionValue::String(value) => true,
+                _ => false,
+            }
+        }
         ConditionField::TransactionAmount => {
             let transaction_value: TransactionAmlContext = serde_json::from_value(context.params)
                 .map_err(|e| {
@@ -691,6 +752,104 @@ pub fn evaluate_eq_condition(
 
                     val == transaction_value.channel_id
                 }
+                _ => false,
+            }
+        }
+        ConditionField::TransactionDailyTotal => {
+            let transaction_value: TransactionAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                tracing::error!("Failed to parse transaction value: {}", e);
+                AmlError::IoError
+            })?;
+
+            // write a query and compare value against ConditionValue here
+            // pass parameters for the query from transaction_value
+            match &rule_params.value {
+                ConditionValue::Decimal(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::TransactionDailyCount => {
+            let transaction_value: TransactionAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                tracing::error!("Failed to parse transaction value: {}", e);
+                AmlError::IoError
+            })?;
+
+            // write a query and compare value against ConditionValue here
+            // pass parameters for the query from transaction_value
+            match &rule_params.value {
+                ConditionValue::Decimal(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::TransactionMonthlyCount => {
+            let transaction_value: TransactionAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                tracing::error!("Failed to parse transaction value: {}", e);
+                AmlError::IoError
+            })?;
+
+            // write a query and compare value against ConditionValue here
+            // pass parameters for the query from transaction_value
+            match &rule_params.value {
+                ConditionValue::Decimal(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::TransactionMonthlyTotal => {
+            let transaction_value: TransactionAmlContext = serde_json::from_value(context.params)
+                .map_err(|e| {
+                tracing::error!("Failed to parse transaction value: {}", e);
+                AmlError::IoError
+            })?;
+
+            // write a query and compare value against ConditionValue here
+            // pass parameters for the query from transaction_value
+            match &rule_params.value {
+                ConditionValue::Decimal(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::AccountBalance => {
+            let account_value: AccountAmlContext =
+                serde_json::from_value(context.params).map_err(|e| {
+                    tracing::error!("Failed to parse transaction value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            match &rule_params.value {
+                ConditionValue::Decimal(value) => account_value
+                    .balance
+                    .map(|b| value == &Decimal::from(b))
+                    .unwrap_or(false),
+                _ => false,
+            }
+        }
+        ConditionField::AccountStatus => {
+            let account_value: AccountAmlContext =
+                serde_json::from_value(context.params).map_err(|e| {
+                    tracing::error!("Failed to parse transaction value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            // add account status to account aml context
+            match &rule_params.value {
+                ConditionValue::String(value) => true,
+                _ => false,
+            }
+        }
+        ConditionField::AccountAgeDays => {
+            let account_value: AccountAmlContext =
+                serde_json::from_value(context.params).map_err(|e| {
+                    tracing::error!("Failed to parse transaction value: {}", e);
+                    AmlError::IoError
+                })?;
+
+            // write a query and compare value against ConditionValue here
+            // pass parameters for the query from transaction_value
+            match &rule_params.value {
+                ConditionValue::Decimal(value) => true,
                 _ => false,
             }
         }

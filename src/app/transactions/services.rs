@@ -1,4 +1,5 @@
 use actix_web::web;
+use futures_util::StreamExt;
 use sea_orm::{
     ActiveValue::Set, ColumnTrait, DatabaseBackend, DatabaseTransaction, DbErr, EntityTrait,
     FromQueryResult, InsertResult, QueryFilter, Statement,
@@ -12,10 +13,12 @@ use crate::{
             TransactionLimitFlat, TransactionLimitRow,
         },
         models::{AddDepositModel, AddTransactionChannelModel, AddTransactionLimitModel},
-        mongo_model::{DepositTransactionMongoModel, TrigStatus},
+        mongo_model::{DepositTransactionMongoModel, MongoDepositTransaction, TrigStatus},
     },
     utils::gen_snow_ids,
 };
+
+const TWELVE_HOURS_MS: i64 = 12 * 60 * 60 * 1000;
 
 pub async fn add_trans_limit(
     model: &AddTransactionLimitModel,
@@ -392,4 +395,47 @@ pub async fn add_mongo_deposit_transaction(
     state.mongo.mongo_transactions.insert_one(deposit).await?;
 
     Ok(())
+}
+
+pub async fn find_all_mongo_transactions(
+    trig_status: TrigStatus,
+    state: &web::Data<AppState>,
+) -> Result<Vec<MongoDepositTransaction>, mongodb::error::Error> {
+    let start = mongodb::bson::DateTime::now();
+    let end = mongodb::bson::DateTime::from_millis(start.timestamp_millis() + TWELVE_HOURS_MS);
+
+    let filter = mongodb::bson::doc! {
+        "trig_status": trig_status,
+        "created_at": { "$gte": start, "$lte": end },
+    };
+
+    let mut cursor = state.mongo.mongo_transactions.find(filter).await?;
+
+    let mut transactions: Vec<MongoDepositTransaction> = Vec::new();
+
+    while let Some(result) = cursor.next().await {
+        match result {
+            Ok(doc) => transactions.push(doc.into()),
+            Err(e) => return Err(e),
+        }
+    }
+
+    Ok(transactions)
+}
+
+pub async fn find_mongo_transaction(
+    trig_status: TrigStatus,
+    state: &web::Data<AppState>,
+) -> Result<Option<MongoDepositTransaction>, mongodb::error::Error> {
+    let start = mongodb::bson::DateTime::now();
+    let end = mongodb::bson::DateTime::from_millis(start.timestamp_millis() + TWELVE_HOURS_MS);
+
+    let filter = mongodb::bson::doc! {
+        "trig_status": trig_status,
+        "created_at": { "$gte": start, "$lte": end },
+    };
+
+    let result = state.mongo.mongo_transactions.find_one(filter).await?;
+
+    Ok(result.map(Into::into))
 }
