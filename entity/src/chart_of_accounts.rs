@@ -10,8 +10,8 @@ pub struct Model {
     pub id: i64,
     #[sea_orm(unique_key = "unique_chart_account_insti")]
     pub institution_id: i64,
-    #[sea_orm(unique)]
-    pub account_code: Option<String>,
+    #[sea_orm(unique_key = "unique_chart_account_insti")]
+    pub account_code: String,
     pub account_name: Option<String>,
     pub account_type: Option<String>,
     pub parent_account_id: Option<i64>,

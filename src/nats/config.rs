@@ -154,6 +154,14 @@ pub async fn setup_nats() -> Result<StreamManager, Box<dyn std::error::Error>> {
         .register_stream("IDEMS", vec!["idems.>".into()], "idems".to_string())
         .await?;
 
+    stream_manager
+        .register_stream(
+            "ACCOUNTS",
+            vec!["accounts.>".into()],
+            "accounts".to_string(),
+        )
+        .await?;
+
     Ok(stream_manager)
 }
 

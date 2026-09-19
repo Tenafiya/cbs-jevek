@@ -12,6 +12,7 @@ use crate::{
             TransactionLimitFlat, TransactionLimitRow,
         },
         models::{AddDepositModel, AddTransactionChannelModel, AddTransactionLimitModel},
+        mongo_model::{DepositTransactionMongoModel, TrigStatus},
     },
     utils::gen_snow_ids,
 };
@@ -57,7 +58,7 @@ pub async fn add_deposit_transaction(
     let data = model.clone();
 
     let deposit = ActiveModel {
-        id: Set(snowflake),
+        id: Set(data.core.id.unwrap_or(snowflake)),
         institution_id: Set(data.core.institution_id),
         transaction_channel_id: Set(data.core.trans_channel_id),
         transaction_reference: Set(Some(data.core.reference)),
@@ -350,4 +351,45 @@ pub async fn fetch_transaction_channels(
         .into_model::<TransactionChannelResponseModel>()
         .all(state.pgdb.get_ref())
         .await
+}
+
+pub async fn add_mongo_deposit_transaction(
+    model: &AddDepositModel,
+    trig_status: TrigStatus,
+    state: &web::Data<AppState>,
+) -> Result<(), mongodb::error::Error> {
+    let data = model.clone();
+
+    let deposit = DepositTransactionMongoModel {
+        id: None,
+        core_id: data.core.id,
+        institution_id: data.core.institution_id,
+        trans_channel_id: data.core.trans_channel_id,
+        reference: data.core.reference,
+        credit_account_id: data.credit_account_id,
+        credit_customer_id: data.credit_customer_id,
+        amount: data.core.amount,
+        currency: mongodb::bson::to_bson(&data.core.currency)?,
+        total_amount: data.core.total_amount,
+        fee_amount: data.core.fee_amount,
+        vat_amount: data.core.vat_amount,
+        requires_approval: data.core.requires_approval,
+        transaction_group_id: data.core.transaction_group_id,
+        transaction_type: data.core.transaction_type,
+        transaction_category: data.core.transaction_category,
+        description: data.description,
+        status: data.core.status,
+        ip_address: data.core.ip_address,
+        created_by: data.core.created_by,
+        drawer_id: data.drawer_id,
+        trig_status,
+        posted_at: mongodb::bson::DateTime::now(),
+        approved_by: data.core.approved_by,
+        created_at: mongodb::bson::DateTime::now(),
+        updated_at: mongodb::bson::DateTime::now(),
+    };
+
+    state.mongo.mongo_transactions.insert_one(deposit).await?;
+
+    Ok(())
 }

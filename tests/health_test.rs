@@ -8,6 +8,8 @@ use serde_json::json;
 mod common;
 use common::{body_json, build_state, setup_test_database, setup_test_dragonfly};
 
+use crate::common::setup_test_mongo;
+
 async fn test_app() -> impl actix_web::dev::Service<
     Request,
     Response = actix_web::dev::ServiceResponse,
@@ -63,6 +65,11 @@ async fn migrate_up_and_down_via_endpoint() {
 
     let Some(cache_url) = setup_test_dragonfly().await else {
         eprintln!("Skipping test: Dragonfly container could not be started");
+        return;
+    };
+
+    let Some(_) = setup_test_mongo().await else {
+        eprintln!("Skipping test: Mongodb container could not be started");
         return;
     };
 

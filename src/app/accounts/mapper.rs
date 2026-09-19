@@ -243,3 +243,23 @@ impl From<LinkedAccountFlat> for LinkedAccountRow {
         }
     }
 }
+
+#[derive(FromQueryResult, Debug, Clone, Serialize, Deserialize)]
+pub struct AccountLimitCheck {
+    pub limits_found: i64,
+    pub limits_passed: i64,
+}
+
+impl AccountLimitCheck {
+    pub fn is_success(&self) -> bool {
+        self.limits_found > 0 && self.limits_passed == self.limits_found
+    }
+
+    pub fn is_blocked(&self) -> bool {
+        self.limits_found > 0 && self.limits_passed == 0
+    }
+
+    pub fn no_limits(&self) -> bool {
+        self.limits_found == 0
+    }
+}

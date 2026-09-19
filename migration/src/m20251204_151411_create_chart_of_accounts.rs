@@ -25,7 +25,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(ChartOfAccounts::AccountCode)
                     .string()
-                    .unique_key(),
+                    .not_null(),
             )
             .col(ColumnDef::new(ChartOfAccounts::AccountName).string())
             .col(ColumnDef::new(ChartOfAccounts::AccountType).string())

@@ -9,7 +9,7 @@ use sea_orm::{
 use crate::{
     AppState,
     app::accounts::{
-        mapper::{AccountFlat, AccountLimitRow, AccountRow},
+        mapper::{AccountFlat, AccountLimitCheck, AccountLimitRow, AccountRow},
         models::{
             AddAccountBalanceModel, AddAccountLimitModel, AddAccountLinkModel, AddAccountModel,
         },
@@ -300,59 +300,69 @@ pub async fn add_acc_links(
     Entity::insert(link).exec(state.pgdb.get_ref()).await
 }
 
-pub async fn update_total_credits(
-    credit: i64,
-    acc_id: i64,
-    bal_date: NaiveDate,
+pub async fn update_account_limit_value(
+    account_id: i64,
+    increment: i64,
     trn: &DatabaseTransaction,
 ) -> Result<(), DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
         r#"
-        UPDATE account_balances
+        UPDATE account_limits
         SET
-            total_credits = COALESCE(total_credits, 0) + $1,
+            current_value = COALESCE(current_value, 0) + $2,
             updated_at = NOW()
         WHERE
-            account_id = $2
-            AND balance_date = $3;
+            account_id = $1
+            AND is_active = TRUE
+            AND effective_from <= NOW()
+            AND effective_to   >  NOW();
         "#,
-        vec![credit.into(), acc_id.into(), bal_date.into()],
+        vec![account_id.into(), increment.into()],
     );
 
     let result = trn.execute_raw(stmt).await?;
 
     if result.rows_affected() == 0 {
-        return Err(DbErr::Custom("Could not update total credits".to_string()));
-    }
+        return Err(DbErr::Custom("Could not update current value".to_string()));
+    };
 
     Ok(())
 }
 
-pub async fn update_total_debits(
-    debit: i64,
-    acc_id: i64,
-    bal_date: NaiveDate,
+pub async fn update_main_account_bal_deposit(
+    account_id: i64,
+    customer_id: i64,
+    amount: i64,
     trn: &DatabaseTransaction,
 ) -> Result<(), DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
         r#"
-        UPDATE account_balances
+        UPDATE accounts
         SET
-            total_debits = COALESCE(total_debits, 0) + $1,
+            current_balance = COALESCE(current_balance, 0) + $3::bigint,
+            ledger_balance = COALESCE(ledger_balance, 0) + $3::bigint,
+            available_balance = (COALESCE(current_balance, 0) + $3::bigint)
+                                - COALESCE(hold_balance, 0)
+                                + CASE WHEN is_overdraft_allowable
+                                       THEN
+                                            COALESCE(overdraft_limit, 0) - COALESCE(overdraft_used, 0)
+                                       ELSE 0
+                                  END,
             updated_at = NOW()
         WHERE
-            account_id = $2
-            AND balance_date = $3;
+            id = $1,
+            AND customer_id = $2,
+            AND status = 'ACTIVE';
         "#,
-        vec![debit.into(), acc_id.into(), bal_date.into()],
+        vec![account_id.into(), customer_id.into(), amount.into()],
     );
 
     let result = trn.execute_raw(stmt).await?;
 
     if result.rows_affected() == 0 {
-        return Err(DbErr::Custom("Could not update total debits".to_string()));
+        return Err(DbErr::Custom("Could not update current value".to_string()));
     };
 
     Ok(())
@@ -413,17 +423,17 @@ pub async fn fetch_limit_for_update(
     AccountLimitRow::find_by_statement(stmt).one(trn).await
 }
 
-pub async fn get_account_limit(
+pub async fn get_account_credit_limit(
     acc_id: i64,
     amount: i64,
     count: i32,
     state: &web::Data<AppState>,
-) -> Result<AccountLimitRow, DbErr> {
+) -> Result<AccountLimitCheck, DbErr> {
     let stmt = Statement::from_sql_and_values(
         DatabaseBackend::Postgres,
         r#"
         WITH before AS (
-            SELECT id, limit_value, current_value
+            SELECT id, limit_value, current_value, limit_unit
             FROM account_limits
             WHERE account_id = $1
               AND is_active  = TRUE
@@ -433,6 +443,16 @@ pub async fn get_account_limit(
                   'DAILY_CREDIT','WEEKLY_CREDIT','MONTHLY_CREDIT',
                   'DAILY_COUNT','WEEKLY_COUNT','MONTHLY_COUNT'
               )
+        ),
+        blocked AS (
+            SELECT b.id
+            FROM before b
+            WHERE b.current_value
+                    + CASE b.limit_unit
+                          WHEN 'AMOUNT' THEN $2::bigint
+                          WHEN 'COUNT'  THEN $3::bigint
+                      END
+                  > b.limit_value
         ),
         updated AS (
             UPDATE account_limits al
@@ -444,13 +464,9 @@ pub async fn get_account_limit(
                 updated_at = NOW()
             FROM before b
             WHERE al.id = b.id
-              AND b.current_value
-                  + CASE al.limit_unit
-                        WHEN 'AMOUNT' THEN $2::bigint
-                        WHEN 'COUNT'  THEN $3::bigint
-                    END
-                  <= b.limit_value
-            RETURNING al.limit_type
+              -- all-or-nothing: only update if nothing is blocked
+              AND NOT EXISTS (SELECT 1 FROM blocked)
+            RETURNING al.id
         )
         SELECT
             (SELECT COUNT(*) FROM before)  AS limits_found,
@@ -459,10 +475,10 @@ pub async fn get_account_limit(
         vec![acc_id.into(), amount.into(), count.into()],
     );
 
-    AccountLimitRow::find_by_statement(stmt)
+    AccountLimitCheck::find_by_statement(stmt)
         .one(state.pgdb.get_ref())
         .await?
-        .ok_or_else(|| DbErr::Custom("account limit not found".to_string()))
+        .ok_or_else(|| DbErr::Custom("account limit check returned no rows".to_string()))
 }
 
 pub async fn fetch_customer_acc_id(
@@ -556,6 +572,76 @@ pub async fn toggle_account_status(
     if result.rows_affected() == 0 {
         return Err(DbErr::RecordNotFound(
             "Could not update account status".to_string(),
+        ));
+    };
+
+    Ok(())
+}
+
+pub async fn record_account_dailys(
+    bal_date: NaiveDate,
+    account_id: i64,
+    amount: i64,
+    state: &web::Data<AppState>,
+) -> Result<(), DbErr> {
+    let stmt = Statement::from_sql_and_values(
+        DatabaseBackend::Postgres,
+        r#"
+        INSERT INTO account_balances (
+            id,
+            account_id,
+            balance_date,
+            opening_balance,
+            total_credits,
+            total_debits,
+            closing_balance,
+            created_at,
+            updated_at
+        )
+        SELECT
+            -- id: generate one; replace with your actual ID strategy (sequence, snowflake, etc.)
+            COALESCE(
+                (SELECT ab.id FROM account_balances ab
+                  WHERE ab.account_id = $1 AND ab.balance_date = $2::date),
+                nextval('account_balances_id_seq')  -- or your id source
+            ),
+            a.id,
+            $2::date,
+            -- opening: previous day's closing, else live balance minus today's net
+            COALESCE(
+                (SELECT ab.closing_balance
+                   FROM account_balances ab
+                  WHERE ab.account_id = a.id
+                    AND ab.balance_date < $2::date
+                  ORDER BY ab.balance_date DESC
+                  LIMIT 1),
+                a.current_balance - $3   -- first row of the day: back out this delta
+            ),
+            CASE WHEN $3 > 0 THEN $3 ELSE 0 END,      -- total_credits
+            CASE WHEN $3 < 0 THEN -$3 ELSE 0 END,     -- total_debits
+            a.current_balance,                        -- closing after this delta
+            NOW(),
+            NOW()
+        FROM accounts a
+        WHERE a.id = $1
+          AND a.status = 'ACTIVE'
+        ON CONFLICT (account_id, balance_date) DO UPDATE
+        SET
+            total_credits   = account_balances.total_credits
+                            + CASE WHEN $3 > 0 THEN $3 ELSE 0 END,
+            total_debits    = account_balances.total_debits
+                            + CASE WHEN $3 < 0 THEN -$3 ELSE 0 END,
+            closing_balance = EXCLUDED.closing_balance,
+            updated_at      = NOW();
+        "#,
+        vec![bal_date.into(), account_id.into(), amount.into()],
+    );
+
+    let result = state.pgdb.get_ref().execute_raw(stmt).await?;
+
+    if result.rows_affected() == 0 {
+        return Err(DbErr::RecordNotFound(
+            "Could not update account daily balance".to_string(),
         ));
     };
 

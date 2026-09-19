@@ -6,9 +6,11 @@ use crate::{
     AppState,
     app::{
         account_charts::{
+            account_codes::GlAccountCode,
             models::{
                 AddAccountCategoryModel, AddAccountCategoryParams, AddAccountChartModel,
                 AddAccountChartParams, AddAccountTypeModel, AddAccountTypeParams,
+                ChartOfAccountResponseModel,
             },
             services,
         },
@@ -42,9 +44,8 @@ pub async fn add_acc_chart(
 
     let acc_chart = AddAccountChartModel {
         institution_id,
-        acc_code: gen_snow_ids::gen_string(14),
+        acc_code: data.acc_code,
         acc_name: data.acc_name,
-        acc_type: data.acc_type,
         currency_code: data.currency_code,
         parent_acc_id,
         is_system_acc: data.is_system_acc,
@@ -208,4 +209,27 @@ pub async fn fetch_account_types(
             Err(ApiError::NotFound)
         }
     }
+}
+
+pub async fn get_deposit_charts(
+    institution_id: i64,
+    state: &web::Data<AppState>,
+) -> Result<(ChartOfAccountResponseModel, ChartOfAccountResponseModel), ApiError> {
+    let asset_gl_account =
+        services::get_chart_of_account(institution_id, GlAccountCode::CustomerDeposits, state)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = ?e, "Failed to get chart of account");
+                ApiError::InternalServerError
+            })?;
+
+    let cash_gl_account =
+        services::get_chart_of_account(institution_id, GlAccountCode::CashInHand, state)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = ?e, "Failed to get chart of account");
+                ApiError::InternalServerError
+            })?;
+
+    Ok((asset_gl_account, cash_gl_account))
 }

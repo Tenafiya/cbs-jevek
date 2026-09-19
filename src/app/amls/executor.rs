@@ -1,7 +1,10 @@
 use crate::{
     AppState,
     app::amls::{
-        action_processes::{freeze_account, log_action},
+        action_processes::{
+            additional_auth, escalate_action, file_sar, freeze_account, generate_alert, log_action,
+            transaction_hold, transaction_reject,
+        },
         mapper::AmlRule,
         models::{
             AmlActionsModel, AmlAlertsModel, AmlCasesModel, AmlExecutionModel, AmlModel,
@@ -100,6 +103,7 @@ pub enum AmlContacts<'a> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransactionAmlContext {
+    pub id: i64,
     pub amount: i64,
     pub transaction_type: TransactionType,
     pub group_id: uuid::Uuid,
@@ -887,13 +891,23 @@ pub async fn process_aml_actions(
                 tracing::warn!("No action type specified for action: {}", action.id);
             }
             Some(AmlRuleActions::LogOnly) => log_action(&action).await?,
-            Some(AmlRuleActions::EscalateToInvestigator) => {}
-            Some(AmlRuleActions::FileSarAutomatically) => {}
+            Some(AmlRuleActions::EscalateToInvestigator) => {
+                escalate_action(&action, &context, state).await?
+            }
+            Some(AmlRuleActions::FileSarAutomatically) => {
+                file_sar(&action, &context, state).await?
+            }
             Some(AmlRuleActions::FreezeAccount) => freeze_account(&action, &context, state).await?,
-            Some(AmlRuleActions::GenerateAlert) => {}
-            Some(AmlRuleActions::HoldTransaction) => {}
-            Some(AmlRuleActions::RejectTransaction) => {}
-            Some(AmlRuleActions::RequireAdditionalAuthentication) => {}
+            Some(AmlRuleActions::GenerateAlert) => generate_alert(&action, &context, state).await?,
+            Some(AmlRuleActions::HoldTransaction) => {
+                transaction_hold(&action, &context, state).await?
+            }
+            Some(AmlRuleActions::RejectTransaction) => {
+                transaction_reject(&action, &context, state).await?
+            }
+            Some(AmlRuleActions::RequireAdditionalAuthentication) => {
+                additional_auth(&action, &context, state).await?
+            }
         }
     }
 

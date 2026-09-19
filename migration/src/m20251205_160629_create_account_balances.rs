@@ -25,7 +25,7 @@ impl MigrationTrait for Migration {
             .col(
                 ColumnDef::new(AccountBalances::BalanceDate)
                     .date()
-                    .unique_key(),
+                    .not_null(),
             )
             .col(
                 ColumnDef::new(AccountBalances::OpeningBalance)
