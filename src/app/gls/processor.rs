@@ -26,7 +26,7 @@ pub async fn setup_gl_record(
 
     let data = model.clone();
 
-    // record ledger entry
+    // record ledger entry (Credit)
     let entry = AddLedgerEntry {
         institution_id: data.institution_id,
         transaction_id: data.transaction_id,

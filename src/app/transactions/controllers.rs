@@ -30,6 +30,7 @@ use crate::{
             },
             mongo_model::TrigStatus,
             services,
+            utils::validate_amount_param,
         },
     },
     utils::{
@@ -292,20 +293,30 @@ pub async fn process_deposit_trans(
         .validate()
         .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
-    let (transaction_id, _) = gen_snow_ids::gen_snowflake_slug().map_err(|e| {
-        tracing::error!(error = ?e, "Failed to generate transaction id");
-        ApiError::InternalServerError
-    })?;
-
     let data = payload.into_inner();
     let staff = staff.into_inner();
     let drawer = drawer.into_inner();
+
+    validate_amount_param(
+        data.amount,
+        data.cash_breakdown.as_deref(),
+        data.cheques.as_deref(),
+    )
+    .map_err(|e| {
+        tracing::error!(error = ?e, "Failed to validate amount parameters");
+        ApiError::BadRequest(e.to_string())
+    })?;
 
     // check if ledger is lock
     if let Ok(Some(_)) = gls::services::get_ledger_lock_period(staff.institution_id, &state).await {
         tracing::error!("Ledger is locked");
         return Err(ApiError::InternalServerError);
     };
+
+    let (transaction_id, _) = gen_snow_ids::gen_snowflake_slug().map_err(|e| {
+        tracing::error!(error = ?e, "Failed to generate transaction id");
+        ApiError::InternalServerError
+    })?;
 
     let customer_id = gen_snow_ids::id_parser(&data.customer_id, "Customer ID")?;
     let account_id = gen_snow_ids::id_parser(&data.account_id, "Account ID")?;

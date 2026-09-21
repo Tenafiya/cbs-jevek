@@ -4,3 +4,4 @@ pub mod models;
 pub mod mongo_model;
 pub mod routes;
 pub mod services;
+pub mod utils;

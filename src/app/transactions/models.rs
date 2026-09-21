@@ -79,6 +79,7 @@ pub struct AddWithdrawModel {
     pub description: Option<String>,
     pub debit_account_id: i64,
     pub debit_customer_id: i64,
+    pub drawer_id: i64,
 }
 
 #[derive(Debug, Clone)]
@@ -208,4 +209,32 @@ pub struct AddDepositParams {
 
     #[validate(length(min = 1, max = 255))]
     pub narration: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(deny_unknown_fields)]
+pub struct AddWithdrawalParams {
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "accountId")]
+    pub account_id: String,
+
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "transactionChannelId")]
+    pub trans_channel_id: String,
+
+    #[validate(custom(function = "validate_snowflake"))]
+    #[serde(rename = "customerId")]
+    pub customer_id: String,
+
+    #[validate(custom(function = "validate_income"))]
+    pub amount: Decimal,
+
+    #[validate(length(min = 1, max = 255))]
+    pub narration: Option<String>,
+
+    #[validate(nested)]
+    pub currency: CurrencyParams,
+
+    #[validate(nested)]
+    pub cheques: Option<Vec<ChequeParams>>,
 }
